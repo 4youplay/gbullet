@@ -32,6 +32,8 @@ import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.IntArrayList;
 import com.bulletphysics.util.ObjectArrayList;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import java.util.Collections;
 import javax.vecmath.Vector3f;
 
@@ -40,6 +42,13 @@ import javax.vecmath.Vector3f;
  * @author jezek2
  */
 public class Dbvt {
+    static final Supplier<Node> NEW_NODE_SUPPLIER = new Supplier<Node>() {
+      @Override
+      public Node get() {
+        return new Node();
+      }
+      
+    };
 	
 	public static final int SIMPLE_STACKSIZE = 64;
 	public static final int DOUBLE_STACKSIZE = SIMPLE_STACKSIZE * 2;
@@ -156,11 +165,13 @@ public class Dbvt {
 		if (leaf.volume.Contain(volume)) {
 			return false;
 		}
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 		tmp.set(margin, margin, margin);
 		volume.Expand(tmp);
 		volume.SignedExpand(velocity);
 		update(leaf, volume);
+		Stack.leave(sp);
 		return true;
 	}
 
@@ -177,10 +188,12 @@ public class Dbvt {
 		if (leaf.volume.Contain(volume)) {
 			return false;
 		}
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 		tmp.set(margin, margin, margin);
 		volume.Expand(tmp);
 		update(leaf, volume);
+		Stack.leave(sp);
 		return true;
 	}
 
@@ -326,10 +339,12 @@ public class Dbvt {
 	}
 
 	public static void collideTT(Node root0, Transform xform0, Node root1, Transform xform1, ICollide policy) {
-		Transform xform = Stack.alloc(Transform.class);
+	    int sp = Stack.enter();
+		Transform xform = Stack.allocTransform();
 		xform.inverse(xform0);
 		xform.mul(xform1);
 		collideTT(root0, root1, xform, policy);
+		Stack.leave(sp);
 	}
 
 	public static void collideTV(Node root, DbvtAabbMm volume, ICollide policy) {
@@ -356,9 +371,10 @@ public class Dbvt {
 	public static void collideRAY(Node root, Vector3f origin, Vector3f direction, ICollide policy) {
 		//DBVT_CHECKTYPE
 		if (root != null) {
-			Vector3f normal = Stack.alloc(Vector3f.class);
+		    int sp = Stack.enter();
+			Vector3f normal = Stack.allocVector3f();
 			normal.normalize(direction);
-			Vector3f invdir = Stack.alloc(Vector3f.class);
+			Vector3f invdir = Stack.allocVector3f();
 			invdir.set(1f / normal.x, 1f / normal.y, 1f / normal.z);
 			int[] signs = new int[] { direction.x<0 ? 1:0, direction.y<0 ? 1:0, direction.z<0 ? 1:0 };
 			ObjectArrayList<Node> stack = new ObjectArrayList<Node>(SIMPLE_STACKSIZE);
@@ -376,6 +392,7 @@ public class Dbvt {
 				}
 			}
 			while (stack.size() != 0);
+			Stack.leave(sp);
 		}
 	}
 
@@ -578,12 +595,15 @@ public class Dbvt {
 		DbvtAabbMm.Merge(a, b, out);
 		return out;
 	}
-	
+
 	// volume+edge lengths
 	private static float size(DbvtAabbMm a) {
-		Vector3f edges = a.Lengths(Stack.alloc(Vector3f.class));
-		return (edges.x * edges.y * edges.z +
+	    int sp = Stack.enter();
+		Vector3f edges = a.Lengths(Stack.allocVector3f());
+		float result = (edges.x * edges.y * edges.z +
 		        edges.x + edges.y + edges.z);
+		Stack.leave(sp);
+		return result;
 	}
 
 	private static void deletenode(Dbvt pdbvt, Node node) {
@@ -715,9 +735,10 @@ public class Dbvt {
 	}
 	
 	private static void split(ObjectArrayList<Node> leaves, ObjectArrayList<Node> left, ObjectArrayList<Node> right, Vector3f org, Vector3f axis) {
-		Vector3f tmp = Stack.alloc(Vector3f.class);
-		MiscUtil.resize(left, 0, Node.class);
-		MiscUtil.resize(right, 0, Node.class);
+		int sp = Stack.enter();
+	    Vector3f tmp = Stack.allocVector3f();
+		MiscUtil.resize(left, 0, NEW_NODE_SUPPLIER);
+		MiscUtil.resize(right, 0, NEW_NODE_SUPPLIER);
 		for (int i=0, ni=leaves.size(); i<ni; i++) {
 			leaves.getQuick(i).volume.Center(tmp);
 			tmp.sub(org);
@@ -728,6 +749,7 @@ public class Dbvt {
 				right.add(leaves.getQuick(i));
 			}
 		}
+		Stack.leave(sp);
 	}
 	
 	private static DbvtAabbMm bounds(ObjectArrayList<Node> leaves) {
@@ -771,8 +793,9 @@ public class Dbvt {
 	private static Node topdown(Dbvt pdbvt, ObjectArrayList<Node> leaves, int bu_treshold) {
 		if (leaves.size() > 1) {
 			if (leaves.size() > bu_treshold) {
+			    int sp = Stack.enter();
 				DbvtAabbMm vol = bounds(leaves);
-				Vector3f org = vol.Center(Stack.alloc(Vector3f.class));
+				Vector3f org = vol.Center(Stack.allocVector3f());
 				ObjectArrayList[] sets = new ObjectArrayList[2];
 				for (int i=0; i<sets.length; i++) {
 					sets[i] = new ObjectArrayList();
@@ -781,7 +804,7 @@ public class Dbvt {
 				int bestmidp = leaves.size();
 				int[][] splitcount = new int[/*3*/][/*2*/]{{0, 0}, {0, 0}, {0, 0}};
 
-				Vector3f x = Stack.alloc(Vector3f.class);
+				Vector3f x = Stack.allocVector3f();
 
 				for (int i=0; i<leaves.size(); i++) {
 					leaves.getQuick(i).volume.Center(x);
@@ -816,6 +839,7 @@ public class Dbvt {
 				node.childs[1] = topdown(pdbvt, sets[1], bu_treshold);
 				node.childs[0].parent = node;
 				node.childs[1].parent = node;
+				Stack.leave(sp);
 				return node;
 			}
 			else {

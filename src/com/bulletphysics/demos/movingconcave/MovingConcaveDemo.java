@@ -33,10 +33,10 @@ import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.collision.shapes.StaticPlaneShape;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
+import com.bulletphysics.demos.lwjgl.LwjglMain;
 import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.GLDebugDrawer;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
@@ -46,7 +46,6 @@ import com.bulletphysics.extras.gimpact.GImpactMeshShape;
 import com.bulletphysics.linearmath.Transform;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
-import org.lwjgl.LWJGLException;
 import static com.bulletphysics.demos.opengl.IGL.*;
 
 /**
@@ -228,12 +227,12 @@ public class MovingConcaveDemo extends DemoApplication {
 		}
 	}
 	
-	public static void main(String[] args) throws LWJGLException {
-		MovingConcaveDemo concaveDemo = new MovingConcaveDemo(LWJGL.getGL());
-		concaveDemo.initPhysics();
-		concaveDemo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
-
-		LWJGL.main(args, 800, 600, "Moving Concave Mesh Demo", concaveDemo);
-	}
+//	public static void main(String[] args) throws LWJGLException {
+//		MovingConcaveDemo concaveDemo = new MovingConcaveDemo(LWJGL.getGL());
+//		concaveDemo.initPhysics();
+//		concaveDemo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
+//
+//		LWJGL.main(args, 800, 600, "Moving Concave Mesh Demo", concaveDemo);
+//	}
 	
 }

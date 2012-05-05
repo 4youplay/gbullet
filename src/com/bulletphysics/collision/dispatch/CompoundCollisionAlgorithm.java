@@ -33,6 +33,7 @@ import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
 import com.bulletphysics.util.ObjectPool;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
 
 /**
  * CompoundCollisionAlgorithm supports collision between {@link CompoundShape}s and
@@ -80,6 +81,7 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 	
 	@Override
 	public void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
+	    int sp = Stack.enter();
 		CollisionObject colObj = isSwapped ? body1 : body0;
 		CollisionObject otherObj = isSwapped ? body0 : body1;
 
@@ -93,11 +95,11 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 		// then use each overlapping node AABB against Tree0
 		// and vise versa.
 
-		Transform tmpTrans = Stack.alloc(Transform.class);
-		Transform orgTrans = Stack.alloc(Transform.class);
-		Transform childTrans = Stack.alloc(Transform.class);
-		Transform orgInterpolationTrans = Stack.alloc(Transform.class);
-		Transform newChildWorldTrans = Stack.alloc(Transform.class);
+		Transform tmpTrans = Stack.allocTransform();
+		Transform orgTrans = Stack.allocTransform();
+		Transform childTrans = Stack.allocTransform();
+		Transform orgInterpolationTrans = Stack.allocTransform();
+		Transform newChildWorldTrans = Stack.allocTransform();
 
 		int numChildren = childCollisionAlgorithms.size();
 		int i;
@@ -123,10 +125,12 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 			colObj.setWorldTransform(orgTrans);
 			colObj.setInterpolationWorldTransform(orgInterpolationTrans);
 		}
+		Stack.leave(sp);
 	}
 
 	@Override
 	public float calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
+	    int sp = Stack.enter();
 		CollisionObject colObj = isSwapped ? body1 : body0;
 		CollisionObject otherObj = isSwapped ? body0 : body1;
 
@@ -141,9 +145,9 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 		// then use each overlapping node AABB against Tree0
 		// and vise versa.
 
-		Transform tmpTrans = Stack.alloc(Transform.class);
-		Transform orgTrans = Stack.alloc(Transform.class);
-		Transform childTrans = Stack.alloc(Transform.class);
+		Transform tmpTrans = Stack.allocTransform();
+		Transform orgTrans = Stack.allocTransform();
+		Transform childTrans = Stack.allocTransform();
 		float hitFraction = 1f;
 
 		int numChildren = childCollisionAlgorithms.size();
@@ -171,6 +175,7 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 			colObj.internalSetTemporaryCollisionShape(tmpShape);
 			colObj.setWorldTransform(orgTrans);
 		}
+		Stack.leave(sp);
 		return hitFraction;
 	}
 
@@ -184,7 +189,13 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 	////////////////////////////////////////////////////////////////////////////
 	
 	public static class CreateFunc extends CollisionAlgorithmCreateFunc {
-		private final ObjectPool<CompoundCollisionAlgorithm> pool = ObjectPool.get(CompoundCollisionAlgorithm.class);
+		private final ObjectPool<CompoundCollisionAlgorithm> pool = ObjectPool.get(CompoundCollisionAlgorithm.class, 
+				new Supplier<CompoundCollisionAlgorithm>() {
+					@Override
+					public CompoundCollisionAlgorithm get() {
+						return new CompoundCollisionAlgorithm();
+					}
+		});
 
 		@Override
 		public CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1) {
@@ -200,7 +211,12 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 	};
 	
 	public static class SwappedCreateFunc extends CollisionAlgorithmCreateFunc {
-		private final ObjectPool<CompoundCollisionAlgorithm> pool = ObjectPool.get(CompoundCollisionAlgorithm.class);
+		private final ObjectPool<CompoundCollisionAlgorithm> pool = ObjectPool.get(CompoundCollisionAlgorithm.class,
+				new Supplier<CompoundCollisionAlgorithm>() {
+					@Override
+					public CompoundCollisionAlgorithm get() {
+						return new CompoundCollisionAlgorithm();
+					}});
 
 		@Override
 		public CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1) {

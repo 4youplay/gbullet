@@ -28,6 +28,8 @@ import com.bulletphysics.util.ObjectPool;
 import com.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import com.bulletphysics.linearmath.VectorUtil;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Vector3f;
 
 /**
@@ -51,7 +53,12 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 	private boolean useQuantizedAabbCompression;
 	private boolean ownsBvh;
 	
-	private ObjectPool<MyNodeOverlapCallback> myNodeCallbacks = ObjectPool.get(MyNodeOverlapCallback.class);
+	private ObjectPool<MyNodeOverlapCallback> myNodeCallbacks = ObjectPool.get(MyNodeOverlapCallback.class,
+			new Supplier<MyNodeOverlapCallback>() {
+				@Override
+				public MyNodeOverlapCallback get() {
+					return new MyNodeOverlapCallback();
+				}});
 	
 	public BvhTriangleMeshShape() {
 		super(null);
@@ -191,8 +198,9 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 	
 	@Override
 	public void setLocalScaling(Vector3f scaling) {
-		Vector3f tmp = Stack.alloc(Vector3f.class);
-		tmp.sub(getLocalScaling(Stack.alloc(Vector3f.class)), scaling);
+	    int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
+		tmp.sub(getLocalScaling(Stack.allocVector3f()), scaling);
 
 		if (tmp.lengthSquared() > BulletGlobals.SIMD_EPSILON) {
 			super.setLocalScaling(scaling);
@@ -209,6 +217,7 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 			bvh.build(meshInterface, useQuantizedAabbCompression, localAabbMin, localAabbMax);
 			ownsBvh = true;
 		}
+		Stack.leave(sp);
 	}
 	
 	public OptimizedBvh getOptimizedBvh() {
@@ -216,9 +225,11 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 	}
 
 	public void setOptimizedBvh(OptimizedBvh bvh) {
-		Vector3f scaling = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f scaling = Stack.allocVector3f();
 		scaling.set(1f, 1f, 1f);
 		setOptimizedBvh(bvh, scaling);
+		Stack.leave(sp);
 	}
 
 	public void setOptimizedBvh(OptimizedBvh bvh, Vector3f scaling) {
@@ -228,13 +239,15 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 		this.bvh = bvh;
 		ownsBvh = false;
 
+		int sp = Stack.enter();
 		// update the scaling without rebuilding the bvh
-		Vector3f tmp = Stack.alloc(Vector3f.class);
-		tmp.sub(getLocalScaling(Stack.alloc(Vector3f.class)), scaling);
+		Vector3f tmp = Stack.allocVector3f();
+		tmp.sub(getLocalScaling(Stack.allocVector3f()), scaling);
 
 		if (tmp.lengthSquared() > BulletGlobals.SIMD_EPSILON) {
 			super.setLocalScaling(scaling);
 		}
+		Stack.leave(sp);
 	}
 
 	public boolean usesQuantizedAabbCompression() {
@@ -258,9 +271,10 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 		}
 
 		public void processNode(int nodeSubPart, int nodeTriangleIndex) {
+		    int sp = Stack.enter();
 			VertexData data = meshInterface.getLockedReadOnlyVertexIndexBase(nodeSubPart);
 
-			Vector3f meshScaling = meshInterface.getScaling(Stack.alloc(Vector3f.class));
+			Vector3f meshScaling = meshInterface.getScaling(Stack.allocVector3f());
 
 			data.getTriangle(nodeTriangleIndex*3, meshScaling, triangle);
 
@@ -268,6 +282,7 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 			callback.processTriangle(triangle, nodeSubPart, nodeTriangleIndex);
 			
 			meshInterface.unLockReadOnlyVertexBase(nodeSubPart);
+			Stack.leave(sp);
 		}
 	}
 	

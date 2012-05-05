@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-package com.bulletphysics.demos.opengl;
+package com.bulletphysics.demos.lwjgl;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
@@ -35,7 +35,6 @@ import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.ARBTextureCompression.*;
 import static org.lwjgl.util.glu.GLU.*;
 
 /**
@@ -120,9 +119,9 @@ public class FontRender {
 			in.read(data);
 			buf.put(data);
 
-			int[] id = new int[1];
-			glGenTextures(IntBuffer.wrap(id));
-			texture = id[0];
+			IntBuffer ib = BufferUtils.createIntBuffer(1);
+			glGenTextures(ib);
+			texture = ib.get(0);
 			width = w;
 			height = h;
 			

@@ -175,36 +175,40 @@ public class JacobianEntry {
 	 */
 	public float getNonDiagonal(JacobianEntry jacB, float massInvA, float massInvB) {
 		JacobianEntry jacA = this;
+		int sp = Stack.enter();
 
-		Vector3f lin = Stack.alloc(Vector3f.class);
+		Vector3f lin = Stack.allocVector3f();
 		VectorUtil.mul(lin, jacA.linearJointAxis, jacB.linearJointAxis);
 
-		Vector3f ang0 = Stack.alloc(Vector3f.class);
+		Vector3f ang0 = Stack.allocVector3f();
 		VectorUtil.mul(ang0, jacA.m_0MinvJt, jacB.aJ);
 
-		Vector3f ang1 = Stack.alloc(Vector3f.class);
+		Vector3f ang1 = Stack.allocVector3f();
 		VectorUtil.mul(ang1, jacA.m_1MinvJt, jacB.bJ);
 
-		Vector3f lin0 = Stack.alloc(Vector3f.class);
+		Vector3f lin0 = Stack.allocVector3f();
 		lin0.scale(massInvA, lin);
 
-		Vector3f lin1 = Stack.alloc(Vector3f.class);
+		Vector3f lin1 = Stack.allocVector3f();
 		lin1.scale(massInvB, lin);
 
-		Vector3f sum = Stack.alloc(Vector3f.class);
+		Vector3f sum = Stack.allocVector3f();
 		VectorUtil.add(sum, ang0, ang1, lin0, lin1);
 
-		return sum.x + sum.y + sum.z;
+		float result = sum.x + sum.y + sum.z;
+		Stack.leave(sp);
+		return result;
 	}
 
 	public float getRelativeVelocity(Vector3f linvelA, Vector3f angvelA, Vector3f linvelB, Vector3f angvelB) {
-		Vector3f linrel = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f linrel = Stack.allocVector3f();
 		linrel.sub(linvelA, linvelB);
 
-		Vector3f angvela = Stack.alloc(Vector3f.class);
+		Vector3f angvela = Stack.allocVector3f();
 		VectorUtil.mul(angvela, angvelA, aJ);
 
-		Vector3f angvelb = Stack.alloc(Vector3f.class);
+		Vector3f angvelb = Stack.allocVector3f();
 		VectorUtil.mul(angvelb, angvelB, bJ);
 
 		VectorUtil.mul(linrel, linrel, linearJointAxis);
@@ -213,6 +217,7 @@ public class JacobianEntry {
 		angvela.add(linrel);
 
 		float rel_vel2 = angvela.x + angvela.y + angvela.z;
+		Stack.leave(sp);
 		return rel_vel2 + BulletGlobals.FLT_EPSILON;
 	}
 	

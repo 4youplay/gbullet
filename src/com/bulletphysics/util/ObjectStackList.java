@@ -23,23 +23,29 @@
 
 package com.bulletphysics.util;
 
+import cz.advel.stack.Supplier;
+
 /**
  * Stack-based object pool for arbitrary objects, returning not supported.
  * 
  * @author jezek2
  */
-public abstract class ObjectStackList<T> extends StackList<T> {
+public class ObjectStackList<T> extends StackList<T> {
 
-	public ObjectStackList() {
+    Supplier<T> creator;
+
+	public ObjectStackList(Supplier<T> creator) {
 		super(false);
+		this.creator = creator;
 	}
 
 	@Override
-	public abstract T create();
+	public T create() {
+	  return creator.get();
+	}
 
 	@Override
 	protected void copy(T dest, T src) {
 		throw new UnsupportedOperationException();
 	}
-	
 }

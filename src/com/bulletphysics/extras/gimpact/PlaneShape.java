@@ -41,15 +41,18 @@ import javax.vecmath.Vector4f;
 class PlaneShape {
 
 	public static void get_plane_equation(StaticPlaneShape shape, Vector4f equation) {
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 		equation.set(shape.getPlaneNormal(tmp));
 		equation.w = shape.getPlaneConstant();
+		Stack.leave(sp);
 	}
 	
 	public static void get_plane_equation_transformed(StaticPlaneShape shape, Transform trans, Vector4f equation) {
+	    int sp = Stack.enter();
 		get_plane_equation(shape, equation);
 
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		Vector3f tmp = Stack.allocVector3f();
 
 		trans.basis.getRow(0, tmp);
 		float x = VectorUtil.dot3(tmp, equation);
@@ -61,6 +64,7 @@ class PlaneShape {
 		float w = VectorUtil.dot3(trans.origin, equation) + equation.w;
 
 		equation.set(x, y, z, w);
+		Stack.leave(sp);
 	}
 	
 }

@@ -39,16 +39,14 @@ import com.bulletphysics.collision.shapes.ConvexHullShape;
 import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.demos.bsp.BspConverter;
 import com.bulletphysics.demos.opengl.DemoApplication;
-import com.bulletphysics.demos.opengl.GLDebugDrawer;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
+import com.bulletphysics.demos.opengl.Keyboard;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.character.KinematicCharacterController;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 import com.bulletphysics.linearmath.Transform;
 import javax.vecmath.Vector3f;
-import org.lwjgl.input.Keyboard;
 import static com.bulletphysics.demos.opengl.IGL.*;
 
 /**
@@ -309,13 +307,6 @@ public class CharacterDemo extends DemoApplication {
 		             cameraUp.x, cameraUp.y, cameraUp.z);
 	}
 
-	public static void main(String[] args) throws Exception {
-		CharacterDemo demo = new CharacterDemo(LWJGL.getGL());
-		demo.initPhysics();
-		demo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
-
-		LWJGL.main(args, 800, 600, "Bullet Character Demo. http://bullet.sf.net", demo);
-	}
 	
 	////////////////////////////////////////////////////////////////////////////
 	

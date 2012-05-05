@@ -33,6 +33,8 @@ import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
 import com.bulletphysics.util.ObjectPool;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Vector3f;
 
 /**
@@ -77,7 +79,7 @@ public class ConvexPlaneCollisionAlgorithm extends CollisionAlgorithm {
 			return;
 		}
 		
-		Transform tmpTrans = Stack.alloc(Transform.class);
+		Transform tmpTrans = Stack.allocTransform();
 
 		CollisionObject convexObj = isSwapped ? body1 : body0;
 		CollisionObject planeObj = isSwapped ? body0 : body1;
@@ -86,29 +88,29 @@ public class ConvexPlaneCollisionAlgorithm extends CollisionAlgorithm {
 		StaticPlaneShape planeShape = (StaticPlaneShape) planeObj.getCollisionShape();
 
 		boolean hasCollision = false;
-		Vector3f planeNormal = planeShape.getPlaneNormal(Stack.alloc(Vector3f.class));
+		Vector3f planeNormal = planeShape.getPlaneNormal(Stack.allocVector3f());
 		float planeConstant = planeShape.getPlaneConstant();
 
-		Transform planeInConvex = Stack.alloc(Transform.class);
+		Transform planeInConvex = Stack.allocTransform();
 		convexObj.getWorldTransform(planeInConvex);
 		planeInConvex.inverse();
 		planeInConvex.mul(planeObj.getWorldTransform(tmpTrans));
 
-		Transform convexInPlaneTrans = Stack.alloc(Transform.class);
+		Transform convexInPlaneTrans = Stack.allocTransform();
 		convexInPlaneTrans.inverse(planeObj.getWorldTransform(tmpTrans));
 		convexInPlaneTrans.mul(convexObj.getWorldTransform(tmpTrans));
 
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		Vector3f tmp = Stack.allocVector3f();
 		tmp.negate(planeNormal);
 		planeInConvex.basis.transform(tmp);
 
-		Vector3f vtx = convexShape.localGetSupportingVertex(tmp, Stack.alloc(Vector3f.class));
+		Vector3f vtx = convexShape.localGetSupportingVertex(tmp, Stack.allocVector3f());
 		Vector3f vtxInPlane = Stack.alloc(vtx);
 		convexInPlaneTrans.transform(vtxInPlane);
 
 		float distance = (planeNormal.dot(vtxInPlane) - planeConstant);
 
-		Vector3f vtxInPlaneProjected = Stack.alloc(Vector3f.class);
+		Vector3f vtxInPlaneProjected = Stack.allocVector3f();
 		tmp.scale(distance, planeNormal);
 		vtxInPlaneProjected.sub(vtxInPlane, tmp);
 
@@ -148,7 +150,13 @@ public class ConvexPlaneCollisionAlgorithm extends CollisionAlgorithm {
 	////////////////////////////////////////////////////////////////////////////
 	
 	public static class CreateFunc extends CollisionAlgorithmCreateFunc {
-		private final ObjectPool<ConvexPlaneCollisionAlgorithm> pool = ObjectPool.get(ConvexPlaneCollisionAlgorithm.class);
+		private final ObjectPool<ConvexPlaneCollisionAlgorithm> pool = ObjectPool.get(ConvexPlaneCollisionAlgorithm.class,
+				new Supplier<ConvexPlaneCollisionAlgorithm>() {
+					@Override
+					public ConvexPlaneCollisionAlgorithm get() {
+						return new ConvexPlaneCollisionAlgorithm();
+					}
+		});
 
 		@Override
 		public CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1) {

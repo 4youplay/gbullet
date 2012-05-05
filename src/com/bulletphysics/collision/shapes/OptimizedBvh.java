@@ -28,6 +28,8 @@ import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.linearmath.VectorUtil;
 import com.bulletphysics.util.ObjectArrayList;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import java.io.Serializable;
 import javax.vecmath.Vector3f;
 
@@ -39,7 +41,14 @@ import javax.vecmath.Vector3f;
  * @author jezek2
  */
 public class OptimizedBvh implements Serializable {
-
+    private final static Supplier<OptimizedBvhNode> NEW_OPTIMIZED_BVH_NODE_SUPPLIER = new Supplier<OptimizedBvhNode>() {
+      @Override
+      public OptimizedBvhNode get() {
+       return new OptimizedBvhNode();
+      }
+      
+    };
+  
 	private static final long serialVersionUID = 1L;
 
 	//protected final BulletStack stack = BulletStack.get();
@@ -126,14 +135,16 @@ public class OptimizedBvh implements Serializable {
 	
 	public void setQuantizationValues(Vector3f aabbMin, Vector3f aabbMax, float quantizationMargin) {
 		// enlarge the AABB to avoid division by zero when initializing the quantization values
-		Vector3f clampValue = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f clampValue = Stack.allocVector3f();
 		clampValue.set(quantizationMargin,quantizationMargin,quantizationMargin);
 		bvhAabbMin.sub(aabbMin, clampValue);
 		bvhAabbMax.add(aabbMax, clampValue);
-		Vector3f aabbSize = Stack.alloc(Vector3f.class);
+		Vector3f aabbSize = Stack.allocVector3f();
 		aabbSize.sub(bvhAabbMax, bvhAabbMin);
 		bvhQuantization.set(65535f, 65535f, 65535f);
 		VectorUtil.div(bvhQuantization, bvhQuantization, aabbSize);
+		Stack.leave(sp);
 	}
 	
 	public void setInternalNodeEscapeIndex(int nodeIndex, int escapeIndex) {
@@ -241,8 +252,9 @@ public class OptimizedBvh implements Serializable {
 			// negative indices are reserved for escapeIndex
 			assert (triangleIndex >= 0);
 
+			int sp = Stack.enter();
 			int nodeId = triangleNodes.add();
-			Vector3f aabbMin = Stack.alloc(Vector3f.class), aabbMax = Stack.alloc(Vector3f.class);
+			Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
 			aabbMin.set(1e30f, 1e30f, 1e30f);
 			aabbMax.set(-1e30f, -1e30f, -1e30f);
 			VectorUtil.setMin(aabbMin, triangle[0]);
@@ -272,6 +284,7 @@ public class OptimizedBvh implements Serializable {
 			triangleNodes.setQuantizedAabbMax(nodeId, optimizedTree.quantizeWithClamp(aabbMax));
 
 			triangleNodes.setEscapeIndexOrTriangleIndex(nodeId, (partId << (31 - MAX_NUM_PARTS_IN_BITS)) | triangleIndex);
+			Stack.leave(sp);
 		}
 	}
 	
@@ -296,11 +309,12 @@ public class OptimizedBvh implements Serializable {
 			quantizedContiguousNodes.resize(2 * numLeafNodes);
 		}
 		else {
+		    int sp = Stack.enter();
 			NodeTriangleCallback callback = new NodeTriangleCallback(leafNodes);
 
-			Vector3f aabbMin = Stack.alloc(Vector3f.class);
+			Vector3f aabbMin = Stack.allocVector3f();
 			aabbMin.set(-1e30f, -1e30f, -1e30f);
-			Vector3f aabbMax = Stack.alloc(Vector3f.class);
+			Vector3f aabbMax = Stack.allocVector3f();
 			aabbMax.set(1e30f, 1e30f, 1e30f);
 
 			triangles.internalProcessAllTriangles(callback, aabbMin, aabbMax);
@@ -310,7 +324,8 @@ public class OptimizedBvh implements Serializable {
 
 			// TODO: check
 			//contiguousNodes.resize(2*numLeafNodes);
-			MiscUtil.resize(contiguousNodes, 2 * numLeafNodes, OptimizedBvhNode.class);
+			MiscUtil.resize(contiguousNodes, 2 * numLeafNodes, NEW_OPTIMIZED_BVH_NODE_SUPPLIER);
+			Stack.leave(sp);
 		}
 
 		curNodeIndex = 0;
@@ -338,7 +353,8 @@ public class OptimizedBvh implements Serializable {
 	public void refit(StridingMeshInterface meshInterface) {
 		if (useQuantization) {
 			// calculate new aabb
-			Vector3f aabbMin = Stack.alloc(Vector3f.class), aabbMax = Stack.alloc(Vector3f.class);
+		    int sp = Stack.enter();
+			Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
 			meshInterface.calculateAabbBruteForce(aabbMin, aabbMax);
 
 			setQuantizationValues(aabbMin, aabbMax);
@@ -352,7 +368,7 @@ public class OptimizedBvh implements Serializable {
 				BvhSubtreeInfo subtree = SubtreeHeaders.getQuick(i);
 				subtree.setAabbFromQuantizeNode(quantizedContiguousNodes, subtree.rootNodeIndex);
 			}
-
+			Stack.leave(sp);
 		}
 		else {
 			// JAVA NOTE: added for testing, it's too slow for practical use
@@ -402,10 +418,11 @@ public class OptimizedBvh implements Serializable {
 		assert (useQuantization);
 
 		int curNodeSubPart = -1;
-
-		Vector3f[] triangleVerts/*[3]*/ = new Vector3f[] { Stack.alloc(Vector3f.class), Stack.alloc(Vector3f.class), Stack.alloc(Vector3f.class) };
-		Vector3f aabbMin = Stack.alloc(Vector3f.class), aabbMax = Stack.alloc(Vector3f.class);
-		Vector3f meshScaling = meshInterface.getScaling(Stack.alloc(Vector3f.class));
+		int sp = Stack.enter();
+		
+		Vector3f[] triangleVerts/*[3]*/ = new Vector3f[] { Stack.allocVector3f(), Stack.allocVector3f(), Stack.allocVector3f() };
+		Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
+		Vector3f meshScaling = meshInterface.getScaling(Stack.allocVector3f());
 
 		VertexData data = null;
 
@@ -464,6 +481,7 @@ public class OptimizedBvh implements Serializable {
 		if (curNodeSubPart >= 0) {
 			meshInterface.unLockReadOnlyVertexBase(curNodeSubPart);
 		}
+		Stack.leave(sp);
 	}
 	
 	protected void buildTree(int startIndex, int endIndex) {
@@ -502,10 +520,11 @@ public class OptimizedBvh implements Serializable {
 
 		int internalNodeIndex = curNodeIndex;
 
-		Vector3f tmp1 = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f tmp1 = Stack.allocVector3f();
 		tmp1.set(-1e30f, -1e30f, -1e30f);
 		setInternalNodeAabbMax(curNodeIndex, tmp1);
-		Vector3f tmp2 = Stack.alloc(Vector3f.class);
+		Vector3f tmp2 = Stack.allocVector3f();
 		tmp2.set(1e30f, 1e30f, 1e30f);
 		setInternalNodeAabbMin(curNodeIndex, tmp2);
 
@@ -544,6 +563,7 @@ public class OptimizedBvh implements Serializable {
 		}
 
 		setInternalNodeEscapeIndex(internalNodeIndex, escapeIndex);
+		Stack.leave(sp);
 	}
 
 	protected boolean testQuantizedAabbAgainstQuantizedAabb(long aabbMin1, long aabbMax1, long aabbMin2, long aabbMax2) {
@@ -608,10 +628,10 @@ public class OptimizedBvh implements Serializable {
 		int splitIndex = startIndex;
 		int numIndices = endIndex - startIndex;
 		float splitValue;
-
-		Vector3f means = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f means = Stack.allocVector3f();
 		means.set(0f, 0f, 0f);
-		Vector3f center = Stack.alloc(Vector3f.class);
+		Vector3f center = Stack.allocVector3f();
 		for (i = startIndex; i < endIndex; i++) {
 			center.add(getAabbMax(i), getAabbMin(i));
 			center.scale(0.5f);
@@ -652,20 +672,21 @@ public class OptimizedBvh implements Serializable {
 
 		boolean unbal = (splitIndex == startIndex) || (splitIndex == (endIndex));
 		assert (!unbal);
-
+		
+		Stack.leave(sp);
 		return splitIndex;
 	}
 
 	protected int calcSplittingAxis(int startIndex, int endIndex) {
 		int i;
-
-		Vector3f means = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f means = Stack.allocVector3f();
 		means.set(0f, 0f, 0f);
-		Vector3f variance = Stack.alloc(Vector3f.class);
+		Vector3f variance = Stack.allocVector3f();
 		variance.set(0f, 0f, 0f);
 		int numIndices = endIndex - startIndex;
 
-		Vector3f center = Stack.alloc(Vector3f.class);
+		Vector3f center = Stack.allocVector3f();
 		for (i = startIndex; i < endIndex; i++) {
 			center.add(getAabbMax(i), getAabbMin(i));
 			center.scale(0.5f);
@@ -673,7 +694,7 @@ public class OptimizedBvh implements Serializable {
 		}
 		means.scale(1f / (float) numIndices);
 
-		Vector3f diff2 = Stack.alloc(Vector3f.class);
+		Vector3f diff2 = Stack.allocVector3f();
 		for (i = startIndex; i < endIndex; i++) {
 			center.add(getAabbMax(i), getAabbMin(i));
 			center.scale(0.5f);
@@ -684,7 +705,9 @@ public class OptimizedBvh implements Serializable {
 		}
 		variance.scale(1f / ((float) numIndices - 1));
 
-		return VectorUtil.maxAxis(variance);
+		int result = VectorUtil.maxAxis(variance);
+		Stack.leave(sp);
+		return result;
 	}
 
 	public void reportAabbOverlappingNodex(NodeOverlapCallback nodeCallback, Vector3f aabbMin, Vector3f aabbMax) {
@@ -794,8 +817,8 @@ public class OptimizedBvh implements Serializable {
 
 	protected void walkStacklessQuantizedTreeAgainstRay(NodeOverlapCallback nodeCallback, Vector3f raySource, Vector3f rayTarget, Vector3f aabbMin, Vector3f aabbMax, int startNodeIndex, int endNodeIndex) {
 		assert (useQuantization);
-
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 
 		int curIndex = startNodeIndex;
 		int walkIterations = 0;
@@ -813,7 +836,7 @@ public class OptimizedBvh implements Serializable {
 		//#define RAYAABB2
 		//#ifdef RAYAABB2
 		Vector3f rayFrom = Stack.alloc(raySource);
-		Vector3f rayDirection = Stack.alloc(Vector3f.class);
+		Vector3f rayDirection = Stack.allocVector3f();
 		tmp.sub(rayTarget, raySource);
 		rayDirection.normalize(tmp);
 		lambda_max = rayDirection.dot(tmp);
@@ -840,9 +863,9 @@ public class OptimizedBvh implements Serializable {
 		quantizedQueryAabbMin = quantizeWithClamp(rayAabbMin);
 		quantizedQueryAabbMax = quantizeWithClamp(rayAabbMax);
 
-		Vector3f bounds_0 = Stack.alloc(Vector3f.class);
-		Vector3f bounds_1 = Stack.alloc(Vector3f.class);
-		Vector3f normal = Stack.alloc(Vector3f.class);
+		Vector3f bounds_0 = Stack.allocVector3f();
+		Vector3f bounds_1 = Stack.allocVector3f();
+		Vector3f normal = Stack.allocVector3f();
 		float[] param = new float[1];
 
 		while (curIndex < endNodeIndex) {
@@ -911,6 +934,7 @@ public class OptimizedBvh implements Serializable {
 		if (maxIterations < walkIterations) {
 			maxIterations = walkIterations;
 		}
+		Stack.leave(sp);
 	}
 
 	protected void walkStacklessQuantizedTree(NodeOverlapCallback nodeCallback, long quantizedQueryAabbMin, long quantizedQueryAabbMax, int startNodeIndex, int endNodeIndex) {
@@ -973,8 +997,9 @@ public class OptimizedBvh implements Serializable {
 	
 	public void reportRayOverlappingNodex(NodeOverlapCallback nodeCallback, Vector3f raySource, Vector3f rayTarget) {
 		boolean fast_path = useQuantization && traversalMode == TraversalMode.STACKLESS;
+		int sp = Stack.enter();
 		if (fast_path) {
-			Vector3f tmp = Stack.alloc(Vector3f.class);
+			Vector3f tmp = Stack.allocVector3f();
 			tmp.set(0f, 0f, 0f);
 			walkStacklessQuantizedTreeAgainstRay(nodeCallback, raySource, rayTarget, tmp, tmp, 0, curNodeIndex);
 		}
@@ -986,6 +1011,7 @@ public class OptimizedBvh implements Serializable {
 			VectorUtil.setMax(aabbMax, rayTarget);
 			reportAabbOverlappingNodex(nodeCallback, aabbMin, aabbMax);
 		}
+		Stack.leave(sp);
 	}
 
 	public void reportBoxCastOverlappingNodex(NodeOverlapCallback nodeCallback, Vector3f raySource, Vector3f rayTarget, Vector3f aabbMin, Vector3f aabbMax) {
@@ -994,6 +1020,7 @@ public class OptimizedBvh implements Serializable {
 			walkStacklessQuantizedTreeAgainstRay(nodeCallback, raySource, rayTarget, aabbMin, aabbMax, 0, curNodeIndex);
 		}
 		else {
+		    int sp = Stack.enter();
 			/* Slow path:
 			Construct the bounding box for the entire box cast and send that down the tree */
 			Vector3f qaabbMin = Stack.alloc(raySource);
@@ -1003,17 +1030,19 @@ public class OptimizedBvh implements Serializable {
 			qaabbMin.add(aabbMin);
 			qaabbMax.add(aabbMax);
 			reportAabbOverlappingNodex(nodeCallback, qaabbMin, qaabbMax);
+			Stack.leave(sp);
 		}
 	}
 	
 	public long quantizeWithClamp(Vector3f point) {
 		assert (useQuantization);
+		int sp = Stack.enter();
 
 		Vector3f clampedPoint = Stack.alloc(point);
 		VectorUtil.setMax(clampedPoint, bvhAabbMin);
 		VectorUtil.setMin(clampedPoint, bvhAabbMax);
 
-		Vector3f v = Stack.alloc(Vector3f.class);
+		Vector3f v = Stack.allocVector3f();
 		v.sub(clampedPoint, bvhAabbMin);
 		VectorUtil.mul(v, v, bvhQuantization);
 
@@ -1021,6 +1050,7 @@ public class OptimizedBvh implements Serializable {
 		int out1 = (int)(v.y + 0.5f) & 0xFFFF;
 		int out2 = (int)(v.z + 0.5f) & 0xFFFF;
 
+		Stack.leave(sp);
 		return ((long)out0) | (((long)out1) << 16) | (((long)out2) << 32);
 	}
 	

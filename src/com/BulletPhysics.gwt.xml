@@ -1,15 +1,13 @@
 <module >
-  <inherits name='cz.advel.Stack' />
   <inherits name='com.google.gwt.core.Core'/>
   <inherits name='javax.Vecmath'/>
+  <inherits name='cz.advel.Stack'/>
 
-  <source path='bulletphysics' />
-  <source path='bulletphysics.collision'/>
-  <source path='bulletphysics.dynamics'/>
-  <source path='bulletphysics.extras'/>
-  <source path='bulletphysics.linearmath'/>
-  <source path='bulletphysics.util'/>
-  
-  <super-source path="super"/>
+  <source path='bulletphysics'>
+    <exclude name='**/demos/bsp/**/*' />
+    <exclude name='**/demos/character/**/*' />
+    <exclude name='**/demos/concave/**/*' />
+    <exclude name='**/demos/lwjgl/**/*' /> 
+  </source>
  
 </module>

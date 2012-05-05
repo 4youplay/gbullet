@@ -29,6 +29,8 @@ import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.linearmath.convexhull.*;
 import com.bulletphysics.util.IntArrayList;
 import com.bulletphysics.util.ObjectArrayList;
+import com.bulletphysics.util.Suppliers;
+
 import cz.advel.stack.Stack;
 import javax.vecmath.Vector3f;
 
@@ -53,14 +55,15 @@ public class ShapeHull {
 		this.indices.clear();
 		this.numIndices = 0;
 
-		MiscUtil.resize(unitSpherePoints, NUM_UNITSPHERE_POINTS+ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS*2, Vector3f.class);
+		MiscUtil.resize(unitSpherePoints, NUM_UNITSPHERE_POINTS+ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS*2, Suppliers.NEW_VECTOR3F_SUPPLIER);
 		for (int i=0; i<constUnitSpherePoints.size(); i++) {
 			unitSpherePoints.getQuick(i).set(constUnitSpherePoints.getQuick(i));
 		}
 	}
 
 	public boolean buildHull(float margin) {
-		Vector3f norm = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f norm = Stack.allocVector3f();
 
 		int numSampleDirections = NUM_UNITSPHERE_POINTS;
 		{
@@ -75,7 +78,7 @@ public class ShapeHull {
 		}
 
 		ObjectArrayList<Vector3f> supportPoints = new ObjectArrayList<Vector3f>();
-		MiscUtil.resize(supportPoints, NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2, Vector3f.class);
+		MiscUtil.resize(supportPoints, NUM_UNITSPHERE_POINTS + ConvexShape.MAX_PREFERRED_PENETRATION_DIRECTIONS * 2, Suppliers.NEW_VECTOR3F_SUPPLIER);
 
 		for (int i=0; i<numSampleDirections; i++) {
 			shape.localGetSupportingVertex(unitSpherePoints.getQuick(i), supportPoints.getQuick(i));
@@ -96,10 +99,11 @@ public class ShapeHull {
 		HullLibrary hl = new HullLibrary();
 		HullResult hr = new HullResult();
 		if (!hl.createConvexHull(hd, hr)) {
+		    Stack.leave(sp);
 			return false;
 		}
 
-		MiscUtil.resize(vertices, hr.numOutputVertices, Vector3f.class);
+		MiscUtil.resize(vertices, hr.numOutputVertices, Suppliers.NEW_VECTOR3F_SUPPLIER);
 
 		for (int i=0; i<hr.numOutputVertices; i++) {
 			vertices.getQuick(i).set(hr.outputVertices.getQuick(i));
@@ -113,6 +117,7 @@ public class ShapeHull {
 		// free temporary hull result that we just copied
 		hl.releaseResult(hr);
 
+		Stack.leave(sp);
 		return true;
 	}
 

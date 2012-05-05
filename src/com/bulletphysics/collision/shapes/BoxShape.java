@@ -50,10 +50,12 @@ public class BoxShape extends PolyhedralConvexShape {
 	}
 
 	public Vector3f getHalfExtentsWithMargin(Vector3f out) {
+	    int sp = Stack.enter();
 		Vector3f halfExtents = getHalfExtentsWithoutMargin(out);
-		Vector3f margin = Stack.alloc(Vector3f.class);
+		Vector3f margin = Stack.allocVector3f();
 		margin.set(getMargin(), getMargin(), getMargin());
 		halfExtents.add(margin);
+		Stack.leave(sp);
 		return out;
 	}
 
@@ -96,7 +98,8 @@ public class BoxShape extends PolyhedralConvexShape {
 
 	@Override
 	public void batchedUnitVectorGetSupportingVertexWithoutMargin(Vector3f[] vectors, Vector3f[] supportVerticesOut, int numVectors) {
-		Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.alloc(Vector3f.class));
+	    int sp = Stack.enter();
+	    Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.allocVector3f());
 
 		for (int i = 0; i < numVectors; i++) {
 			Vector3f vec = vectors[i];
@@ -104,46 +107,53 @@ public class BoxShape extends PolyhedralConvexShape {
 					ScalarUtil.fsel(vec.y, halfExtents.y, -halfExtents.y),
 					ScalarUtil.fsel(vec.z, halfExtents.z, -halfExtents.z));
 		}
+		Stack.leave(sp);
 	}
 
 	@Override
 	public void setMargin(float margin) {
+	    int sp = Stack.enter();
 		// correct the implicitShapeDimensions for the margin
-		Vector3f oldMargin = Stack.alloc(Vector3f.class);
+		Vector3f oldMargin = Stack.allocVector3f();
 		oldMargin.set(getMargin(), getMargin(), getMargin());
-		Vector3f implicitShapeDimensionsWithMargin = Stack.alloc(Vector3f.class);
+		Vector3f implicitShapeDimensionsWithMargin = Stack.allocVector3f();
 		implicitShapeDimensionsWithMargin.add(implicitShapeDimensions, oldMargin);
 
 		super.setMargin(margin);
-		Vector3f newMargin = Stack.alloc(Vector3f.class);
+		Vector3f newMargin = Stack.allocVector3f();
 		newMargin.set(getMargin(), getMargin(), getMargin());
 		implicitShapeDimensions.sub(implicitShapeDimensionsWithMargin, newMargin);
+		Stack.leave(sp);
 	}
 
 	@Override
 	public void setLocalScaling(Vector3f scaling) {
-		Vector3f oldMargin = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f oldMargin = Stack.allocVector3f();
 		oldMargin.set(getMargin(), getMargin(), getMargin());
-		Vector3f implicitShapeDimensionsWithMargin = Stack.alloc(Vector3f.class);
+		Vector3f implicitShapeDimensionsWithMargin = Stack.allocVector3f();
 		implicitShapeDimensionsWithMargin.add(implicitShapeDimensions, oldMargin);
-		Vector3f unScaledImplicitShapeDimensionsWithMargin = Stack.alloc(Vector3f.class);
+		Vector3f unScaledImplicitShapeDimensionsWithMargin = Stack.allocVector3f();
 		VectorUtil.div(unScaledImplicitShapeDimensionsWithMargin, implicitShapeDimensionsWithMargin, localScaling);
 
 		super.setLocalScaling(scaling);
 
 		VectorUtil.mul(implicitShapeDimensions, unScaledImplicitShapeDimensionsWithMargin, localScaling);
 		implicitShapeDimensions.sub(oldMargin);
+		Stack.leave(sp);
 	}
 
 	@Override
 	public void getAabb(Transform t, Vector3f aabbMin, Vector3f aabbMax) {
-		AabbUtil2.transformAabb(getHalfExtentsWithoutMargin(Stack.alloc(Vector3f.class)), getMargin(), t, aabbMin, aabbMax);
+	    int sp = Stack.enter();
+		AabbUtil2.transformAabb(getHalfExtentsWithoutMargin(Stack.allocVector3f()), getMargin(), t, aabbMin, aabbMax);
+		Stack.leave(sp);
 	}
 
 	@Override
 	public void calculateLocalInertia(float mass, Vector3f inertia) {
 		//btScalar margin = btScalar(0.);
-		Vector3f halfExtents = getHalfExtentsWithMargin(Stack.alloc(Vector3f.class));
+		Vector3f halfExtents = getHalfExtentsWithMargin(Stack.allocVector3f());
 
 		float lx = 2f * halfExtents.x;
 		float ly = 2f * halfExtents.y;
@@ -157,12 +167,14 @@ public class BoxShape extends PolyhedralConvexShape {
 	@Override
 	public void getPlane(Vector3f planeNormal, Vector3f planeSupport, int i) {
 		// this plane might not be aligned...
-		Vector4f plane = Stack.alloc(Vector4f.class);
+	    int sp = Stack.enter();
+		Vector4f plane = Stack.allocVector4f();
 		getPlaneEquation(plane, i);
 		planeNormal.set(plane.x, plane.y, plane.z);
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		Vector3f tmp = Stack.allocVector3f();
 		tmp.negate(planeNormal);
 		localGetSupportingVertex(tmp, planeSupport);
+		Stack.leave(sp);
 	}
 
 	@Override
@@ -182,15 +194,18 @@ public class BoxShape extends PolyhedralConvexShape {
 
 	@Override
 	public void getVertex(int i, Vector3f vtx) {
-		Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.alloc(Vector3f.class));
+	    int sp = Stack.enter();
+		Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.allocVector3f());
 
 		vtx.set(halfExtents.x * (1 - (i & 1)) - halfExtents.x * (i & 1),
 				halfExtents.y * (1 - ((i & 2) >> 1)) - halfExtents.y * ((i & 2) >> 1),
 				halfExtents.z * (1 - ((i & 4) >> 2)) - halfExtents.z * ((i & 4) >> 2));
+		Stack.leave(sp);
 	}
 	
 	public void getPlaneEquation(Vector4f plane, int i) {
-		Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.alloc(Vector3f.class));
+	    int sp = Stack.enter();
+		Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.allocVector3f());
 
 		switch (i) {
 			case 0:
@@ -214,6 +229,7 @@ public class BoxShape extends PolyhedralConvexShape {
 			default:
 				assert (false);
 		}
+		Stack.leave(sp);
 	}
 
 	@Override
@@ -282,7 +298,8 @@ public class BoxShape extends PolyhedralConvexShape {
 
 	@Override
 	public boolean isInside(Vector3f pt, float tolerance) {
-		Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.alloc(Vector3f.class));
+	    int sp = Stack.enter();
+		Vector3f halfExtents = getHalfExtentsWithoutMargin(Stack.allocVector3f());
 
 		//btScalar minDist = 2*tolerance;
 
@@ -293,7 +310,7 @@ public class BoxShape extends PolyhedralConvexShape {
 				(pt.y >= (-halfExtents.y - tolerance)) &&
 				(pt.z <= (halfExtents.z + tolerance)) &&
 				(pt.z >= (-halfExtents.z - tolerance));
-
+		Stack.leave(sp);
 		return result;
 	}
 

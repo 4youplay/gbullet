@@ -40,6 +40,8 @@ import com.bulletphysics.collision.shapes.SphereShape;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Vector3f;
 
 /**
@@ -50,7 +52,12 @@ import javax.vecmath.Vector3f;
  */
 public class ConvexConvexAlgorithm extends CollisionAlgorithm {
 	
-	protected final ObjectPool<ClosestPointInput> pointInputsPool = ObjectPool.get(ClosestPointInput.class);
+	protected final ObjectPool<ClosestPointInput> pointInputsPool = ObjectPool.get(ClosestPointInput.class,
+			new Supplier<ClosestPointInput>() {
+				@Override
+				public ClosestPointInput get() {
+					return new ClosestPointInput();
+				}});
 
 	private GjkPairDetector gjkPairDetector = new GjkPairDetector();
 
@@ -138,10 +145,11 @@ public class ConvexConvexAlgorithm extends CollisionAlgorithm {
 	
 	@Override
 	public float calculateTimeOfImpact(CollisionObject col0, CollisionObject col1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 		
-		Transform tmpTrans1 = Stack.alloc(Transform.class);
-		Transform tmpTrans2 = Stack.alloc(Transform.class);
+		Transform tmpTrans1 = Stack.allocTransform();
+		Transform tmpTrans2 = Stack.allocTransform();
 
 		// Rather then checking ALL pairs, only calculate TOI when motion exceeds threshold
 
@@ -161,11 +169,12 @@ public class ConvexConvexAlgorithm extends CollisionAlgorithm {
 		}
 
 		if (disableCcd) {
+		    Stack.leave(sp);
 			return 1f;
 		}
 		
-		Transform tmpTrans3 = Stack.alloc(Transform.class);
-		Transform tmpTrans4 = Stack.alloc(Transform.class);
+		Transform tmpTrans3 = Stack.allocTransform();
+		Transform tmpTrans4 = Stack.allocTransform();
 
 		// An adhoc way of testing the Continuous Collision Detection algorithms
 		// One object is approximated as a sphere, to simplify things
@@ -231,7 +240,7 @@ public class ConvexConvexAlgorithm extends CollisionAlgorithm {
 
 			}
 		}
-
+        Stack.leave(sp);
 		return resultFraction;
 	}
 
@@ -250,7 +259,12 @@ public class ConvexConvexAlgorithm extends CollisionAlgorithm {
 	////////////////////////////////////////////////////////////////////////////
 	
 	public static class CreateFunc extends CollisionAlgorithmCreateFunc {
-		private final ObjectPool<ConvexConvexAlgorithm> pool = ObjectPool.get(ConvexConvexAlgorithm.class);
+		private final ObjectPool<ConvexConvexAlgorithm> pool = ObjectPool.get(ConvexConvexAlgorithm.class,
+				new Supplier<ConvexConvexAlgorithm>() {
+					@Override
+					public ConvexConvexAlgorithm get() {
+						return new ConvexConvexAlgorithm();
+					}});
 
 		public ConvexPenetrationDepthSolver pdSolver;
 		public SimplexSolverInterface simplexSolver;

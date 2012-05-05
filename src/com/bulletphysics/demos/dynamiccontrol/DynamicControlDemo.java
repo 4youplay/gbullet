@@ -32,9 +32,9 @@ import com.bulletphysics.collision.dispatch.CollisionObject;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.demos.lwjgl.LwjglMain;
 import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
@@ -232,11 +232,11 @@ public class DynamicControlDemo extends DemoApplication {
 		gl.glEnd();
 	}
 
-	public static void main(String[] args) throws LWJGLException {
-		DynamicControlDemo demoApp = new DynamicControlDemo(LWJGL.getGL());
-		demoApp.initPhysics();
-
-		LWJGL.main(args, 800, 600, "Bullet Physics Demo. http://bullet.sf.net", demoApp);
-	}
+//	public static void main(String[] args) throws LWJGLException {
+//		DynamicControlDemo demoApp = new DynamicControlDemo(LWJGL.getGL());
+//		demoApp.initPhysics();
+//
+//		LWJGL.main(args, 800, 600, "Bullet Physics Demo. http://bullet.sf.net", demoApp);
+//	}
 	
 }

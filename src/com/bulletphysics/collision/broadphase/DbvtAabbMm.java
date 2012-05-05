@@ -53,7 +53,8 @@ public class DbvtAabbMm {
 	}
 	
 	public static void swap(DbvtAabbMm p1, DbvtAabbMm p2) {
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 		
 		tmp.set(p1.mi);
 		p1.mi.set(p2.mi);
@@ -62,6 +63,7 @@ public class DbvtAabbMm {
 		tmp.set(p1.mx);
 		p1.mx.set(p2.mx);
 		p2.mx.set(tmp);
+		Stack.leave(sp);
 	}
 
 	public Vector3f Center(Vector3f out) {
@@ -97,9 +99,12 @@ public class DbvtAabbMm {
 	}
 
 	public static DbvtAabbMm FromCR(Vector3f c, float r, DbvtAabbMm out) {
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 		tmp.set(r, r, r);
-		return FromCE(c, tmp, out);
+		DbvtAabbMm result = FromCE(c, tmp, out);
+		Stack.leave(sp);
+		return result;
 	}
 
 	public static DbvtAabbMm FromMM(Vector3f mi, Vector3f mx, DbvtAabbMm out) {
@@ -150,8 +155,9 @@ public class DbvtAabbMm {
 	}
 
 	public int Classify(Vector3f n, float o, int s) {
-		Vector3f pi = Stack.alloc(Vector3f.class);
-		Vector3f px = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f pi = Stack.allocVector3f();
+		Vector3f px = Stack.allocVector3f();
 
 		switch (s) {
 			case (0 + 0 + 0):
@@ -189,21 +195,27 @@ public class DbvtAabbMm {
 		}
 		
 		if ((n.dot(px) + o) < 0) {
+		    Stack.leave(sp);
 			return -1;
 		}
 		if ((n.dot(pi) + o) >= 0) {
+		    Stack.leave(sp);
 			return +1;
 		}
+		Stack.leave(sp);
 		return 0;
 	}
 
 	public float ProjectMinimum(Vector3f v, int signs) {
 		Vector3f[] b = new Vector3f[] { mx, mi };
-		Vector3f p = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f p = Stack.allocVector3f();
 		p.set(b[(signs >> 0) & 1].x,
 		      b[(signs >> 1) & 1].y,
 		      b[(signs >> 2) & 1].z);
-		return p.dot(v);
+		float result = p.dot(v);
+		Stack.leave(sp);
+		return result;
 	}
 	 
 	public static boolean Intersect(DbvtAabbMm a, DbvtAabbMm b) {
@@ -216,9 +228,10 @@ public class DbvtAabbMm {
 	}
 
 	public static boolean Intersect(DbvtAabbMm a, DbvtAabbMm b, Transform xform) {
-		Vector3f d0 = Stack.alloc(Vector3f.class);
-		Vector3f d1 = Stack.alloc(Vector3f.class);
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f d0 = Stack.allocVector3f();
+		Vector3f d1 = Stack.allocVector3f();
+		Vector3f tmp = Stack.allocVector3f();
 
 		// JAVA NOTE: check
 		b.Center(d0);
@@ -235,11 +248,14 @@ public class DbvtAabbMm {
 		a.AddSpan(d0, s0, 0, s0, 1);
 		b.AddSpan(d1, s1, 0, s1, 1);
 		if (s0[0] > (s1[1])) {
+		    Stack.leave(sp);
 			return false;
 		}
 		if (s0[1] < (s1[0])) {
+		    Stack.leave(sp);
 			return false;
 		}
+		Stack.leave(sp);
 		return true;
 	}
 
@@ -284,13 +300,16 @@ public class DbvtAabbMm {
 	}
 
 	public static float Proximity(DbvtAabbMm a, DbvtAabbMm b) {
-		Vector3f d = Stack.alloc(Vector3f.class);
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f d = Stack.allocVector3f();
+		Vector3f tmp = Stack.allocVector3f();
 
 		d.add(a.mi, a.mx);
 		tmp.add(b.mi, b.mx);
 		d.sub(tmp);
-		return Math.abs(d.x) + Math.abs(d.y) + Math.abs(d.z);
+		float result = Math.abs(d.x) + Math.abs(d.y) + Math.abs(d.z);
+		Stack.leave(sp);
+		return result;
 	}
 
 	public static void Merge(DbvtAabbMm a, DbvtAabbMm b, DbvtAabbMm r) {

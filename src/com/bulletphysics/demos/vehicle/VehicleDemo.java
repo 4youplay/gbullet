@@ -37,10 +37,9 @@ import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.collision.shapes.CylinderShapeX;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.bulletphysics.demos.opengl.DemoApplication;
-import com.bulletphysics.demos.opengl.GLDebugDrawer;
 import com.bulletphysics.demos.opengl.GLShapeDrawer;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
+import com.bulletphysics.demos.opengl.Keyboard;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
@@ -53,8 +52,6 @@ import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
 import javax.vecmath.Vector3f;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
 
 /**
  * VehicleDemo shows how to setup and use the built-in raycast vehicle.
@@ -601,12 +598,12 @@ public class VehicleDemo extends DemoApplication {
 				  cameraUp.x,cameraUp.y,cameraUp.z);
 	}
 	
-	public static void main(String[] args) throws LWJGLException {
-		VehicleDemo vehicleDemo = new VehicleDemo(LWJGL.getGL());
-		vehicleDemo.initPhysics();
-		vehicleDemo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
-
-		LWJGL.main(args, 800, 600, "Bullet Vehicle Demo", vehicleDemo);
-	}
+//	public static void main(String[] args) throws LWJGLException {
+//		VehicleDemo vehicleDemo = new VehicleDemo(LWJGL.getGL());
+//		vehicleDemo.initPhysics();
+//		vehicleDemo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
+//
+//		LWJGL.main(args, 800, 600, "Bullet Vehicle Demo", vehicleDemo);
+//	}
 	
 }

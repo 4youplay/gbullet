@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-package com.bulletphysics.demos.opengl;
+package com.bulletphysics.demos.lwjgl;
 
 import java.awt.event.KeyEvent;
 import org.lwjgl.LWJGLException;
@@ -31,14 +31,24 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
 
+import com.bulletphysics.demos.opengl.DemoApplication;
+import com.bulletphysics.demos.opengl.DemoRunner;
+import com.bulletphysics.demos.opengl.IGL;
+
 /**
  *
  * @author jezek2
  */
-public class LWJGL {
+public class LwjglMain {
 	
 	private static boolean redisplay = false;
 	private static LwjglGL gl = new LwjglGL();
+	
+	public static void main(String[] args) throws LWJGLException {
+	  DemoRunner demoRunner = new FullDemoRunner(LwjglMain.getGL());
+	  main(args, 800, 600, "Bullet Physics Demo. http://bullet.sf.net", demoRunner);
+	}
+	
 	
 	public static void postRedisplay() {
 		redisplay = true;
@@ -48,7 +58,7 @@ public class LWJGL {
 		return gl;
 	}
 	
-	public static int main(String[] args, int width, int height, String title, DemoApplication demoApp) throws LWJGLException {
+	public static int main(String[] args, int width, int height, String title, DemoRunner demoApp) throws LWJGLException {
 		Display.setDisplayMode(new DisplayMode(width, height));
 		Display.setTitle(title);
 		Display.create(new PixelFormat(0, 24, 0));
@@ -88,8 +98,8 @@ public class LWJGL {
 					demoApp.specialKeyboardUp(Keyboard.getEventKey(), Mouse.getX(), Mouse.getY(), modifiers);
 				}
 				
-				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) quit = true;
-				if (Keyboard.getEventKey() == Keyboard.KEY_Q) quit = true;
+//				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) quit = true;
+//				if (Keyboard.getEventKey() == Keyboard.KEY_Q) quit = true;
 			}
 			
 			while (Mouse.next()) {

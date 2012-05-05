@@ -49,13 +49,15 @@ public class QuaternionUtil {
 	
 	// Game Programming Gems 2.10. make sure v0,v1 are normalized
 	public static Quat4f shortestArcQuat(Vector3f v0, Vector3f v1, Quat4f out) {
-		Vector3f c = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f c = Stack.allocVector3f();
 		c.cross(v0, v1);
 		float d = v0.dot(v1);
 
 		if (d < -1.0 + BulletGlobals.FLT_EPSILON) {
 			// just pick any vector
 			out.set(0.0f, 1.0f, 0.0f, 0.0f);
+			Stack.leave(sp);
 			return out;
 		}
 
@@ -63,6 +65,7 @@ public class QuaternionUtil {
 		float rs = 1.0f / s;
 
 		out.set(c.x * rs, c.y * rs, c.z * rs, s * 0.5f);
+		Stack.leave(sp);
 		return out;
 	}
 	
@@ -75,14 +78,16 @@ public class QuaternionUtil {
 	}
 	
 	public static Vector3f quatRotate(Quat4f rotation, Vector3f v, Vector3f out) {
+	    int sp = Stack.enter();
 		Quat4f q = Stack.alloc(rotation);
 		QuaternionUtil.mul(q, v);
 
-		Quat4f tmp = Stack.alloc(Quat4f.class);
+		Quat4f tmp = Stack.allocQuat4f();
 		inverse(tmp, rotation);
 		q.mul(tmp);
 		
 		out.set(q.x, q.y, q.z);
+		Stack.leave(sp);
 		return out;
 	}
 	

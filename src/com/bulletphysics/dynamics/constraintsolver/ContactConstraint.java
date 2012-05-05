@@ -29,6 +29,8 @@ import com.bulletphysics.collision.narrowphase.ManifoldPoint;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.Transform;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
 
@@ -70,51 +72,57 @@ public class ContactConstraint {
 			return;
 		}
 
-		ObjectPool<JacobianEntry> jacobiansPool = ObjectPool.get(JacobianEntry.class);
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		ObjectPool<JacobianEntry> jacobiansPool = ObjectPool.get(JacobianEntry.class, new Supplier<JacobianEntry>() {
+			@Override
+			public JacobianEntry get() {
+				return new JacobianEntry();
+			}
+		});
+		int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 		
-		Vector3f rel_pos1 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos1 = Stack.allocVector3f();
 		rel_pos1.sub(pos1, body1.getCenterOfMassPosition(tmp));
 
-		Vector3f rel_pos2 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos2 = Stack.allocVector3f();
 		rel_pos2.sub(pos2, body2.getCenterOfMassPosition(tmp));
 
 		//this jacobian entry could be re-used for all iterations
 
-		Vector3f vel1 = Stack.alloc(Vector3f.class);
+		Vector3f vel1 = Stack.allocVector3f();
 		body1.getVelocityInLocalPoint(rel_pos1, vel1);
 
-		Vector3f vel2 = Stack.alloc(Vector3f.class);
+		Vector3f vel2 = Stack.allocVector3f();
 		body2.getVelocityInLocalPoint(rel_pos2, vel2);
 
-		Vector3f vel = Stack.alloc(Vector3f.class);
+		Vector3f vel = Stack.allocVector3f();
 		vel.sub(vel1, vel2);
 
-		Matrix3f mat1 = body1.getCenterOfMassTransform(Stack.alloc(Transform.class)).basis;
+		Matrix3f mat1 = body1.getCenterOfMassTransform(Stack.allocTransform()).basis;
 		mat1.transpose();
 
-		Matrix3f mat2 = body2.getCenterOfMassTransform(Stack.alloc(Transform.class)).basis;
+		Matrix3f mat2 = body2.getCenterOfMassTransform(Stack.allocTransform()).basis;
 		mat2.transpose();
 
 		JacobianEntry jac = jacobiansPool.get();
 		jac.init(mat1, mat2,
 				rel_pos1, rel_pos2, normal,
-				body1.getInvInertiaDiagLocal(Stack.alloc(Vector3f.class)), body1.getInvMass(),
-				body2.getInvInertiaDiagLocal(Stack.alloc(Vector3f.class)), body2.getInvMass());
+				body1.getInvInertiaDiagLocal(Stack.allocVector3f()), body1.getInvMass(),
+				body2.getInvInertiaDiagLocal(Stack.allocVector3f()), body2.getInvMass());
 
 		float jacDiagAB = jac.getDiagonal();
 		float jacDiagABInv = 1f / jacDiagAB;
 
-		Vector3f tmp1 = body1.getAngularVelocity(Stack.alloc(Vector3f.class));
+		Vector3f tmp1 = body1.getAngularVelocity(Stack.allocVector3f());
 		mat1.transform(tmp1);
 
-		Vector3f tmp2 = body2.getAngularVelocity(Stack.alloc(Vector3f.class));
+		Vector3f tmp2 = body2.getAngularVelocity(Stack.allocVector3f());
 		mat2.transform(tmp2);
 
 		float rel_vel = jac.getRelativeVelocity(
-				body1.getLinearVelocity(Stack.alloc(Vector3f.class)),
+				body1.getLinearVelocity(Stack.allocVector3f()),
 				tmp1,
-				body2.getLinearVelocity(Stack.alloc(Vector3f.class)),
+				body2.getLinearVelocity(Stack.allocVector3f()),
 				tmp2);
 
 		jacobiansPool.release(jac);
@@ -135,6 +143,7 @@ public class ContactConstraint {
 		float velocityImpulse = -contactDamping * rel_vel * jacDiagABInv;
 		impulse[0] = velocityImpulse;
 		//#endif
+		Stack.leave(sp);
 	}
 
 	/**
@@ -146,22 +155,23 @@ public class ContactConstraint {
 			ManifoldPoint contactPoint,
 			ContactSolverInfo solverInfo) {
 		
-		Vector3f tmpVec = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f tmpVec = Stack.allocVector3f();
 
-		Vector3f pos1_ = contactPoint.getPositionWorldOnA(Stack.alloc(Vector3f.class));
-		Vector3f pos2_ = contactPoint.getPositionWorldOnB(Stack.alloc(Vector3f.class));
+		Vector3f pos1_ = contactPoint.getPositionWorldOnA(Stack.allocVector3f());
+		Vector3f pos2_ = contactPoint.getPositionWorldOnB(Stack.allocVector3f());
 		Vector3f normal = contactPoint.normalWorldOnB;
 
 		// constant over all iterations
-		Vector3f rel_pos1 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos1 = Stack.allocVector3f();
 		rel_pos1.sub(pos1_, body1.getCenterOfMassPosition(tmpVec));
 
-		Vector3f rel_pos2 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos2 = Stack.allocVector3f();
 		rel_pos2.sub(pos2_, body2.getCenterOfMassPosition(tmpVec));
 
-		Vector3f vel1 = body1.getVelocityInLocalPoint(rel_pos1, Stack.alloc(Vector3f.class));
-		Vector3f vel2 = body2.getVelocityInLocalPoint(rel_pos2, Stack.alloc(Vector3f.class));
-		Vector3f vel = Stack.alloc(Vector3f.class);
+		Vector3f vel1 = body1.getVelocityInLocalPoint(rel_pos1, Stack.allocVector3f());
+		Vector3f vel2 = body2.getVelocityInLocalPoint(rel_pos2, Stack.allocVector3f());
+		Vector3f vel = Stack.allocVector3f();
 		vel.sub(vel1, vel2);
 
 		float rel_vel;
@@ -193,7 +203,7 @@ public class ContactConstraint {
 		normalImpulse = cpd.appliedImpulse - oldNormalImpulse;
 
 		//#ifdef USE_INTERNAL_APPLY_IMPULSE
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		Vector3f tmp = Stack.allocVector3f();
 		if (body1.getInvMass() != 0f) {
 			tmp.scale(body1.getInvMass(), contactPoint.normalWorldOnB);
 			body1.internalApplyImpulse(tmp, cpd.angularComponentA, normalImpulse);
@@ -207,6 +217,7 @@ public class ContactConstraint {
 		//	body2.applyImpulse(-normal*(normalImpulse), rel_pos2);
 		//#endif //USE_INTERNAL_APPLY_IMPULSE
 
+		Stack.leave(sp);
 		return normalImpulse;
 	}
 	
@@ -215,16 +226,16 @@ public class ContactConstraint {
 			RigidBody body2,
 			ManifoldPoint contactPoint,
 			ContactSolverInfo solverInfo) {
+		int sp = Stack.enter();
+		Vector3f tmpVec = Stack.allocVector3f();
 		
-		Vector3f tmpVec = Stack.alloc(Vector3f.class);
-		
-		Vector3f pos1 = contactPoint.getPositionWorldOnA(Stack.alloc(Vector3f.class));
-		Vector3f pos2 = contactPoint.getPositionWorldOnB(Stack.alloc(Vector3f.class));
+		Vector3f pos1 = contactPoint.getPositionWorldOnA(Stack.allocVector3f());
+		Vector3f pos2 = contactPoint.getPositionWorldOnB(Stack.allocVector3f());
 
-		Vector3f rel_pos1 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos1 = Stack.allocVector3f();
 		rel_pos1.sub(pos1, body1.getCenterOfMassPosition(tmpVec));
 
-		Vector3f rel_pos2 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos2 = Stack.allocVector3f();
 		rel_pos2.sub(pos2, body2.getCenterOfMassPosition(tmpVec));
 
 		ConstraintPersistentData cpd = (ConstraintPersistentData) contactPoint.userPersistentData;
@@ -239,13 +250,13 @@ public class ContactConstraint {
 			//apply friction in the 2 tangential directions
 
 			// 1st tangent
-			Vector3f vel1 = Stack.alloc(Vector3f.class);
+			Vector3f vel1 = Stack.allocVector3f();
 			body1.getVelocityInLocalPoint(rel_pos1, vel1);
 
-			Vector3f vel2 = Stack.alloc(Vector3f.class);
+			Vector3f vel2 = Stack.allocVector3f();
 			body2.getVelocityInLocalPoint(rel_pos2, vel2);
 
-			Vector3f vel = Stack.alloc(Vector3f.class);
+			Vector3f vel = Stack.allocVector3f();
 			vel.sub(vel1, vel2);
 
 			float j1, j2;
@@ -278,7 +289,7 @@ public class ContactConstraint {
 			}
 
 			//#ifdef USE_INTERNAL_APPLY_IMPULSE
-			Vector3f tmp = Stack.alloc(Vector3f.class);
+			Vector3f tmp = Stack.allocVector3f();
 
 			if (body1.getInvMass() != 0f) {
 				tmp.scale(body1.getInvMass(), cpd.frictionWorldTangential0);
@@ -299,6 +310,7 @@ public class ContactConstraint {
 			//	body2.applyImpulse((j1 * -cpd->m_frictionWorldTangential0)+(j2 * -cpd->m_frictionWorldTangential1), rel_pos2);
 			//#endif //USE_INTERNAL_APPLY_IMPULSE
 		}
+		Stack.leave(sp);
 		return cpd.appliedImpulse;
 	}
 	
@@ -311,22 +323,22 @@ public class ContactConstraint {
 			RigidBody body2,
 			ManifoldPoint contactPoint,
 			ContactSolverInfo solverInfo) {
+		int sp = Stack.enter();
+		Vector3f tmpVec = Stack.allocVector3f();
 		
-		Vector3f tmpVec = Stack.alloc(Vector3f.class);
-		
-		Vector3f pos1 = contactPoint.getPositionWorldOnA(Stack.alloc(Vector3f.class));
-		Vector3f pos2 = contactPoint.getPositionWorldOnB(Stack.alloc(Vector3f.class));
+		Vector3f pos1 = contactPoint.getPositionWorldOnA(Stack.allocVector3f());
+		Vector3f pos2 = contactPoint.getPositionWorldOnB(Stack.allocVector3f());
 		Vector3f normal = contactPoint.normalWorldOnB;
 
-		Vector3f rel_pos1 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos1 = Stack.allocVector3f();
 		rel_pos1.sub(pos1, body1.getCenterOfMassPosition(tmpVec));
 
-		Vector3f rel_pos2 = Stack.alloc(Vector3f.class);
+		Vector3f rel_pos2 = Stack.allocVector3f();
 		rel_pos2.sub(pos2, body2.getCenterOfMassPosition(tmpVec));
 
-		Vector3f vel1 = body1.getVelocityInLocalPoint(rel_pos1, Stack.alloc(Vector3f.class));
-		Vector3f vel2 = body2.getVelocityInLocalPoint(rel_pos2, Stack.alloc(Vector3f.class));
-		Vector3f vel = Stack.alloc(Vector3f.class);
+		Vector3f vel1 = body1.getVelocityInLocalPoint(rel_pos1, Stack.allocVector3f());
+		Vector3f vel2 = body2.getVelocityInLocalPoint(rel_pos2, Stack.allocVector3f());
+		Vector3f vel = Stack.allocVector3f();
 		vel.sub(vel1, vel2);
 
 		float rel_vel;
@@ -359,7 +371,7 @@ public class ContactConstraint {
 
 
 		//#ifdef USE_INTERNAL_APPLY_IMPULSE
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		Vector3f tmp = Stack.allocVector3f();
 		if (body1.getInvMass() != 0f) {
 			tmp.scale(body1.getInvMass(), contactPoint.normalWorldOnB);
 			body1.internalApplyImpulse(tmp, cpd.angularComponentA, normalImpulse);
@@ -382,7 +394,7 @@ public class ContactConstraint {
 			rel_vel = normal.dot(vel);
 
 			tmp.scale(rel_vel, normal);
-			Vector3f lat_vel = Stack.alloc(Vector3f.class);
+			Vector3f lat_vel = Stack.allocVector3f();
 			lat_vel.sub(vel, tmp);
 			float lat_rel_vel = lat_vel.length();
 
@@ -392,18 +404,18 @@ public class ContactConstraint {
 				if (lat_rel_vel > BulletGlobals.FLT_EPSILON) {
 					lat_vel.scale(1f / lat_rel_vel);
 
-					Vector3f temp1 = Stack.alloc(Vector3f.class);
+					Vector3f temp1 = Stack.allocVector3f();
 					temp1.cross(rel_pos1, lat_vel);
-					body1.getInvInertiaTensorWorld(Stack.alloc(Matrix3f.class)).transform(temp1);
+					body1.getInvInertiaTensorWorld(Stack.allocMatrix3f()).transform(temp1);
 
-					Vector3f temp2 = Stack.alloc(Vector3f.class);
+					Vector3f temp2 = Stack.allocVector3f();
 					temp2.cross(rel_pos2, lat_vel);
-					body2.getInvInertiaTensorWorld(Stack.alloc(Matrix3f.class)).transform(temp2);
+					body2.getInvInertiaTensorWorld(Stack.allocMatrix3f()).transform(temp2);
 
-					Vector3f java_tmp1 = Stack.alloc(Vector3f.class);
+					Vector3f java_tmp1 = Stack.allocVector3f();
 					java_tmp1.cross(temp1, rel_pos1);
 
-					Vector3f java_tmp2 = Stack.alloc(Vector3f.class);
+					Vector3f java_tmp2 = Stack.allocVector3f();
 					java_tmp2.cross(temp2, rel_pos2);
 
 					tmp.add(java_tmp1, java_tmp2);
@@ -423,7 +435,7 @@ public class ContactConstraint {
 				}
 			}
 		}
-
+		Stack.leave(sp);
 		return normalImpulse;
 	}
 

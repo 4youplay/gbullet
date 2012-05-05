@@ -39,7 +39,7 @@ import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.GLDebugDrawer;
 import com.bulletphysics.demos.opengl.GLShapeDrawer;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
+import com.bulletphysics.demos.opengl.Keyboard;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
@@ -58,8 +58,6 @@ import java.awt.event.KeyEvent;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import javax.vecmath.Vector3f;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
 import static com.bulletphysics.demos.opengl.IGL.*;
 
 /**
@@ -855,12 +853,12 @@ public class ForkLiftDemo extends DemoApplication {
 		setCameraDistance(26.f);
 	}
 	
-	public static void main(String[] args) throws LWJGLException {
-		ForkLiftDemo forkLiftDemo = new ForkLiftDemo(LWJGL.getGL());
-		forkLiftDemo.initPhysics();
-		forkLiftDemo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
-
-		LWJGL.main(args, 800, 600, "Bullet ForkLift Demo", forkLiftDemo);
-	}
+//	public static void main(String[] args) throws LWJGLException {
+//		ForkLiftDemo forkLiftDemo = new ForkLiftDemo(LWJGL.getGL());
+//		forkLiftDemo.initPhysics();
+//		forkLiftDemo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
+//
+//		LWJGL.main(args, 800, 600, "Bullet ForkLift Demo", forkLiftDemo);
+//	}
 
 }

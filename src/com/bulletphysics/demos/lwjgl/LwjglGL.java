@@ -21,13 +21,15 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-package com.bulletphysics.demos.opengl;
+package com.bulletphysics.demos.lwjgl;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import com.bulletphysics.demos.opengl.FontRender.GLFont;
+
+import com.bulletphysics.demos.lwjgl.FontRender.GLFont;
+import com.bulletphysics.demos.opengl.IGL;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Cylinder;
@@ -50,7 +52,7 @@ public class LwjglGL implements IGL {
 	public void init() {
 		try {
 			//font = FontRender.createFont("Dialog", 11, false, true);
-			font = new GLFont(IGL.class.getResourceAsStream("DejaVu_Sans_11.fnt"));
+			font = new GLFont(LwjglGL.class.getResourceAsStream("DejaVu_Sans_11.fnt"));
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -58,7 +60,10 @@ public class LwjglGL implements IGL {
 	}
 	
 	public void glLight(int light, int pname, float[] params) {
-		GL11.glLight(light, pname, FloatBuffer.wrap(params));
+	    FloatBuffer fb = BufferUtils.createFloatBuffer(params.length);
+	    fb.put(params);
+	    fb.position(0);
+		GL11.glLight(light, pname, fb);
 	}
 
 	public void glEnable(int cap) {

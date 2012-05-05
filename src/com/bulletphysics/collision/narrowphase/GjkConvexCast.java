@@ -29,6 +29,8 @@ import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.linearmath.VectorUtil;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Vector3f;
 
 /**
@@ -39,7 +41,11 @@ import javax.vecmath.Vector3f;
 public class GjkConvexCast extends ConvexCast {
 
 	//protected final BulletStack stack = BulletStack.get();
-	protected final ObjectPool<ClosestPointInput> pointInputsPool = ObjectPool.get(ClosestPointInput.class);
+	protected final ObjectPool<ClosestPointInput> pointInputsPool = ObjectPool.get(ClosestPointInput.class, new Supplier<ClosestPointInput>() {
+		@Override
+		public ClosestPointInput get() {
+			return new ClosestPointInput();
+		}});
 
 //#ifdef BT_USE_DOUBLE_PRECISION
 //	private static final int MAX_ITERATIONS = 64;
@@ -62,26 +68,27 @@ public class GjkConvexCast extends ConvexCast {
 	public boolean calcTimeOfImpact(Transform fromA, Transform toA, Transform fromB, Transform toB, CastResult result) {
 		simplexSolver.reset();
 
+		int sp = Stack.enter();
 		// compute linear velocity for this interval, to interpolate
 		// assume no rotation/angular velocity, assert here?
-		Vector3f linVelA = Stack.alloc(Vector3f.class);
-		Vector3f linVelB = Stack.alloc(Vector3f.class);
+		Vector3f linVelA = Stack.allocVector3f();
+		Vector3f linVelB = Stack.allocVector3f();
 
 		linVelA.sub(toA.origin, fromA.origin);
 		linVelB.sub(toB.origin, fromB.origin);
 
 		float radius = 0.001f;
 		float lambda = 0f;
-		Vector3f v = Stack.alloc(Vector3f.class);
+		Vector3f v = Stack.allocVector3f();
 		v.set(1f, 0f, 0f);
 
 		int maxIter = MAX_ITERATIONS;
 
-		Vector3f n = Stack.alloc(Vector3f.class);
+		Vector3f n = Stack.allocVector3f();
 		n.set(0f, 0f, 0f);
 		boolean hasResult = false;
-		Vector3f c = Stack.alloc(Vector3f.class);
-		Vector3f r = Stack.alloc(Vector3f.class);
+		Vector3f c = Stack.allocVector3f();
+		Vector3f r = Stack.allocVector3f();
 		r.sub(linVelA, linVelB);
 
 		float lastLambda = lambda;
@@ -90,7 +97,7 @@ public class GjkConvexCast extends ConvexCast {
 		int numIter = 0;
 		// first solution, using GJK
 
-		Transform identityTrans = Stack.alloc(Transform.class);
+		Transform identityTrans = Stack.allocTransform();
 		identityTrans.setIdentity();
 
 		//result.drawCoordSystem(sphereTr);
@@ -156,6 +163,7 @@ public class GjkConvexCast extends ConvexCast {
 							n.set(pointCollector.normalOnBInWorld);
 							result.normal.set(n);
 							result.hitPoint.set(pointCollector.pointInWorld);
+							Stack.leave(sp);
 							return true;
 						}
 						c.set(pointCollector.pointInWorld);
@@ -183,6 +191,7 @@ public class GjkConvexCast extends ConvexCast {
 			return false;
 		}
 		finally {
+            Stack.leave(sp);
 			pointInputsPool.release(input);
 		}
 	}

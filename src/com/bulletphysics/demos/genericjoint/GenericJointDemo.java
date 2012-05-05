@@ -34,10 +34,10 @@ import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.demos.lwjgl.LwjglMain;
 import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.GLDebugDrawer;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
@@ -154,12 +154,12 @@ public class GenericJointDemo extends DemoApplication {
 		}
 	}
 
-	public static void main(String[] args) throws LWJGLException {
-		GenericJointDemo demoApp = new GenericJointDemo(LWJGL.getGL());
-		demoApp.initPhysics();
-		demoApp.setCameraDistance(10f);
-
-		LWJGL.main(args, 800, 600, "Joint 6DOF - Sequencial Impulse Solver", demoApp);
-	}
+//	public static void main(String[] args) throws LWJGLException {
+//		GenericJointDemo demoApp = new GenericJointDemo(LWJGL.getGL());
+//		demoApp.initPhysics();
+//		demoApp.setCameraDistance(10f);
+//
+//		LWJGL.main(args, 800, 600, "Joint 6DOF - Sequencial Impulse Solver", demoApp);
+//	}
 	
 }

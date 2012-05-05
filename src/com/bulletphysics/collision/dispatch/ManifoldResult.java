@@ -30,6 +30,8 @@ import com.bulletphysics.collision.narrowphase.ManifoldPoint;
 import com.bulletphysics.collision.narrowphase.PersistentManifold;
 import com.bulletphysics.linearmath.Transform;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Vector3f;
 
 /**
@@ -40,7 +42,12 @@ import javax.vecmath.Vector3f;
 public class ManifoldResult extends DiscreteCollisionDetectorInterface.Result {
 
 	//protected final BulletStack stack = BulletStack.get();
-	protected final ObjectPool<ManifoldPoint> pointsPool = ObjectPool.get(ManifoldPoint.class);
+	protected final ObjectPool<ManifoldPoint> pointsPool = ObjectPool.get(ManifoldPoint.class,
+			new Supplier<ManifoldPoint>() {
+				@Override
+				public ManifoldPoint get() {
+					return new ManifoldPoint();
+				}});
 	
 	private PersistentManifold manifoldPtr;
 
@@ -93,11 +100,12 @@ public class ManifoldResult extends DiscreteCollisionDetectorInterface.Result {
 
 		boolean isSwapped = manifoldPtr.getBody0() != body0;
 
-		Vector3f pointA = Stack.alloc(Vector3f.class);
+		int sp = Stack.enter();
+		Vector3f pointA = Stack.allocVector3f();
 		pointA.scaleAdd(depth, normalOnBInWorld, pointInWorld);
 
-		Vector3f localA = Stack.alloc(Vector3f.class);
-		Vector3f localB = Stack.alloc(Vector3f.class);
+		Vector3f localA = Stack.allocVector3f();
+		Vector3f localB = Stack.allocVector3f();
 
 		if (isSwapped) {
 			rootTransB.invXform(pointA, localA);
@@ -146,6 +154,7 @@ public class ManifoldResult extends DiscreteCollisionDetectorInterface.Result {
 		}
 
 		pointsPool.release(newPt);
+		Stack.leave(sp);
 	}
 
 	///User can override this material combiner by implementing gContactAddedCallback and setting body0->m_collisionFlags |= btCollisionObject::customMaterialCallback;

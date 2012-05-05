@@ -33,6 +33,8 @@ import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
 import com.bulletphysics.util.ObjectPool;
 import cz.advel.stack.Stack;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Vector3f;
 
 /**
@@ -76,15 +78,16 @@ public class SphereSphereCollisionAlgorithm extends CollisionAlgorithm {
 			return;
 		}
 		
-		Transform tmpTrans1 = Stack.alloc(Transform.class);
-		Transform tmpTrans2 = Stack.alloc(Transform.class);
+		int sp = Stack.enter();
+		Transform tmpTrans1 = Stack.allocTransform();
+		Transform tmpTrans2 = Stack.allocTransform();
 
 		resultOut.setPersistentManifold(manifoldPtr);
 
 		SphereShape sphere0 = (SphereShape) col0.getCollisionShape();
 		SphereShape sphere1 = (SphereShape) col1.getCollisionShape();
 
-		Vector3f diff = Stack.alloc(Vector3f.class);
+		Vector3f diff = Stack.allocVector3f();
 		diff.sub(col0.getWorldTransform(tmpTrans1).origin, col1.getWorldTransform(tmpTrans2).origin);
 
 		float len = diff.length();
@@ -105,21 +108,21 @@ public class SphereSphereCollisionAlgorithm extends CollisionAlgorithm {
 		// distance (negative means penetration)
 		float dist = len - (radius0 + radius1);
 
-		Vector3f normalOnSurfaceB = Stack.alloc(Vector3f.class);
+		Vector3f normalOnSurfaceB = Stack.allocVector3f();
 		normalOnSurfaceB.set(1f, 0f, 0f);
 		if (len > BulletGlobals.FLT_EPSILON) {
 			normalOnSurfaceB.scale(1f / len, diff);
 		}
 
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+		Vector3f tmp = Stack.allocVector3f();
 
 		// point on A (worldspace)
-		Vector3f pos0 = Stack.alloc(Vector3f.class);
+		Vector3f pos0 = Stack.allocVector3f();
 		tmp.scale(radius0, normalOnSurfaceB);
 		pos0.sub(col0.getWorldTransform(tmpTrans1).origin, tmp);
 
 		// point on B (worldspace)
-		Vector3f pos1 = Stack.alloc(Vector3f.class);
+		Vector3f pos1 = Stack.allocVector3f();
 		tmp.scale(radius1, normalOnSurfaceB);
 		pos1.add(col1.getWorldTransform(tmpTrans2).origin, tmp);
 
@@ -129,6 +132,7 @@ public class SphereSphereCollisionAlgorithm extends CollisionAlgorithm {
 		//#ifndef CLEAR_MANIFOLD
 		resultOut.refreshContactPoints();
 		//#endif //CLEAR_MANIFOLD
+		Stack.leave(sp);
 	}
 
 	@Override
@@ -146,7 +150,12 @@ public class SphereSphereCollisionAlgorithm extends CollisionAlgorithm {
 	////////////////////////////////////////////////////////////////////////////
 
 	public static class CreateFunc extends CollisionAlgorithmCreateFunc {
-		private final ObjectPool<SphereSphereCollisionAlgorithm> pool = ObjectPool.get(SphereSphereCollisionAlgorithm.class);
+		private final ObjectPool<SphereSphereCollisionAlgorithm> pool = ObjectPool.get(SphereSphereCollisionAlgorithm.class,
+				new Supplier<SphereSphereCollisionAlgorithm>() {
+					@Override
+					public SphereSphereCollisionAlgorithm get() {
+						return new SphereSphereCollisionAlgorithm();
+					}});
 
 		@Override
 		public CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1) {

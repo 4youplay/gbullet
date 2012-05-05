@@ -55,11 +55,13 @@ public class SphereShape extends ConvexInternalShape {
 
 	@Override
 	public void getAabb(Transform t, Vector3f aabbMin, Vector3f aabbMax) {
+	    int sp = Stack.enter();
 		Vector3f center = t.origin;
-		Vector3f extent = Stack.alloc(Vector3f.class);
+		Vector3f extent = Stack.allocVector3f();
 		extent.set(getMargin(), getMargin(), getMargin());
 		aabbMin.sub(center, extent);
 		aabbMax.add(center, extent);
+		Stack.leave(sp);
 	}
 
 	@Override

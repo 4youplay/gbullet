@@ -181,17 +181,18 @@ public class ConvexcastBatch {
 		//#ifdef USE_BT_CLOCK
 		frame_timer.reset();
 		//#endif //USE_BT_CLOCK
+        int sp = Stack.enter();
 
 		for (int i=0; i<NUMRAYS_IN_BAR; i++) {
 			ClosestConvexResultCallback cb = new ClosestConvexResultCallback(source[i], dest[i]);
 
-			Quat4f qFrom = Stack.alloc(Quat4f.class);
-			Quat4f qTo = Stack.alloc(Quat4f.class);
+			Quat4f qFrom = Stack.allocQuat4f();
+			Quat4f qTo = Stack.allocQuat4f();
 			QuaternionUtil.setRotation(qFrom, new Vector3f(1f, 0f, 0f), 0f);
 			QuaternionUtil.setRotation(qTo, new Vector3f(1f, 0f, 0f), 0.7f);
 
-			Transform from = Stack.alloc(Transform.class);
-			Transform to = Stack.alloc(Transform.class);
+			Transform from = Stack.allocTransform();
+			Transform to = Stack.allocTransform();
 			from.basis.set(qFrom);
 			from.origin.set(source[i]);
 			to.basis.set(qTo);
@@ -226,10 +227,11 @@ public class ConvexcastBatch {
 			sum_ms += ms;
 			sum_ms_samples++;
 			float mean_ms = (float) sum_ms / (float) sum_ms_samples;
-			System.out.printf("%d rays in %d ms %d %d %f\n", NUMRAYS_IN_BAR * frame_counter, ms, min_ms, max_ms, mean_ms);
+			System.out.println((NUMRAYS_IN_BAR * frame_counter)  + " rays in " + ms + " ms " +  min_ms + " " + max_ms + " " + mean_ms);
 			ms = 0;
 			frame_counter = 0;
 		}
+		Stack.leave(sp);
 	}
 
 	public void drawCube(IGL gl, Transform T) {
@@ -243,6 +245,7 @@ public class ConvexcastBatch {
 	}
 
 	public void draw(IGL gl) {
+	    int sp = Stack.enter();
 		gl.glDisable(GL_LIGHTING);
 		gl.glColor3f(0f, 1f, 0f);
 		gl.glBegin(GL_LINES);
@@ -259,28 +262,29 @@ public class ConvexcastBatch {
 		}
 		gl.glEnd();
 		gl.glColor3f(0f, 1f, 1f);
-		Quat4f qFrom = Stack.alloc(Quat4f.class);
-		Quat4f qTo = Stack.alloc(Quat4f.class);
+		Quat4f qFrom = Stack.allocQuat4f();
+		Quat4f qTo = Stack.allocQuat4f();
 		QuaternionUtil.setRotation(qFrom, new Vector3f(1f, 0f, 0f), 0f);
 		QuaternionUtil.setRotation(qTo, new Vector3f(1f, 0f, 0f), 0.7f);
 		for (int i=0; i<NUMRAYS_IN_BAR; i++) {
-			Transform from = Stack.alloc(Transform.class);
+			Transform from = Stack.allocTransform();
 			from.basis.set(qFrom);
 			from.origin.set(source[i]);
 
-			Transform to = Stack.alloc(Transform.class);
+			Transform to = Stack.allocTransform();
 			to.basis.set(qTo);
 			to.origin.set(dest[i]);
 
-			Vector3f linVel = Stack.alloc(Vector3f.class);
-			Vector3f angVel = Stack.alloc(Vector3f.class);
+			Vector3f linVel = Stack.allocVector3f();
+			Vector3f angVel = Stack.allocVector3f();
 
 			TransformUtil.calculateVelocity(from, to, 1f, linVel, angVel);
-			Transform T = Stack.alloc(Transform.class);
+			Transform T = Stack.allocTransform();
 			TransformUtil.integrateTransform(from, linVel, angVel, hit_fraction[i], T);
 			drawCube(gl, T);
 		}
 		gl.glEnable(GL_LIGHTING);
+		Stack.leave(sp);
 	}
 
 }

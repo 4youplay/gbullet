@@ -97,10 +97,11 @@ public class WheelInfo {
 
 	public void updateWheel(RigidBody chassis, RaycastInfo raycastInfo) {
 		if (raycastInfo.isInContact) {
+		    int sp = Stack.enter();
 			float project = raycastInfo.contactNormalWS.dot(raycastInfo.wheelDirectionWS);
-			Vector3f chassis_velocity_at_contactPoint = Stack.alloc(Vector3f.class);
-			Vector3f relpos = Stack.alloc(Vector3f.class);
-			relpos.sub(raycastInfo.contactPointWS, chassis.getCenterOfMassPosition(Stack.alloc(Vector3f.class)));
+			Vector3f chassis_velocity_at_contactPoint = Stack.allocVector3f();
+			Vector3f relpos = Stack.allocVector3f();
+			relpos.sub(raycastInfo.contactPointWS, chassis.getCenterOfMassPosition(Stack.allocVector3f()));
 			chassis.getVelocityInLocalPoint(relpos, chassis_velocity_at_contactPoint);
 			float projVel = raycastInfo.contactNormalWS.dot(chassis_velocity_at_contactPoint);
 			if (project >= -0.1f) {
@@ -112,6 +113,7 @@ public class WheelInfo {
 				suspensionRelativeVelocity = projVel * inv;
 				clippedInvContactDotSuspension = inv;
 			}
+			Stack.leave(sp);
 		}
 		else {
 			// Not in contact : position wheel in a nice (rest length) position

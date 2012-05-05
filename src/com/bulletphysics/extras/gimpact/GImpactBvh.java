@@ -72,9 +72,10 @@ class GImpactBvh {
 	
 	// stackless refit
 	protected void refit() {
-		AABB leafbox = Stack.alloc(AABB.class);
-		AABB bound = Stack.alloc(AABB.class);
-		AABB temp_box = Stack.alloc(AABB.class);
+	    int sp = Stack.enter();
+		AABB leafbox = Stack.allocAABB();
+		AABB bound = Stack.allocAABB();
+		AABB temp_box = Stack.allocAABB();
 
 		int nodecount = getNodeCount();
 		while ((nodecount--) != 0) {
@@ -102,6 +103,7 @@ class GImpactBvh {
 				setNodeBound(nodecount, bound);
 			}
 		}
+		Stack.leave(sp);
 	}
 
 	/**
@@ -120,7 +122,8 @@ class GImpactBvh {
 		BvhDataArray primitive_boxes = new BvhDataArray();
 		primitive_boxes.resize(primitive_manager.get_primitive_count());
 
-		AABB tmpAABB = Stack.alloc(AABB.class);
+		int sp = Stack.enter();
+		AABB tmpAABB = Stack.allocAABB();
 
 		for (int i = 0; i < primitive_boxes.size(); i++) {
 			//primitive_manager.get_primitive_box(i,primitive_boxes[i].bound);
@@ -131,6 +134,7 @@ class GImpactBvh {
 		}
 
 		box_tree.build_tree(primitive_boxes);
+		Stack.leave(sp);
 	}
 
 	/**
@@ -140,7 +144,8 @@ class GImpactBvh {
 		int curIndex = 0;
 		int numNodes = getNodeCount();
 
-		AABB bound = Stack.alloc(AABB.class);
+		int sp = Stack.enter();
+		AABB bound = Stack.allocAABB();
 
 		while (curIndex < numNodes) {
 			getNodeBound(curIndex, bound);
@@ -164,8 +169,10 @@ class GImpactBvh {
 			}
 		}
 		if (collided_results.size() > 0) {
+		    Stack.leave(sp);
 			return true;
 		}
+		Stack.leave(sp);
 		return false;
 	}
 
@@ -173,9 +180,12 @@ class GImpactBvh {
 	 * Returns the indices of the primitives in the primitive_manager field.
 	 */
 	public boolean boxQueryTrans(AABB box, Transform transform, IntArrayList collided_results) {
+	    int sp = Stack.enter();
 		AABB transbox = Stack.alloc(box);
 		transbox.appy_transform(transform);
-		return boxQuery(transbox, collided_results);
+		boolean result = boxQuery(transbox, collided_results);
+		Stack.leave(sp);
+		return result;
 	}
 
 	/**
@@ -185,7 +195,8 @@ class GImpactBvh {
 		int curIndex = 0;
 		int numNodes = getNodeCount();
 
-		AABB bound = Stack.alloc(AABB.class);
+		int sp = Stack.enter();
+		AABB bound = Stack.allocAABB();
 
 		while (curIndex < numNodes) {
 			getNodeBound(curIndex, bound);
@@ -209,8 +220,10 @@ class GImpactBvh {
 			}
 		}
 		if (collided_results.size() > 0) {
+		    Stack.leave(sp);
 			return true;
 		}
+		Stack.leave(sp);
 		return false;
 	}
 
@@ -272,14 +285,17 @@ class GImpactBvh {
 	}
 
 	private static boolean _node_collision(GImpactBvh boxset0, GImpactBvh boxset1, BoxBoxTransformCache trans_cache_1to0, int node0, int node1, boolean complete_primitive_tests) {
-		AABB box0 = Stack.alloc(AABB.class);
+		int sp = Stack.enter();
+	    AABB box0 = Stack.allocAABB();
 		boxset0.getNodeBound(node0, box0);
-		AABB box1 = Stack.alloc(AABB.class);
+		AABB box1 = Stack.allocAABB();
 		boxset1.getNodeBound(node1, box1);
 
-		return box0.overlapping_trans_cache(box1, trans_cache_1to0, complete_primitive_tests);
+		boolean result = box0.overlapping_trans_cache(box1, trans_cache_1to0, complete_primitive_tests);
 		//box1.appy_transform_trans_cache(trans_cache_1to0);
 		//return box0.has_collision(box1);
+		Stack.leave(sp);
+		return result;
 	}
 	
 	/**
@@ -361,7 +377,8 @@ class GImpactBvh {
 		if (boxset0.getNodeCount() == 0 || boxset1.getNodeCount() == 0) {
 			return;
 		}
-		BoxBoxTransformCache trans_cache_1to0 = Stack.alloc(BoxBoxTransformCache.class);
+		int sp = Stack.enter();
+		BoxBoxTransformCache trans_cache_1to0 = Stack.allocBoxBoxTransformCache();
 
 		trans_cache_1to0.calc_from_homogenic(trans0, trans1);
 
@@ -376,6 +393,7 @@ class GImpactBvh {
 		//#ifdef TRI_COLLISION_PROFILING
 		//bt_end_gim02_tree_time();
 		//#endif //TRI_COLLISION_PROFILING
+		Stack.leave(sp);
 	}
 	
 }

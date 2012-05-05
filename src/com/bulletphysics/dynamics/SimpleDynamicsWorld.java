@@ -57,7 +57,8 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 	}
 
 	protected void predictUnconstraintMotion(float timeStep) {
-		Transform tmpTrans = Stack.alloc(Transform.class);
+	    int sp = Stack.enter();
+		Transform tmpTrans = Stack.allocTransform();
 		
 		for (int i = 0; i < collisionObjects.size(); i++) {
 			CollisionObject colObj = collisionObjects.getQuick(i);
@@ -73,10 +74,12 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
+		Stack.leave(sp);
 	}
 	
 	protected void integrateTransforms(float timeStep) {
-		Transform predictedTrans = Stack.alloc(Transform.class);
+	    int sp = Stack.enter();
+		Transform predictedTrans = Stack.allocTransform();
 		for (int i = 0; i < collisionObjects.size(); i++) {
 			CollisionObject colObj = collisionObjects.getQuick(i);
 			RigidBody body = RigidBody.upcast(colObj);
@@ -87,6 +90,7 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
+		Stack.leave(sp);
 	}
 	
 	/**
@@ -177,9 +181,10 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 
 	@Override
 	public void updateAabbs() {
-		Transform tmpTrans = Stack.alloc(Transform.class);
-		Transform predictedTrans = Stack.alloc(Transform.class);
-		Vector3f minAabb = Stack.alloc(Vector3f.class), maxAabb = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Transform tmpTrans = Stack.allocTransform();
+//		Transform predictedTrans = Stack.allocTransform();
+		Vector3f minAabb = Stack.allocVector3f(), maxAabb = Stack.allocVector3f();
 
 		for (int i = 0; i < collisionObjects.size(); i++) {
 			CollisionObject colObj = collisionObjects.getQuick(i);
@@ -192,10 +197,12 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
+		Stack.leave(sp);
 	}
 
 	public void synchronizeMotionStates() {
-		Transform tmpTrans = Stack.alloc(Transform.class);
+	    int sp = Stack.enter();
+		Transform tmpTrans = Stack.allocTransform();
 		
 		// todo: iterate over awake simulation islands!
 		for (int i = 0; i < collisionObjects.size(); i++) {
@@ -207,6 +214,7 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
+		Stack.leave(sp);
 	}
 
 	@Override

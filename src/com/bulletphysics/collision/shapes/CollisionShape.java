@@ -44,29 +44,31 @@ public abstract class CollisionShape {
 	///getAabb returns the axis aligned bounding box in the coordinate frame of the given transform t.
 	public abstract void getAabb(Transform t, Vector3f aabbMin, Vector3f aabbMax);
 
-	public void getBoundingSphere(Vector3f center, float[] radius) {
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	public float getBoundingSphere(Vector3f center) {
+		Vector3f tmp = Stack.allocVector3f();
 
-		Transform tr = Stack.alloc(Transform.class);
+		Transform tr = Stack.allocTransform();
 		tr.setIdentity();
-		Vector3f aabbMin = Stack.alloc(Vector3f.class), aabbMax = Stack.alloc(Vector3f.class);
+		Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
 
 		getAabb(tr, aabbMin, aabbMax);
 
 		tmp.sub(aabbMax, aabbMin);
-		radius[0] = tmp.length() * 0.5f;
+		float radius = tmp.length() * 0.5f;
 
 		tmp.add(aabbMin, aabbMax);
 		center.scale(0.5f, tmp);
+		return radius;
 	}
 
 	///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
 	public float getAngularMotionDisc() {
-		Vector3f center = Stack.alloc(Vector3f.class);
-		float[] disc = new float[1]; // TODO: stack
-		getBoundingSphere(center, disc);
-		disc[0] += center.length();
-		return disc[0];
+	    int sp = Stack.enter();
+		Vector3f center = Stack.allocVector3f();
+		float disc = getBoundingSphere(center);
+		disc += center.length();
+		Stack.leave(sp);
+		return disc;
 	}
 
 	///calculateTemporalAabb calculates the enclosing aabb for the moving object over interval [0..timeStep)
@@ -75,6 +77,8 @@ public abstract class CollisionShape {
 		//start with static aabb
 		getAabb(curTrans, temporalAabbMin, temporalAabbMax);
 
+		int sp = Stack.enter();
+		
 		float temporalAabbMaxx = temporalAabbMax.x;
 		float temporalAabbMaxy = temporalAabbMax.y;
 		float temporalAabbMaxz = temporalAabbMax.z;
@@ -108,13 +112,15 @@ public abstract class CollisionShape {
 
 		//add conservative angular motion
 		float angularMotion = angvel.length() * getAngularMotionDisc() * timeStep;
-		Vector3f angularMotion3d = Stack.alloc(Vector3f.class);
+		Vector3f angularMotion3d = Stack.allocVector3f();
 		angularMotion3d.set(angularMotion, angularMotion, angularMotion);
 		temporalAabbMin.set(temporalAabbMinx, temporalAabbMiny, temporalAabbMinz);
 		temporalAabbMax.set(temporalAabbMaxx, temporalAabbMaxy, temporalAabbMaxz);
 
 		temporalAabbMin.sub(angularMotion3d);
 		temporalAabbMax.add(angularMotion3d);
+		
+		Stack.leave(sp);
 	}
 
 //#ifndef __SPU__

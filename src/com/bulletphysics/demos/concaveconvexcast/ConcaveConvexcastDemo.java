@@ -37,14 +37,15 @@ import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
+import com.bulletphysics.demos.lwjgl.LwjglMain;
 import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.GLDebugDrawer;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
+import com.bulletphysics.linearmath.Clock;
 import com.bulletphysics.linearmath.Transform;
 import javax.vecmath.Vector3f;
 import org.lwjgl.LWJGLException;
@@ -218,7 +219,7 @@ public class ConcaveConvexcastDemo extends DemoApplication {
 		float dt = getDeltaTimeMicroseconds() * 0.000001f;
 
 		if (animatedMesh) {
-			long t0 = System.nanoTime();
+			long t0 = Clock.nanoTime();
 			
 			offset += 0.01f;
 
@@ -230,7 +231,7 @@ public class ConcaveConvexcastDemo extends DemoApplication {
 			// clear all contact points involving mesh proxy. Note: this is a slow/unoptimized operation.
 			dynamicsWorld.getBroadphase().getOverlappingPairCache().cleanProxyFromPairs(staticBody.getBroadphaseHandle(), getDynamicsWorld().getDispatcher());
 			
-			BulletStats.updateTime = (System.nanoTime() - t0) / 1000000;
+			BulletStats.updateTime = (Clock.nanoTime() - t0) / 1000000;
 		}
 
 		dynamicsWorld.stepSimulation(dt);
@@ -264,12 +265,12 @@ public class ConcaveConvexcastDemo extends DemoApplication {
 		//glutSwapBuffers();
 	}
 	
-	public static void main(String[] args) throws LWJGLException {
-		ConcaveConvexcastDemo concaveConvexcastDemo = new ConcaveConvexcastDemo(LWJGL.getGL());
-		concaveConvexcastDemo.initPhysics();
-		concaveConvexcastDemo.setCameraDistance(30f);
-
-		LWJGL.main(args, 800, 600, "Concave Convexcast Demo", concaveConvexcastDemo);
-	}
+//	public static void main(String[] args) throws LWJGLException {
+//		ConcaveConvexcastDemo concaveConvexcastDemo = new ConcaveConvexcastDemo(LWJGL.getGL());
+//		concaveConvexcastDemo.initPhysics();
+//		concaveConvexcastDemo.setCameraDistance(30f);
+//
+//		LWJGL.main(args, 800, 600, "Concave Convexcast Demo", concaveConvexcastDemo);
+//	}
 	
 }

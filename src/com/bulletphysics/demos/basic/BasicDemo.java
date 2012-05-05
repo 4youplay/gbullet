@@ -30,10 +30,10 @@ import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.demos.lwjgl.LwjglMain;
 import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.GLDebugDrawer;
 import com.bulletphysics.demos.opengl.IGL;
-import com.bulletphysics.demos.opengl.LWJGL;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
@@ -52,10 +52,10 @@ import static com.bulletphysics.demos.opengl.IGL.*;
  */
 public class BasicDemo extends DemoApplication {
 
-	// create 125 (5x5x5) dynamic object
-	private static final int ARRAY_SIZE_X = 5;
-	private static final int ARRAY_SIZE_Y = 5;
-	private static final int ARRAY_SIZE_Z = 5;
+	// create 27 (3x3x3) dynamic object
+	private static final int ARRAY_SIZE_X = 3; // Was 5 each
+	private static final int ARRAY_SIZE_Y = 3;
+	private static final int ARRAY_SIZE_Z = 3;
 
 	// maximum number of objects (and allow user to shoot additional boxes)
 	private static final int MAX_PROXIES = (ARRAY_SIZE_X*ARRAY_SIZE_Y*ARRAY_SIZE_Z + 1024);
@@ -213,12 +213,6 @@ public class BasicDemo extends DemoApplication {
 		clientResetScene();
 	}
 	
-	public static void main(String[] args) throws LWJGLException {
-		BasicDemo ccdDemo = new BasicDemo(LWJGL.getGL());
-		ccdDemo.initPhysics();
-		ccdDemo.getDynamicsWorld().setDebugDrawer(new GLDebugDrawer(LWJGL.getGL()));
-
-		LWJGL.main(args, 800, 600, "Bullet Physics Demo. http://bullet.sf.net", ccdDemo);
-	}
+	
 	
 }

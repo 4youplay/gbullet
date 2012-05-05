@@ -27,6 +27,8 @@ import com.bulletphysics.util.ObjectPool;
 import com.bulletphysics.linearmath.VectorUtil;
 import cz.advel.stack.Stack;
 import cz.advel.stack.StaticAlloc;
+import cz.advel.stack.Supplier;
+
 import javax.vecmath.Vector3f;
 
 /**
@@ -39,7 +41,12 @@ import javax.vecmath.Vector3f;
 public class VoronoiSimplexSolver extends SimplexSolverInterface {
 
 	//protected final BulletStack stack = BulletStack.get();
-	protected final ObjectPool<SubSimplexClosestResult> subsimplexResultsPool = ObjectPool.get(SubSimplexClosestResult.class);
+	protected final ObjectPool<SubSimplexClosestResult> subsimplexResultsPool = ObjectPool.get(SubSimplexClosestResult.class,
+			new Supplier<SubSimplexClosestResult>() {
+				@Override
+				public SubSimplexClosestResult get() {
+					return new SubSimplexClosestResult();
+				}});
 	
 	private static final int VORONOI_SIMPLEX_MAX_VERTS = 5;
 	
@@ -99,6 +106,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 		if (needsUpdate)
 		{
 			cachedBC.reset();
+			int sp = Stack.enter();
 
 			needsUpdate = false;
 
@@ -119,19 +127,19 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 				}
 			case 2:
 				{
-					Vector3f tmp = Stack.alloc(Vector3f.class);
+					Vector3f tmp = Stack.allocVector3f();
 					
 					//closest point origin from line segment
 					Vector3f from = simplexVectorW[0];
 					Vector3f to = simplexVectorW[1];
-					Vector3f nearest = Stack.alloc(Vector3f.class);
+					Vector3f nearest = Stack.allocVector3f();
 
-					Vector3f p = Stack.alloc(Vector3f.class);
+					Vector3f p = Stack.allocVector3f();
 					p.set(0f, 0f, 0f);
-					Vector3f diff = Stack.alloc(Vector3f.class);
+					Vector3f diff = Stack.allocVector3f();
 					diff.sub(p, from);
 
-					Vector3f v = Stack.alloc(Vector3f.class);
+					Vector3f v = Stack.allocVector3f();
 					v.sub(to, from);
 
 					float t = v.dot(diff);
@@ -178,12 +186,12 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 				}
 			case 3: 
 				{ 
-					Vector3f tmp1 = Stack.alloc(Vector3f.class);
-					Vector3f tmp2 = Stack.alloc(Vector3f.class);
-					Vector3f tmp3 = Stack.alloc(Vector3f.class);
+					Vector3f tmp1 = Stack.allocVector3f();
+					Vector3f tmp2 = Stack.allocVector3f();
+					Vector3f tmp3 = Stack.allocVector3f();
 					
 					// closest point origin from triangle 
-					Vector3f p = Stack.alloc(Vector3f.class);
+					Vector3f p = Stack.allocVector3f();
 					p.set(0f, 0f, 0f);
 
 					Vector3f a = simplexVectorW[0]; 
@@ -211,12 +219,12 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 				}
 			case 4:
 				{
-					Vector3f tmp1 = Stack.alloc(Vector3f.class);
-					Vector3f tmp2 = Stack.alloc(Vector3f.class);
-					Vector3f tmp3 = Stack.alloc(Vector3f.class);
-					Vector3f tmp4 = Stack.alloc(Vector3f.class);
+					Vector3f tmp1 = Stack.allocVector3f();
+					Vector3f tmp2 = Stack.allocVector3f();
+					Vector3f tmp3 = Stack.allocVector3f();
+					Vector3f tmp4 = Stack.allocVector3f();
 					
-					Vector3f p = Stack.alloc(Vector3f.class);
+					Vector3f p = Stack.allocVector3f();
 					p.set(0f, 0f, 0f);
 
 					Vector3f a = simplexVectorW[0];
@@ -268,6 +276,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 					cachedValidClosest = false;
 				}
 			}
+			Stack.leave(sp);
 		}
 
 		return cachedValidClosest;
@@ -277,14 +286,15 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 	public boolean closestPtPointTriangle(Vector3f p, Vector3f a, Vector3f b, Vector3f c, SubSimplexClosestResult result) {
 		result.usedVertices.reset();
 
+		int sp = Stack.enter();
 		// Check if P in vertex region outside A
-		Vector3f ab = Stack.alloc(Vector3f.class);
+		Vector3f ab = Stack.allocVector3f();
 		ab.sub(b, a);
 
-		Vector3f ac = Stack.alloc(Vector3f.class);
+		Vector3f ac = Stack.allocVector3f();
 		ac.sub(c, a);
 
-		Vector3f ap = Stack.alloc(Vector3f.class);
+		Vector3f ap = Stack.allocVector3f();
 		ap.sub(p, a);
 
 		float d1 = ab.dot(ap);
@@ -295,11 +305,12 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 			result.closestPointOnSimplex.set(a);
 			result.usedVertices.usedVertexA = true;
 			result.setBarycentricCoordinates(1f, 0f, 0f, 0f);
+			Stack.leave(sp);
 			return true; // a; // barycentric coordinates (1,0,0)
 		}
 
 		// Check if P in vertex region outside B
-		Vector3f bp = Stack.alloc(Vector3f.class);
+		Vector3f bp = Stack.allocVector3f();
 		bp.sub(p, b);
 
 		float d3 = ab.dot(bp);
@@ -310,7 +321,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 			result.closestPointOnSimplex.set(b);
 			result.usedVertices.usedVertexB = true;
 			result.setBarycentricCoordinates(0, 1f, 0f, 0f);
-
+			Stack.leave(sp);
 			return true; // b; // barycentric coordinates (0,1,0)
 		}
 
@@ -322,12 +333,13 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 			result.usedVertices.usedVertexA = true;
 			result.usedVertices.usedVertexB = true;
 			result.setBarycentricCoordinates(1f-v, v, 0f, 0f);
+			Stack.leave(sp);
 			return true;
 			//return a + v * ab; // barycentric coordinates (1-v,v,0)
 		}
 
 		// Check if P in vertex region outside C
-		Vector3f cp = Stack.alloc(Vector3f.class);
+		Vector3f cp = Stack.allocVector3f();
 		cp.sub(p, c);
 
 		float d5 = ab.dot(cp);
@@ -338,6 +350,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 			result.closestPointOnSimplex.set(c);
 			result.usedVertices.usedVertexC = true;
 			result.setBarycentricCoordinates(0f, 0f, 1f, 0f);
+			Stack.leave(sp);
 			return true;//c; // barycentric coordinates (0,0,1)
 		}
 
@@ -349,6 +362,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 			result.usedVertices.usedVertexA = true;
 			result.usedVertices.usedVertexC = true;
 			result.setBarycentricCoordinates(1f-w, 0f, w, 0f);
+			Stack.leave(sp);
 			return true;
 			//return a + w * ac; // barycentric coordinates (1-w,0,w)
 		}
@@ -358,13 +372,14 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 		if (va <= 0f && (d4 - d3) >= 0f && (d5 - d6) >= 0f) {
 			float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
 
-			Vector3f tmp = Stack.alloc(Vector3f.class);
+			Vector3f tmp = Stack.allocVector3f();
 			tmp.sub(c, b);
 			result.closestPointOnSimplex.scaleAdd(w, tmp, b);
 
 			result.usedVertices.usedVertexB = true;
 			result.usedVertices.usedVertexC = true;
 			result.setBarycentricCoordinates(0, 1f-w, w, 0f);
+			Stack.leave(sp);
 			return true;		
 		   // return b + w * (c - b); // barycentric coordinates (0,1-w,w)
 		}
@@ -374,8 +389,8 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 		float v = vb * denom;
 		float w = vc * denom;
 
-		Vector3f tmp1 = Stack.alloc(Vector3f.class);
-		Vector3f tmp2 = Stack.alloc(Vector3f.class);
+		Vector3f tmp1 = Stack.allocVector3f();
+		Vector3f tmp2 = Stack.allocVector3f();
 
 		tmp1.scale(v, ab);
 		tmp2.scale(w, ac);
@@ -384,7 +399,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 		result.usedVertices.usedVertexB = true;
 		result.usedVertices.usedVertexC = true;
 		result.setBarycentricCoordinates(1f-v-w, v, w, 0f);
-
+		Stack.leave(sp);
 		return true;
 		//	return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = btScalar(1.0) - v - w
 	}
@@ -393,9 +408,10 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 	@StaticAlloc
 	public static int pointOutsideOfPlane(Vector3f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d)
 	{
-		Vector3f tmp = Stack.alloc(Vector3f.class);
+	    int sp = Stack.enter();
+		Vector3f tmp = Stack.allocVector3f();
 
-		Vector3f normal = Stack.alloc(Vector3f.class);
+		Vector3f normal = Stack.allocVector3f();
 		normal.sub(b, a);
 		tmp.sub(c, a);
 		normal.cross(normal, tmp);
@@ -413,6 +429,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 //			return -1;
 //		}
 //	#else
+        Stack.leave(sp);
 		if (signd * signd < ((1e-4f) * (1e-4f)))
 		{
 	//		printf("affine dependent/degenerate\n");//
@@ -429,9 +446,10 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 	public boolean closestPtPointTetrahedron(Vector3f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d, SubSimplexClosestResult finalResult) {
 		SubSimplexClosestResult tempResult = subsimplexResultsPool.get();
 		tempResult.reset();
+		int sp = Stack.enter();
 		try {
-			Vector3f tmp = Stack.alloc(Vector3f.class);
-			Vector3f q = Stack.alloc(Vector3f.class);
+			Vector3f tmp = Stack.allocVector3f();
+			Vector3f q = Stack.allocVector3f();
 
 			// Start out assuming point inside all halfspaces, so closest to itself
 			finalResult.closestPointOnSimplex.set(p);
@@ -587,6 +605,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 		}
 		finally {
 			subsimplexResultsPool.release(tempResult);
+			Stack.leave(sp);
 		}
 	}
 	

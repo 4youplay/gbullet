@@ -46,7 +46,6 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
-import org.lwjgl.input.Keyboard;
 import static com.bulletphysics.demos.opengl.IGL.*;
 
 /**
@@ -156,8 +155,8 @@ public abstract class DemoApplication {
 
 		gl.glClearColor(0.7f, 0.7f, 0.7f, 0f);
 
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
+//		glEnable(GL_CULL_FACE);
+//		glCullFace(GL_BACK);
 	}
 
 	public void setCameraDistance(float dist) {
@@ -500,10 +499,10 @@ public abstract class DemoApplication {
 			case Keyboard.KEY_DOWN:
 				stepBack();
 				break;
-			case Keyboard.KEY_PRIOR /* TODO: check PAGE_UP */:
+			case Keyboard.KEY_PAGE_UP:
 				zoomIn();
 				break;
-			case Keyboard.KEY_NEXT /* TODO: checkPAGE_DOWN */:
+			case Keyboard.KEY_PAGE_DOWN:
 				zoomOut();
 				break;
 			case Keyboard.KEY_HOME:
@@ -1089,15 +1088,15 @@ public abstract class DemoApplication {
 				//#endif //SHOW_NUM_DEEP_PENETRATIONS
 
 				// JAVA NOTE: added
-				int free = (int)Runtime.getRuntime().freeMemory();
-				int total = (int)Runtime.getRuntime().totalMemory();
-				buf.setLength(0);
-				buf.append("heap = ");
-				FastFormat.append(buf, (float)(total - free) / (1024*1024));
-				buf.append(" / ");
-				FastFormat.append(buf, (float)(total) / (1024*1024));
-				buf.append(" MB");
-				drawString(buf, Math.round(xOffset), Math.round(yStart), TEXT_COLOR);
+//				int free = (int)Runtime.getRuntime().freeMemory();
+//				int total = (int)Runtime.getRuntime().totalMemory();
+//				buf.setLength(0);
+//				buf.append("heap = ");
+//				FastFormat.append(buf, (float)(total - free) / (1024*1024));
+//				buf.append(" / ");
+//				FastFormat.append(buf, (float)(total) / (1024*1024));
+//				buf.append(" MB");
+//				drawString(buf, Math.round(xOffset), Math.round(yStart), TEXT_COLOR);
 				yStart += yIncr;
 				
 				resetPerspectiveProjection();
