@@ -54,7 +54,7 @@ public class CompoundShapeChild {
 		hash = 19 * hash + transform.hashCode();
 		hash = 19 * hash + childShape.hashCode();
 		hash = 19 * hash + childShapeType.hashCode();
-		hash = 19 * hash + Float.floatToIntBits(childMargin);
+		hash = 19 * hash + (int) childMargin; //TODO(haustein) was: Float.floatToIntBits(childMargin);
 		return hash;
 	}
 

@@ -23,6 +23,8 @@
 
 package com.bulletphysics.dynamics.constraintsolver;
 
+import java.util.Random;
+
 import com.bulletphysics.BulletGlobals;
 import com.bulletphysics.BulletStats;
 import com.bulletphysics.ContactDestroyedCallback;
@@ -37,6 +39,7 @@ import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.linearmath.TransformUtil;
 import com.bulletphysics.util.IntArrayList;
+import com.bulletphysics.util.Misc;
 import com.bulletphysics.util.ObjectArrayList;
 import cz.advel.stack.Stack;
 import cz.advel.stack.StaticAlloc;
@@ -86,6 +89,7 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 	
 	// btSeed2 is used for re-arranging the constraint rows. improves convergence/quality of friction
 	protected long btSeed2 = 0L;
+	protected Random random = new Random(0);
 
 	public SequentialImpulseConstraintSolver() {
 		BulletGlobals.setContactDestroyedCallback(new ContactDestroyedCallback() {
@@ -109,13 +113,18 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 		}
 	}
 	
-	public long rand2() {
-		btSeed2 = (1664525L * btSeed2 + 1013904223L) & 0xffffffff;
-		return btSeed2;
-	}
+//	public long rand2() {
+//		btSeed2 = (1664525L * btSeed2 + 1013904223L) & 0xffffffff;
+//		return btSeed2;
+//	}
+	
+	
 	
 	// See ODE: adam's all-int straightforward(?) dRandInt (0..n-1)
 	public int randInt2(int n) {
+	  return random.nextInt(n);
+	  /*
+	  return new Random().
 		// seems good; xor-fold and modulus
 		long un = n;
 		long r = rand2();
@@ -140,6 +149,7 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 
 		// TODO: check modulo C vs Java mismatch
 		return (int) Math.abs(r % un);
+		*/
 	}
 	
 	private void initSolverBody(SolverBody solverBody, CollisionObject collisionObject) {
@@ -1282,7 +1292,8 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 	
 	@Override
 	public void reset() {
-		btSeed2 = 0;
+	    btSeed2 = 0;
+		random = new Random(0);
 	}
 	
 	/**
@@ -1302,7 +1313,8 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 	}
 
 	public void setRandSeed(long seed) {
-		btSeed2 = seed;
+	    btSeed2 = seed;
+		random = new Random(seed);
 	}
 
 	public long getRandSeed() {

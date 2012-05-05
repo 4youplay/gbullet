@@ -51,6 +51,7 @@ import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSo
 import com.bulletphysics.dynamics.constraintsolver.TypedConstraint;
 import com.bulletphysics.dynamics.vehicle.RaycastVehicle;
 import com.bulletphysics.linearmath.CProfileManager;
+import com.bulletphysics.linearmath.Clock;
 import com.bulletphysics.linearmath.DebugDrawModes;
 import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.linearmath.MiscUtil;
@@ -293,7 +294,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 	public int stepSimulation(float timeStep, int maxSubSteps, float fixedTimeStep) {
 		startProfiling(timeStep);
 
-		long t0 = System.nanoTime();
+		long t0 = Clock.nanoTime();
 		
 		BulletStats.pushProfile("stepSimulation");
 		try {
@@ -352,7 +353,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 		finally {
 			BulletStats.popProfile();
 			
-			BulletStats.stepSimulationTime = (System.nanoTime() - t0) / 1000000;
+			BulletStats.stepSimulationTime = (Clock.nanoTime() - t0) / 1000000;
 		}
 	}
 

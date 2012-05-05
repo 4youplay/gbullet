@@ -72,8 +72,8 @@ public class CollisionDispatcher extends Dispatcher {
 		for (int i = 0; i < MAX_BROADPHASE_COLLISION_TYPES; i++) {
 			for (int j = 0; j < MAX_BROADPHASE_COLLISION_TYPES; j++) {
 				doubleDispatch[i][j] = collisionConfiguration.getCollisionAlgorithmCreateFunc(
-					BroadphaseNativeType.forValue(i),
-					BroadphaseNativeType.forValue(j)
+					BroadphaseNativeType.values()[i],
+					BroadphaseNativeType.values()[j]
 				);
 				assert (doubleDispatch[i][j] != null);
 			}

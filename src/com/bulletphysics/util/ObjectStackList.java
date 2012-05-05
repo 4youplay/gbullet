@@ -28,27 +28,14 @@ package com.bulletphysics.util;
  * 
  * @author jezek2
  */
-public class ObjectStackList<T> extends StackList<T> {
+public abstract class ObjectStackList<T> extends StackList<T> {
 
-	private Class<T> cls;
-	
-	public ObjectStackList(Class<T> cls) {
+	public ObjectStackList() {
 		super(false);
-		this.cls = cls;
 	}
 
 	@Override
-	protected T create() {
-		try {
-			return cls.newInstance();
-		}
-		catch (InstantiationException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+	public abstract T create();
 
 	@Override
 	protected void copy(T dest, T src) {

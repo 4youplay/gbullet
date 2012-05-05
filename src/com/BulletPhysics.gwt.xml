@@ -1,0 +1,15 @@
+<module >
+  <inherits name='cz.advel.Stack' />
+  <inherits name='com.google.gwt.core.Core'/>
+  <inherits name='javax.Vecmath'/>
+
+  <source path='bulletphysics' />
+  <source path='bulletphysics.collision'/>
+  <source path='bulletphysics.dynamics'/>
+  <source path='bulletphysics.extras'/>
+  <source path='bulletphysics.linearmath'/>
+  <source path='bulletphysics.util'/>
+  
+  <super-source path="super"/>
+ 
+</module>

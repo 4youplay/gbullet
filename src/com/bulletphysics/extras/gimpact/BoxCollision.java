@@ -39,7 +39,7 @@ import javax.vecmath.Vector4f;
  *
  * @author jezek2
  */
-class BoxCollision {
+public class BoxCollision {
 	
 	public static final float BOX_PLANE_EPSILON = 0.000001f;
 

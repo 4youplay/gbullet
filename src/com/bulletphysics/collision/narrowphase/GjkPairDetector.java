@@ -205,14 +205,14 @@ public class GjkPairDetector extends DiscreteCollisionDetectorInterface {
 				if (curIter++ > gGjkMaxIter) {
 					//#if defined(DEBUG) || defined (_DEBUG)   
 					if (BulletGlobals.DEBUG) {
-						System.err.printf("btGjkPairDetector maxIter exceeded:%i\n", curIter);
-						System.err.printf("sepAxis=(%f,%f,%f), squaredDistance = %f, shapeTypeA=%i,shapeTypeB=%i\n",
+						System.err.println("btGjkPairDetector maxIter exceeded:" + curIter);
+						/*System.err.printf("sepAxis=(%f,%f,%f), squaredDistance = %f, shapeTypeA=%i,shapeTypeB=%i\n",
 								cachedSeparatingAxis.x,
 								cachedSeparatingAxis.y,
 								cachedSeparatingAxis.z,
 								squaredDistance,
 								minkowskiA.getShapeType(),
-								minkowskiB.getShapeType());
+								minkowskiB.getShapeType());*/
 					}
 					//#endif   
 					break;

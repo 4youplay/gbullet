@@ -77,9 +77,11 @@ public final class ObjectArrayList<T> extends AbstractList<T> implements RandomA
 	public T remove(int index) {
 		if (index < 0 || index >= size) throw new IndexOutOfBoundsException();
 		T prev = array[index];
-		System.arraycopy(array, index+1, array, index, size-index-1);
-		array[size-1] = null;
 		size--;
+		if (index < size) {
+		  System.arraycopy(array, index+1, array, index, size-index);
+		}
+		array[size] = null;
 		return prev;
     }
 	

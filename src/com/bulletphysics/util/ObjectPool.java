@@ -26,6 +26,8 @@ package com.bulletphysics.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import cz.advel.stack.Reflection;
+
 /**
  * Object pool.
  * 
@@ -41,15 +43,7 @@ public class ObjectPool<T> {
 	}
 
 	private T create() {
-		try {
-			return cls.newInstance();
-		}
-		catch (InstantiationException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
+		return Reflection.newInstance(cls);
 	}
 	
 	/**
