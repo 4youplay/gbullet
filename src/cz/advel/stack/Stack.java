@@ -34,7 +34,7 @@ public class Stack {
 	static ObjectArrayList<PrimitiveTriangle> primitiveTriangleStack = new ObjectArrayList<PrimitiveTriangle>();
 	static ObjectArrayList<TriangleContact> triangleContactStack = new ObjectArrayList<TriangleContact>();
 
-	static int[] stackPositions = new int[6];
+	static int[] stackPositions = new int[9];
 	static int[] positions = new int[32768];
 	static int[] types = new int[65536];
 	public static int typePos;
