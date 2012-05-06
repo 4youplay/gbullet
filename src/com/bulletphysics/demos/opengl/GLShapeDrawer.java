@@ -145,6 +145,7 @@ public class GLShapeDrawer {
 				// you can comment out any of the specific cases, and use the default
 				// the benefit of 'default' is that it approximates the actual collision shape including collision margin
 				
+				gl.setUserPointer(shape.getUserPointer());
 				switch (shape.getShapeType()) {
 					case BOX_SHAPE_PROXYTYPE: {
 						BoxShape boxShape = (BoxShape) shape;

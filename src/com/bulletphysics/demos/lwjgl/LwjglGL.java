@@ -324,4 +324,9 @@ public class LwjglGL implements IGL {
 		}
 	}
 
+	@Override
+	public void setUserPointer(Object userPointer) {
+		// Unimplemented
+	}
+
 }

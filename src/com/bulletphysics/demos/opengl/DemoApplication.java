@@ -540,6 +540,7 @@ public abstract class DemoApplication {
 				//m_shootBoxShape = new btUniformScalingShape(childShape,0.5f);
 				//#else
 				shootBoxShape = new BoxShape(new Vector3f(1f, 1f, 1f));
+				shootBoxShape.setUserPointer("Box");
 				//#endif//
 			}
 
@@ -902,33 +903,21 @@ public abstract class DemoApplication {
 					colObj.getWorldTransform(m);
 				}
 
-				wireColor.set(1f, 1f, 0.5f); // wants deactivation
+				// Changed to grayscale (to work with textures)
 				if ((i & 1) != 0) {
-					wireColor.set(0f, 0f, 1f);
+					wireColor.set(0.4f, 0.4f, 0.4f);
+				} else {
+					wireColor.set(0.8f, 0.8f, 0.8f); 
 				}
 
 				// color differently for active, sleeping, wantsdeactivation states
 				if (colObj.getActivationState() == 1) // active
 				{
-					if ((i & 1) != 0) {
-						//wireColor.add(new Vector3f(1f, 0f, 0f));
-						wireColor.x += 1f;
-					}
-					else {
-						//wireColor.add(new Vector3f(0.5f, 0f, 0f));
-						wireColor.x += 0.5f;
-					}
-				}
-				if (colObj.getActivationState() == 2) // ISLAND_SLEEPING
+					wireColor.x += 0.2f;
+				} 
+				else if (colObj.getActivationState() != 2) // ISLAND_SLEEPING
 				{
-					if ((i & 1) != 0) {
-						//wireColor.add(new Vector3f(0f, 1f, 0f));
-						wireColor.y += 1f;
-					}
-					else {
-						//wireColor.add(new Vector3f(0f, 0.5f, 0f));
-						wireColor.y += 0.5f;
-					}
+					wireColor.z += 0.2f;
 				}
 
 				GLShapeDrawer.drawOpenGL(gl, m, colObj.getCollisionShape(), wireColor, getDebugMode());

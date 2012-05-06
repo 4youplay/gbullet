@@ -305,4 +305,9 @@ public class SoftwareGL implements IGL {
 		g.drawString(s.toString(), x, y);
 	}
 
+	@Override
+	public void setUserPointer(Object userPointer) {
+		// Unsupported
+	}
+
 }

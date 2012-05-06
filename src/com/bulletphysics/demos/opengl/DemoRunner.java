@@ -4,7 +4,6 @@ import static com.bulletphysics.demos.opengl.IGL.GL_MODELVIEW;
 import static com.bulletphysics.demos.opengl.IGL.GL_PROJECTION;
 
 import com.bulletphysics.demos.basic.BasicDemo;
-import com.bulletphysics.demos.concaveconvexcast.ConcaveConvexcastDemo;
 import com.bulletphysics.demos.dynamiccontrol.DynamicControlDemo;
 import com.bulletphysics.demos.genericjoint.GenericJointDemo;
 import com.bulletphysics.demos.movingconcave.MovingConcaveDemo;

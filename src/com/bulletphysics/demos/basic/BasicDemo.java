@@ -30,6 +30,7 @@ import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.collision.shapes.StaticPlaneShape;
 import com.bulletphysics.demos.lwjgl.LwjglMain;
 import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.GLDebugDrawer;
@@ -111,7 +112,7 @@ public class BasicDemo extends DemoApplication {
 	}
 
 	public void initPhysics() {
-		setCameraDistance(50f);
+		setCameraDistance(20f);
 
 		// collision configuration contains default setup for memory, collision setup
 		collisionConfiguration = new DefaultCollisionConfiguration();
@@ -134,6 +135,7 @@ public class BasicDemo extends DemoApplication {
 
 		// create a few basic rigid bodies
 		CollisionShape groundShape = new BoxShape(new Vector3f(50f, 50f, 50f));
+		groundShape.setUserPointer("Grid");
 		//CollisionShape groundShape = new StaticPlaneShape(new Vector3f(0, 1, 0), 50);
 
 		collisionShapes.add(groundShape);
@@ -168,9 +170,9 @@ public class BasicDemo extends DemoApplication {
 			// Re-using the same collision is better for memory usage and performance
 
 			CollisionShape colShape = new BoxShape(new Vector3f(1, 1, 1));
+			colShape.setUserPointer("Cube");
 			//CollisionShape colShape = new SphereShape(1f);
 			collisionShapes.add(colShape);
-
 			// Create Dynamic Objects
 			Transform startTransform = new Transform();
 			startTransform.setIdentity();

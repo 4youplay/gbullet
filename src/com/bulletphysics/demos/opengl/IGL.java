@@ -28,7 +28,6 @@ package com.bulletphysics.demos.opengl;
  * @author jezek2
  */
 public interface IGL {
-
 	public static final int GL_LIGHT0 = 0x4000;
 	public static final int GL_LIGHT1 = 0x4001;
 	public static final int GL_AMBIENT = 0x1200;
@@ -80,5 +79,6 @@ public interface IGL {
 	public void drawCylinder(float radius, float halfHeight, int upAxis);
 
 	public void drawString(CharSequence s, int x, int y, float red, float green, float blue);
+	public void setUserPointer(Object userPointer);
 	
 }
