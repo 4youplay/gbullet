@@ -14,19 +14,26 @@ import com.bulletphysics.util.ObjectArrayList;
 
 public class Stack {
 
-  private final static int TYPE_VECTOR3F = 0;
-  private final static int TYPE_VECTOR4F = 1;
-  private final static int TYPE_AABB = 2;
-  private final static int TYPE_TRANSFORM = 3;
-  private final static int TYPE_MATRIX3F = 4;
-  private final static int TYPE_QUAT4F = 5;
+  private static final int TYPE_VECTOR3F = 0;
+  private static final int TYPE_VECTOR4F = 1;
+  private static final int TYPE_AABB = 2;
+  private static final int TYPE_TRANSFORM = 3;
+  private static final int TYPE_MATRIX3F = 4;
+  private static final int TYPE_QUAT4F = 5;
+  private static final int TYPE_BOX_BOX_TRANSFORM_CACHE = 6;
+  private static final int TYPE_PRIMITIVE_TRIANGLE = 7;
+  private static final int TYPE_TRIANGLE_CONTACT = 8;
   
-    static ObjectArrayList<Vector3f> vector3fStack = new ObjectArrayList<Vector3f>();
-    static ObjectArrayList<Vector4f> vector4fStack = new ObjectArrayList<Vector4f>();
-    static ObjectArrayList<AABB> aabbStack = new ObjectArrayList<AABB>();
-    static ObjectArrayList<Transform> transformStack = new ObjectArrayList<Transform>();
-    static ObjectArrayList<Matrix3f> matrix3fStack = new ObjectArrayList<Matrix3f>();
-    static ObjectArrayList<Quat4f> quat4fStack = new ObjectArrayList<Quat4f>();
+  static ObjectArrayList<Vector3f> vector3fStack = new ObjectArrayList<Vector3f>();
+  static ObjectArrayList<Vector4f> vector4fStack = new ObjectArrayList<Vector4f>();
+  static ObjectArrayList<AABB> aabbStack = new ObjectArrayList<AABB>();
+  static ObjectArrayList<Transform> transformStack = new ObjectArrayList<Transform>();
+  static ObjectArrayList<Matrix3f> matrix3fStack = new ObjectArrayList<Matrix3f>();
+  static ObjectArrayList<Quat4f> quat4fStack = new ObjectArrayList<Quat4f>();
+  static ObjectArrayList<BoxBoxTransformCache> boxBoxTransformCacheStack = new ObjectArrayList<BoxBoxTransformCache>();
+  static ObjectArrayList<PrimitiveTriangle> primitiveTriangleStack = new ObjectArrayList<PrimitiveTriangle>();
+  static ObjectArrayList<TriangleContact> triangleContactStack = new ObjectArrayList<TriangleContact>();
+  
     static int[] stackPositions = new int[6];
     static int[] positions = new int[32768];
     static int[] types = new int[65536];
@@ -34,8 +41,6 @@ public class Stack {
     static int posPos;
   
     public static void libraryCleanCurrentThread() {
-        // TODO Auto-generated method stub
-      //PlayN.log().info("typePos: " + typePos);
       posPos = 0;
       typePos = 0;
       for (int i = 0; i < stackPositions.length; i++){
@@ -124,21 +129,35 @@ public class Stack {
       if (aabbStack.size() <= pos) {
         aabbStack.add(new AABB());
       }
-      return aabbStack.get(pos);	}
+      return aabbStack.get(pos);
+    }
 
 	public static BoxBoxTransformCache allocBoxBoxTransformCache() {
-		return new BoxBoxTransformCache();
+	  types[typePos++] = TYPE_BOX_BOX_TRANSFORM_CACHE;
+      int pos = stackPositions[TYPE_BOX_BOX_TRANSFORM_CACHE]++;
+      if (boxBoxTransformCacheStack.size() <= pos) {
+        boxBoxTransformCacheStack.add(new BoxBoxTransformCache());
+      }
+      return boxBoxTransformCacheStack.get(pos);
 	}
 
 	public static PrimitiveTriangle allocPrimitiveTriangle() {
-		return new PrimitiveTriangle();
+	  types[typePos++] = TYPE_PRIMITIVE_TRIANGLE;
+      int pos = stackPositions[TYPE_PRIMITIVE_TRIANGLE]++;
+      if (primitiveTriangleStack.size() <= pos) {
+        primitiveTriangleStack.add(new PrimitiveTriangle());
+      }
+      return primitiveTriangleStack.get(pos);
 	}
 
 	public static TriangleContact allocTriangleContact() {
-		return new TriangleContact();
+      types[typePos++] = TYPE_TRIANGLE_CONTACT;
+      int pos = stackPositions[TYPE_TRIANGLE_CONTACT]++;
+      if (triangleContactStack.size() <= pos) {
+        triangleContactStack.add(new TriangleContact());
+      }
+      return triangleContactStack.get(pos);
 	}
-	
-	
 	
 	public static int enter() {
 	  return typePos;
