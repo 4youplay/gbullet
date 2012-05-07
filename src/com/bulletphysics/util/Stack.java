@@ -38,6 +38,8 @@ public class Stack {
 	static int[] types = new int[65536];
 	public static int typePos;
 	static int posPos;
+	
+	Stack stack = new Stack();
 
 	public static void libraryCleanCurrentThread() {
 		posPos = 0;
@@ -159,14 +161,34 @@ public class Stack {
 	}
 
 	public static int enter() {
+		types[typePos++] = -1;
 		return typePos;
+	}
+	
+	public static int getSp() {
+		return typePos;
+	}
+	
+	public static void leave() {
+		while(true) {
+			int type = types[--typePos];
+			if (type == -1) {
+				break;
+			}
+			stackPositions[type]--;
+		}
+		typePos--;
 	}
 
 	public static void leave(int sp) {
 		for (int i = sp; i < typePos; i++) {
-			stackPositions[types[i]]--;
+			int type = types[i];
+			if (type != -1) {
+				stackPositions[type]--;
+			}
 		}
-		typePos = sp;
+		assert types[typePos] == -1;
+		typePos = sp - 1;
 	}
 
 }
