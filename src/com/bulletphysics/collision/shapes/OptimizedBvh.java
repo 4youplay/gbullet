@@ -27,8 +27,8 @@ import com.bulletphysics.linearmath.AabbUtil2;
 import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.linearmath.VectorUtil;
 import com.bulletphysics.util.ObjectArrayList;
-import cz.advel.stack.Stack;
-import cz.advel.stack.Supplier;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.Supplier;
 
 import java.io.Serializable;
 import javax.vecmath.Vector3f;

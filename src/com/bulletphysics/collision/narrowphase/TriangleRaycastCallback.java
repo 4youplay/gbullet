@@ -25,7 +25,8 @@ package com.bulletphysics.collision.narrowphase;
 
 import com.bulletphysics.collision.shapes.TriangleCallback;
 import com.bulletphysics.linearmath.VectorUtil;
-import cz.advel.stack.Stack;
+import com.bulletphysics.util.Stack;
+
 import javax.vecmath.Vector3f;
 
 /**

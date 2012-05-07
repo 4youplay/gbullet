@@ -26,7 +26,8 @@ package com.bulletphysics.collision.shapes;
 import com.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import com.bulletphysics.linearmath.MatrixUtil;
 import com.bulletphysics.linearmath.Transform;
-import cz.advel.stack.Stack;
+import com.bulletphysics.util.Stack;
+
 import javax.vecmath.Vector3f;
 
 /**

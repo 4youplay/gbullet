@@ -29,8 +29,9 @@ import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.linearmath.MatrixUtil;
 import com.bulletphysics.linearmath.Transform;
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.StaticAlloc;
+
 import javax.vecmath.Vector3f;
 
 /**

@@ -30,8 +30,8 @@ import com.bulletphysics.collision.broadphase.Dispatcher;
 import com.bulletphysics.collision.narrowphase.PersistentManifold;
 import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.util.ObjectArrayList;
+import com.bulletphysics.util.Stack;
 
-import cz.advel.stack.Stack;
 
 /**
  * SimulationIslandManager creates and handles simulation islands, using {@link UnionFind}.

@@ -24,7 +24,8 @@
 package com.bulletphysics.linearmath;
 
 import com.bulletphysics.BulletGlobals;
-import cz.advel.stack.Stack;
+import com.bulletphysics.util.Stack;
+
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 

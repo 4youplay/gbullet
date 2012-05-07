@@ -1,4 +1,4 @@
-package cz.advel.stack;
+package com.bulletphysics.util;
 
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Quat4f;
@@ -10,7 +10,6 @@ import com.bulletphysics.extras.gimpact.BoxCollision.BoxBoxTransformCache;
 import com.bulletphysics.extras.gimpact.PrimitiveTriangle;
 import com.bulletphysics.extras.gimpact.TriangleContact;
 import com.bulletphysics.linearmath.Transform;
-import com.bulletphysics.util.ObjectArrayList;
 
 public class Stack {
 

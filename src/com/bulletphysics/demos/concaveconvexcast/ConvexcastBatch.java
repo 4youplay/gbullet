@@ -32,7 +32,8 @@ import com.bulletphysics.linearmath.QuaternionUtil;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.linearmath.TransformUtil;
 import com.bulletphysics.linearmath.VectorUtil;
-import cz.advel.stack.Stack;
+import com.bulletphysics.util.Stack;
+
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 import static com.bulletphysics.demos.opengl.IGL.*;

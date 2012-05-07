@@ -24,12 +24,12 @@
 package com.bulletphysics.collision.narrowphase;
 
 import com.bulletphysics.util.ObjectPool;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.Supplier;
 import com.bulletphysics.collision.narrowphase.DiscreteCollisionDetectorInterface.ClosestPointInput;
 import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.linearmath.VectorUtil;
-import cz.advel.stack.Stack;
-import cz.advel.stack.Supplier;
 
 import javax.vecmath.Vector3f;
 

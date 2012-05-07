@@ -25,7 +25,8 @@ package com.bulletphysics.dynamics.vehicle;
 
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.Transform;
-import cz.advel.stack.Stack;
+import com.bulletphysics.util.Stack;
+
 import javax.vecmath.Vector3f;
 
 /**

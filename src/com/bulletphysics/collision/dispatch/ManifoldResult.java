@@ -25,12 +25,12 @@ package com.bulletphysics.collision.dispatch;
 
 import com.bulletphysics.BulletGlobals;
 import com.bulletphysics.util.ObjectPool;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.Supplier;
 import com.bulletphysics.collision.narrowphase.DiscreteCollisionDetectorInterface;
 import com.bulletphysics.collision.narrowphase.ManifoldPoint;
 import com.bulletphysics.collision.narrowphase.PersistentManifold;
 import com.bulletphysics.linearmath.Transform;
-import cz.advel.stack.Stack;
-import cz.advel.stack.Supplier;
 
 import javax.vecmath.Vector3f;
 

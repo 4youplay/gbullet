@@ -25,10 +25,10 @@ package com.bulletphysics.collision.shapes;
 
 import com.bulletphysics.BulletGlobals;
 import com.bulletphysics.util.ObjectPool;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.Supplier;
 import com.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import com.bulletphysics.linearmath.VectorUtil;
-import cz.advel.stack.Stack;
-import cz.advel.stack.Supplier;
 
 import javax.vecmath.Vector3f;
 

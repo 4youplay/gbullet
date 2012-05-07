@@ -28,8 +28,8 @@ import com.bulletphysics.util.ObjectPool;
 import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.util.IntArrayList;
 import com.bulletphysics.util.ObjectArrayList;
+import com.bulletphysics.util.Supplier;
 
-import cz.advel.stack.Supplier;
 
 /**
  * Hash-space based {@link OverlappingPairCache}.

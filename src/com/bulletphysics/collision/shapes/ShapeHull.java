@@ -29,9 +29,9 @@ import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.linearmath.convexhull.*;
 import com.bulletphysics.util.IntArrayList;
 import com.bulletphysics.util.ObjectArrayList;
+import com.bulletphysics.util.Stack;
 import com.bulletphysics.util.Suppliers;
 
-import cz.advel.stack.Stack;
 import javax.vecmath.Vector3f;
 
 /**

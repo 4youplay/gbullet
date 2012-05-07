@@ -25,8 +25,8 @@ package com.bulletphysics.collision.dispatch;
 
 import com.bulletphysics.linearmath.MiscUtil;
 import com.bulletphysics.util.ObjectArrayList;
+import com.bulletphysics.util.Supplier;
 
-import cz.advel.stack.Supplier;
 
 import java.util.Comparator;
 

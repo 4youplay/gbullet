@@ -24,8 +24,9 @@
 package com.bulletphysics.linearmath;
 
 import com.bulletphysics.collision.shapes.UniformScalingShape;
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.StaticAlloc;
+
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;

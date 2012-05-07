@@ -24,6 +24,8 @@
 package com.bulletphysics.collision.dispatch;
 
 import com.bulletphysics.util.ObjectPool;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.Supplier;
 import com.bulletphysics.collision.broadphase.CollisionAlgorithm;
 import com.bulletphysics.collision.broadphase.CollisionAlgorithmConstructionInfo;
 import com.bulletphysics.collision.broadphase.DispatcherInfo;
@@ -39,8 +41,6 @@ import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.collision.shapes.SphereShape;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
-import cz.advel.stack.Stack;
-import cz.advel.stack.Supplier;
 
 import javax.vecmath.Vector3f;
 

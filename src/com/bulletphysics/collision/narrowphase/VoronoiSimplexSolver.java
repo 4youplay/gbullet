@@ -24,10 +24,10 @@
 package com.bulletphysics.collision.narrowphase;
 
 import com.bulletphysics.util.ObjectPool;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.StaticAlloc;
+import com.bulletphysics.util.Supplier;
 import com.bulletphysics.linearmath.VectorUtil;
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
-import cz.advel.stack.Supplier;
 
 import javax.vecmath.Vector3f;
 

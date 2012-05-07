@@ -32,8 +32,9 @@ package com.bulletphysics.dynamics.constraintsolver;
 
 import com.bulletphysics.BulletGlobals;
 import com.bulletphysics.dynamics.RigidBody;
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.StaticAlloc;
+
 import javax.vecmath.Vector3f;
 
 /**

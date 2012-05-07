@@ -23,7 +23,6 @@
 
 package com.bulletphysics.util;
 
-import cz.advel.stack.Supplier;
 
 /**
  * Stack-based object pool for arbitrary objects, returning not supported.

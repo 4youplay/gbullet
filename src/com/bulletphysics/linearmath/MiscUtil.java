@@ -27,8 +27,8 @@ import java.util.Comparator;
 import com.bulletphysics.util.FloatArrayList;
 import com.bulletphysics.util.IntArrayList;
 import com.bulletphysics.util.ObjectArrayList;
+import com.bulletphysics.util.Supplier;
 
-import cz.advel.stack.Supplier;
 
 /**
  * Miscellaneous utility functions.

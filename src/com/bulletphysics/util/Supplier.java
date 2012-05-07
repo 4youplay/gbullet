@@ -1,6 +1,6 @@
 // Copyright 2012 Google Inc. All Rights Reserved.
 
-package cz.advel.stack;
+package com.bulletphysics.util;
 
 /**
  * Supplies an instance of T.

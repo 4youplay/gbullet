@@ -30,7 +30,8 @@ package com.bulletphysics.extras.gimpact;
 import com.bulletphysics.collision.shapes.TriangleShape;
 import com.bulletphysics.extras.gimpact.BoxCollision.AABB;
 import com.bulletphysics.linearmath.Transform;
-import cz.advel.stack.Stack;
+import com.bulletphysics.util.Stack;
+
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 

@@ -26,7 +26,8 @@
 package com.bulletphysics.collision.broadphase;
 
 import com.bulletphysics.util.ObjectArrayList;
-import cz.advel.stack.Stack;
+import com.bulletphysics.util.Stack;
+
 import javax.vecmath.Vector3f;
 
 /**

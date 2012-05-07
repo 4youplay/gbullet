@@ -4,7 +4,6 @@ import javax.vecmath.Vector3f;
 
 import com.bulletphysics.linearmath.Transform;
 
-import cz.advel.stack.Supplier;
 
 public class Suppliers {
 

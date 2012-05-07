@@ -1,4 +1,4 @@
-package cz.advel.stack;
+package com.bulletphysics.util;
 
 public @interface StaticAlloc {
 

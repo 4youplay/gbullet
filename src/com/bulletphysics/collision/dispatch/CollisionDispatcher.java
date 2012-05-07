@@ -25,6 +25,7 @@ package com.bulletphysics.collision.dispatch;
 
 import java.util.Collections;
 import com.bulletphysics.util.ObjectPool;
+import com.bulletphysics.util.Supplier;
 import com.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import com.bulletphysics.collision.broadphase.BroadphasePair;
 import com.bulletphysics.collision.broadphase.CollisionAlgorithm;
@@ -36,7 +37,6 @@ import com.bulletphysics.collision.broadphase.OverlappingPairCache;
 import com.bulletphysics.collision.narrowphase.PersistentManifold;
 import com.bulletphysics.util.ObjectArrayList;
 
-import cz.advel.stack.Supplier;
 
 /**
  * CollisionDispatcher supports algorithms that handle ConvexConvex and ConvexConcave collision pairs.

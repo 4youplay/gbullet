@@ -23,9 +23,10 @@
 
 package com.bulletphysics.linearmath;
 
-import cz.advel.stack.Stack;
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
+
+import com.bulletphysics.util.Stack;
 
 /**
  * Utility functions for axis aligned bounding boxes (AABB).

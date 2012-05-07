@@ -1,7 +1,6 @@
 <module >
   <inherits name='com.google.gwt.core.Core'/>
   <inherits name='javax.Vecmath'/>
-  <inherits name='cz.advel.Stack'/>
 
   <source path='bulletphysics'>
     <exclude name='**/demos/bsp/**/*' />
@@ -9,5 +8,7 @@
     <exclude name='**/demos/concave/**/*' />
     <exclude name='**/demos/lwjgl/**/*' /> 
   </source>
+ 
+   <super-source path='super' />
  
 </module>

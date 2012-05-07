@@ -38,8 +38,8 @@ import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.linearmath.VectorUtil;
 import com.bulletphysics.util.ObjectArrayList;
 import com.bulletphysics.util.ObjectPool;
-import cz.advel.stack.Stack;
-import cz.advel.stack.Supplier;
+import com.bulletphysics.util.Stack;
+import com.bulletphysics.util.Supplier;
 
 import javax.vecmath.Vector3f;
 
