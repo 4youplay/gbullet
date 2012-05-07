@@ -96,16 +96,19 @@ public class CylinderShape extends BoxShape {
 
 	@Override
 	public Vector3f localGetSupportingVertexWithoutMargin(Vector3f vec, Vector3f out) {
-		return cylinderLocalSupportY(getHalfExtentsWithoutMargin(Stack.allocVector3f()), vec, out);
+		Stack stack = Stack.enter();
+		Vector3f result = cylinderLocalSupportY(getHalfExtentsWithoutMargin(stack.allocVector3f()), vec, out);
+		stack.leave();
+		return result;
 	}
 
 	@Override
 	public void batchedUnitVectorGetSupportingVertexWithoutMargin(Vector3f[] vectors, Vector3f[] supportVerticesOut, int numVectors) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		for (int i = 0; i < numVectors; i++) {
-			cylinderLocalSupportY(getHalfExtentsWithoutMargin(Stack.allocVector3f()), vectors[i], supportVerticesOut[i]);
+			cylinderLocalSupportY(getHalfExtentsWithoutMargin(stack.allocVector3f()), vectors[i], supportVerticesOut[i]);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
@@ -114,14 +117,14 @@ public class CylinderShape extends BoxShape {
 		localGetSupportingVertexWithoutMargin(vec, supVertex);
 
 		if (getMargin() != 0f) {
-		    int sp = Stack.enter();
-			Vector3f vecnorm = Stack.alloc(vec);
+		    Stack stack = Stack.enter();
+			Vector3f vecnorm = stack.alloc(vec);
 			if (vecnorm.lengthSquared() < (BulletGlobals.SIMD_EPSILON * BulletGlobals.SIMD_EPSILON)) {
 				vecnorm.set(-1f, -1f, -1f);
 			}
 			vecnorm.normalize();
 			supVertex.scaleAdd(getMargin(), vecnorm, supVertex);
-			Stack.leave(sp);
+			stack.leave();
 		}
 		return out;
 	}
@@ -136,9 +139,9 @@ public class CylinderShape extends BoxShape {
 	}
 	
 	public float getRadius() {
-	    int sp = Stack.enter();
-		float result = getHalfExtentsWithMargin(Stack.allocVector3f()).x;
-		Stack.leave(sp);
+	    Stack stack = Stack.enter();
+		float result = getHalfExtentsWithMargin(stack.allocVector3f()).x;
+		stack.leave();
 		return result;
 	}
 

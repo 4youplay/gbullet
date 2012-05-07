@@ -215,8 +215,8 @@ public class MatrixUtil {
 	 */
 	// JAVA NOTE: diagonalize method from 2.71
 	public static void diagonalize(Matrix3f mat, Matrix3f rot, float threshold, int maxSteps) {
-	    int sp = Stack.enter();
-		Vector3f row = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f row = stack.allocVector3f();
 
 		rot.setIdentity();
 		for (int step = maxSteps; step > 0; step--) {
@@ -289,7 +289,7 @@ public class MatrixUtil {
 				rot.setRow(i, row);
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 }

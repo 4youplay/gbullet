@@ -100,12 +100,12 @@ public class ManifoldResult extends DiscreteCollisionDetectorInterface.Result {
 
 		boolean isSwapped = manifoldPtr.getBody0() != body0;
 
-		int sp = Stack.enter();
-		Vector3f pointA = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f pointA = stack.allocVector3f();
 		pointA.scaleAdd(depth, normalOnBInWorld, pointInWorld);
 
-		Vector3f localA = Stack.allocVector3f();
-		Vector3f localB = Stack.allocVector3f();
+		Vector3f localA = stack.allocVector3f();
+		Vector3f localB = stack.allocVector3f();
 
 		if (isSwapped) {
 			rootTransB.invXform(pointA, localA);
@@ -154,7 +154,7 @@ public class ManifoldResult extends DiscreteCollisionDetectorInterface.Result {
 		}
 
 		pointsPool.release(newPt);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	///User can override this material combiner by implementing gContactAddedCallback and setting body0->m_collisionFlags |= btCollisionObject::customMaterialCallback;

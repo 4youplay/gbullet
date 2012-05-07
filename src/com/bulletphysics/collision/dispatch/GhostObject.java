@@ -80,28 +80,28 @@ public class GhostObject extends CollisionObject {
 	}
 
 	public void convexSweepTest(ConvexShape castShape, Transform convexFromWorld, Transform convexToWorld, CollisionWorld.ConvexResultCallback resultCallback, float allowedCcdPenetration) {
-		int sp = Stack.enter();
-	    Transform convexFromTrans = Stack.allocTransform();
-		Transform convexToTrans = Stack.allocTransform();
+		Stack stack = Stack.enter();
+	    Transform convexFromTrans = stack.allocTransform();
+		Transform convexToTrans = stack.allocTransform();
 
 		convexFromTrans.set(convexFromWorld);
 		convexToTrans.set(convexToWorld);
 
-		Vector3f castShapeAabbMin = Stack.allocVector3f();
-		Vector3f castShapeAabbMax = Stack.allocVector3f();
+		Vector3f castShapeAabbMin = stack.allocVector3f();
+		Vector3f castShapeAabbMax = stack.allocVector3f();
 
 		// compute AABB that encompasses angular movement
 		{
-			Vector3f linVel = Stack.allocVector3f();
-			Vector3f angVel = Stack.allocVector3f();
+			Vector3f linVel = stack.allocVector3f();
+			Vector3f angVel = stack.allocVector3f();
 			TransformUtil.calculateVelocity(convexFromTrans, convexToTrans, 1f, linVel, angVel);
-			Transform R = Stack.allocTransform();
+			Transform R = stack.allocTransform();
 			R.setIdentity();
-			R.setRotation(convexFromTrans.getRotation(Stack.allocQuat4f()));
+			R.setRotation(convexFromTrans.getRotation(stack.allocQuat4f()));
 			castShape.calculateTemporalAabb(R, linVel, angVel, 1f, castShapeAabbMin, castShapeAabbMax);
 		}
 
-		Transform tmpTrans = Stack.allocTransform();
+		Transform tmpTrans = stack.allocTransform();
 
 		// go over all objects, and if the ray intersects their aabb + cast shape aabb,
 		// do a ray-shape query using convexCaster (CCD)
@@ -111,12 +111,12 @@ public class GhostObject extends CollisionObject {
 			// only perform raycast if filterMask matches
 			if (resultCallback.needsCollision(collisionObject.getBroadphaseHandle())) {
 				//RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
-				Vector3f collisionObjectAabbMin = Stack.allocVector3f();
-				Vector3f collisionObjectAabbMax = Stack.allocVector3f();
+				Vector3f collisionObjectAabbMin = stack.allocVector3f();
+				Vector3f collisionObjectAabbMax = stack.allocVector3f();
 				collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(tmpTrans), collisionObjectAabbMin, collisionObjectAabbMax);
 				AabbUtil2.aabbExpand(collisionObjectAabbMin, collisionObjectAabbMax, castShapeAabbMin, castShapeAabbMax);
 				float[] hitLambda = new float[]{1f}; // could use resultCallback.closestHitFraction, but needs testing
-				Vector3f hitNormal = Stack.allocVector3f();
+				Vector3f hitNormal = stack.allocVector3f();
 				if (AabbUtil2.rayAabb(convexFromWorld.origin, convexToWorld.origin, collisionObjectAabbMin, collisionObjectAabbMax, hitLambda, hitNormal)) {
 					CollisionWorld.objectQuerySingle(castShape, convexFromTrans, convexToTrans,
 					                                 collisionObject,
@@ -127,19 +127,19 @@ public class GhostObject extends CollisionObject {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void rayTest(Vector3f rayFromWorld, Vector3f rayToWorld, CollisionWorld.RayResultCallback resultCallback) {
-	    int sp = Stack.enter();
-		Transform rayFromTrans = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform rayFromTrans = stack.allocTransform();
 		rayFromTrans.setIdentity();
 		rayFromTrans.origin.set(rayFromWorld);
-		Transform rayToTrans = Stack.allocTransform();
+		Transform rayToTrans = stack.allocTransform();
 		rayToTrans.setIdentity();
 		rayToTrans.origin.set(rayToWorld);
 
-		Transform tmpTrans = Stack.allocTransform();
+		Transform tmpTrans = stack.allocTransform();
 
 		for (int i=0; i<overlappingObjects.size(); i++) {
 			CollisionObject collisionObject = overlappingObjects.getQuick(i);
@@ -153,7 +153,7 @@ public class GhostObject extends CollisionObject {
 				                             resultCallback);
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public int getNumOverlappingObjects() {

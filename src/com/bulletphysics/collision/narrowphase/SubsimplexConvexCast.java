@@ -65,44 +65,44 @@ public class SubsimplexConvexCast extends ConvexCast {
 	}
 	
 	public boolean calcTimeOfImpact(Transform fromA, Transform toA, Transform fromB, Transform toB, CastResult result) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 		
 		simplexSolver.reset();
 
-		Vector3f linVelA = Stack.allocVector3f();
-		Vector3f linVelB = Stack.allocVector3f();
+		Vector3f linVelA = stack.allocVector3f();
+		Vector3f linVelB = stack.allocVector3f();
 		linVelA.sub(toA.origin, fromA.origin);
 		linVelB.sub(toB.origin, fromB.origin);
 		
 		float lambda = 0f;
 		
-		Transform interpolatedTransA = Stack.alloc(fromA);
-		Transform interpolatedTransB = Stack.alloc(fromB);
+		Transform interpolatedTransA = stack.alloc(fromA);
+		Transform interpolatedTransB = stack.alloc(fromB);
 
 		// take relative motion
-		Vector3f r = Stack.allocVector3f();
+		Vector3f r = stack.allocVector3f();
 		r.sub(linVelA, linVelB);
 		
-		Vector3f v = Stack.allocVector3f();
+		Vector3f v = stack.allocVector3f();
 
 		tmp.negate(r);
 		MatrixUtil.transposeTransform(tmp, tmp, fromA.basis);
-		Vector3f supVertexA = convexA.localGetSupportingVertex(tmp, Stack.allocVector3f());
+		Vector3f supVertexA = convexA.localGetSupportingVertex(tmp, stack.allocVector3f());
 		fromA.transform(supVertexA);
 		
 		MatrixUtil.transposeTransform(tmp, r, fromB.basis);
-		Vector3f supVertexB = convexB.localGetSupportingVertex(tmp, Stack.allocVector3f());
+		Vector3f supVertexB = convexB.localGetSupportingVertex(tmp, stack.allocVector3f());
 		fromB.transform(supVertexB);
 		
 		v.sub(supVertexA, supVertexB);
 		
 		int maxIter = MAX_ITERATIONS;
 
-		Vector3f n = Stack.allocVector3f();
+		Vector3f n = stack.allocVector3f();
 		n.set(0f, 0f, 0f);
 		boolean hasResult = false;
-		Vector3f c = Stack.allocVector3f();
+		Vector3f c = stack.allocVector3f();
 
 		float lastLambda = lambda;
 
@@ -112,7 +112,7 @@ public class SubsimplexConvexCast extends ConvexCast {
 		//#else
 		float epsilon = 0.0001f;
 		//#endif
-		Vector3f w = Stack.allocVector3f(), p = Stack.allocVector3f();
+		Vector3f w = stack.allocVector3f(), p = stack.allocVector3f();
 		float VdotR;
 
 		while ((dist2 > epsilon) && (maxIter--) != 0) {
@@ -130,7 +130,7 @@ public class SubsimplexConvexCast extends ConvexCast {
 			float VdotW = v.dot(w);
 
 			if (lambda > 1f) {
-			    Stack.leave(sp);
+			    stack.leave();
 				return false;
 			}
 			
@@ -138,7 +138,7 @@ public class SubsimplexConvexCast extends ConvexCast {
 				VdotR = v.dot(r);
 
 				if (VdotR >= -(BulletGlobals.FLT_EPSILON * BulletGlobals.FLT_EPSILON)) {
-				    Stack.leave(sp);
+				    stack.leave();
 					return false;
 				}
 				else {
@@ -186,15 +186,15 @@ public class SubsimplexConvexCast extends ConvexCast {
 
 		// don't report time of impact for motion away from the contact normal (or causes minor penetration)
 		if (result.normal.dot(r) >= -result.allowedPenetration) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return false;
 		}
 
-		Vector3f hitA = Stack.allocVector3f();
-		Vector3f hitB = Stack.allocVector3f();
+		Vector3f hitA = stack.allocVector3f();
+		Vector3f hitB = stack.allocVector3f();
 		simplexSolver.compute_points(hitA,hitB);
 		result.hitPoint.set(hitB);
-		Stack.leave(sp);
+		stack.leave();
 		return true;
 	}
 

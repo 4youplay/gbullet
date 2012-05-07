@@ -62,13 +62,13 @@ public class CapsuleShape extends ConvexInternalShape {
 
 	@Override
 	public Vector3f localGetSupportingVertexWithoutMargin(Vector3f vec0, Vector3f out) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		Vector3f supVec = out;
 		supVec.set(0f, 0f, 0f);
 
 		float maxDot = -1e30f;
 
-		Vector3f vec = Stack.alloc(vec0);
+		Vector3f vec = stack.alloc(vec0);
 		float lenSqr = vec.lengthSquared();
 		if (lenSqr < 0.0001f) {
 			vec.set(1f, 0f, 0f);
@@ -78,14 +78,14 @@ public class CapsuleShape extends ConvexInternalShape {
 			vec.scale(rlen);
 		}
 
-		Vector3f vtx = Stack.allocVector3f();
+		Vector3f vtx = stack.allocVector3f();
 		float newDot;
 
 		float radius = getRadius();
 
-		Vector3f tmp1 = Stack.allocVector3f();
-		Vector3f tmp2 = Stack.allocVector3f();
-		Vector3f pos = Stack.allocVector3f();
+		Vector3f tmp1 = stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
+		Vector3f pos = stack.allocVector3f();
 
 		{
 			pos.set(0f, 0f, 0f);
@@ -117,7 +117,7 @@ public class CapsuleShape extends ConvexInternalShape {
 				supVec.set(vtx);
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return out;
 	}
 
@@ -131,13 +131,13 @@ public class CapsuleShape extends ConvexInternalShape {
 	public void calculateLocalInertia(float mass, Vector3f inertia) {
 		// as an approximation, take the inertia of the box that bounds the spheres
 
-	    int sp = Stack.enter();
-		Transform ident = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform ident = stack.allocTransform();
 		ident.setIdentity();
 
 		float radius = getRadius();
 
-		Vector3f halfExtents = Stack.allocVector3f();
+		Vector3f halfExtents = stack.allocVector3f();
 		halfExtents.set(radius, radius, radius);
 		VectorUtil.setCoord(halfExtents, getUpAxis(), radius + getHalfHeight());
 
@@ -154,7 +154,7 @@ public class CapsuleShape extends ConvexInternalShape {
 		inertia.x = scaledmass * (y2 + z2);
 		inertia.y = scaledmass * (x2 + z2);
 		inertia.z = scaledmass * (x2 + y2);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
@@ -164,10 +164,10 @@ public class CapsuleShape extends ConvexInternalShape {
 	
 	@Override
 	public void getAabb(Transform t, Vector3f aabbMin, Vector3f aabbMax) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 
-		Vector3f halfExtents = Stack.allocVector3f();
+		Vector3f halfExtents = stack.allocVector3f();
 		halfExtents.set(getRadius(), getRadius(), getRadius());
 		VectorUtil.setCoord(halfExtents, upAxis, getRadius() + getHalfHeight());
 
@@ -175,12 +175,12 @@ public class CapsuleShape extends ConvexInternalShape {
 		halfExtents.y += getMargin();
 		halfExtents.z += getMargin();
 
-		Matrix3f abs_b = Stack.allocMatrix3f();
+		Matrix3f abs_b = stack.allocMatrix3f();
 		abs_b.set(t.basis);
 		MatrixUtil.absolute(abs_b);
 
 		Vector3f center = t.origin;
-		Vector3f extent = Stack.allocVector3f();
+		Vector3f extent = stack.allocVector3f();
 
 		abs_b.getRow(0, tmp);
 		extent.x = tmp.dot(halfExtents);
@@ -191,7 +191,7 @@ public class CapsuleShape extends ConvexInternalShape {
 
 		aabbMin.sub(center, extent);
 		aabbMax.add(center, extent);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override

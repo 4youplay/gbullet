@@ -165,10 +165,10 @@ public class Generic6DofConstraint extends TypedConstraint {
 	 * Calcs the euler angles between the two bodies.
 	 */
 	protected void calculateAngleInfo() {
-	    int sp = Stack.enter();
-		Matrix3f mat = Stack.allocMatrix3f();
+	    Stack stack = Stack.enter();
+		Matrix3f mat = stack.allocMatrix3f();
 
-		Matrix3f relative_frame = Stack.allocMatrix3f();
+		Matrix3f relative_frame = stack.allocMatrix3f();
 		mat.set(calculatedTransformA.basis);
 		MatrixUtil.invert(mat);
 		relative_frame.mul(mat, calculatedTransformB.basis);
@@ -190,10 +190,10 @@ public class Generic6DofConstraint extends TypedConstraint {
 		// easier to take the euler rate expression for d(angle[2])/dt with respect
 		// to the components of w and set that to 0.
 
-		Vector3f axis0 = Stack.allocVector3f();
+		Vector3f axis0 = stack.allocVector3f();
 		calculatedTransformB.basis.getColumn(0, axis0);
 
-		Vector3f axis2 = Stack.allocVector3f();
+		Vector3f axis2 = stack.allocVector3f();
 		calculatedTransformA.basis.getColumn(2, axis2);
 
 		calculatedAxis[1].cross(axis2, axis0);
@@ -210,7 +210,7 @@ public class Generic6DofConstraint extends TypedConstraint {
 		//		m_calculatedAxisAngleDiff[2]);
 		//    	m_debugDrawer->reportErrorWarning(buff);
 		//    }
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	/**
@@ -230,19 +230,19 @@ public class Generic6DofConstraint extends TypedConstraint {
 	}
 	
 	protected void buildLinearJacobian(/*JacobianEntry jacLinear*/int jacLinear_index, Vector3f normalWorld, Vector3f pivotAInW, Vector3f pivotBInW) {
-		int sp = Stack.enter();
-	    Matrix3f mat1 = rbA.getCenterOfMassTransform(Stack.allocTransform()).basis;
+		Stack stack = Stack.enter();
+	    Matrix3f mat1 = rbA.getCenterOfMassTransform(stack.allocTransform()).basis;
 		mat1.transpose();
 
-		Matrix3f mat2 = rbB.getCenterOfMassTransform(Stack.allocTransform()).basis;
+		Matrix3f mat2 = rbB.getCenterOfMassTransform(stack.allocTransform()).basis;
 		mat2.transpose();
 
-		Vector3f tmpVec = Stack.allocVector3f();
+		Vector3f tmpVec = stack.allocVector3f();
 		
-		Vector3f tmp1 = Stack.allocVector3f();
+		Vector3f tmp1 = stack.allocVector3f();
 		tmp1.sub(pivotAInW, rbA.getCenterOfMassPosition(tmpVec));
 
-		Vector3f tmp2 = Stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
 		tmp2.sub(pivotBInW, rbB.getCenterOfMassPosition(tmpVec));
 
 		jacLinear[jacLinear_index].init(
@@ -251,27 +251,27 @@ public class Generic6DofConstraint extends TypedConstraint {
 				tmp1,
 				tmp2,
 				normalWorld,
-				rbA.getInvInertiaDiagLocal(Stack.allocVector3f()),
+				rbA.getInvInertiaDiagLocal(stack.allocVector3f()),
 				rbA.getInvMass(),
-				rbB.getInvInertiaDiagLocal(Stack.allocVector3f()),
+				rbB.getInvInertiaDiagLocal(stack.allocVector3f()),
 				rbB.getInvMass());
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	protected void buildAngularJacobian(/*JacobianEntry jacAngular*/int jacAngular_index, Vector3f jointAxisW) {
-	    int sp = Stack.enter();
-		Matrix3f mat1 = rbA.getCenterOfMassTransform(Stack.allocTransform()).basis;
+	    Stack stack = Stack.enter();
+		Matrix3f mat1 = rbA.getCenterOfMassTransform(stack.allocTransform()).basis;
 		mat1.transpose();
 
-		Matrix3f mat2 = rbB.getCenterOfMassTransform(Stack.allocTransform()).basis;
+		Matrix3f mat2 = rbB.getCenterOfMassTransform(stack.allocTransform()).basis;
 		mat2.transpose();
 
 		jacAng[jacAngular_index].init(jointAxisW,
 				mat1,
 				mat2,
-				rbA.getInvInertiaDiagLocal(Stack.allocVector3f()),
-				rbB.getInvInertiaDiagLocal(Stack.allocVector3f()));
-		Stack.leave(sp);
+				rbA.getInvInertiaDiagLocal(stack.allocVector3f()),
+				rbB.getInvInertiaDiagLocal(stack.allocVector3f()));
+		stack.leave();
 	}
 
 	/**
@@ -297,20 +297,20 @@ public class Generic6DofConstraint extends TypedConstraint {
 		
 		// calculates transform
 		calculateTransforms();
-		int sp = Stack.enter();
-		Vector3f tmpVec = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f tmpVec = stack.allocVector3f();
 
 		//  const btVector3& pivotAInW = m_calculatedTransformA.getOrigin();
 		//  const btVector3& pivotBInW = m_calculatedTransformB.getOrigin();
 		calcAnchorPos();
-		Vector3f pivotAInW = Stack.alloc(anchorPos);
-		Vector3f pivotBInW = Stack.alloc(anchorPos);
+		Vector3f pivotAInW = stack.alloc(anchorPos);
+		Vector3f pivotBInW = stack.alloc(anchorPos);
 		
 		// not used here
 		//    btVector3 rel_pos1 = pivotAInW - m_rbA.getCenterOfMassPosition();
 		//    btVector3 rel_pos2 = pivotBInW - m_rbB.getCenterOfMassPosition();
 
-		Vector3f normalWorld = Stack.allocVector3f();
+		Vector3f normalWorld = stack.allocVector3f();
 		// linear part
 		for (int i=0; i<3; i++) {
 			if (linearLimits.isLimited(i)) {
@@ -337,7 +337,7 @@ public class Generic6DofConstraint extends TypedConstraint {
 				buildAngularJacobian(/*jacAng[i]*/i, normalWorld);
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
@@ -347,14 +347,14 @@ public class Generic6DofConstraint extends TypedConstraint {
 		//calculateTransforms();
 
 		int i;
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		// linear
 
-		Vector3f pointInA = Stack.alloc(calculatedTransformA.origin);
-		Vector3f pointInB = Stack.alloc(calculatedTransformB.origin);
+		Vector3f pointInA = stack.alloc(calculatedTransformA.origin);
+		Vector3f pointInB = stack.alloc(calculatedTransformB.origin);
 
 		float jacDiagABInv;
-		Vector3f linear_axis = Stack.allocVector3f();
+		Vector3f linear_axis = stack.allocVector3f();
 		for (i = 0; i < 3; i++) {
 			if (linearLimits.isLimited(i)) {
 				jacDiagABInv = 1f / jacLinear[i].getDiagonal();
@@ -377,7 +377,7 @@ public class Generic6DofConstraint extends TypedConstraint {
 		}
 
 		// angular
-		Vector3f angular_axis = Stack.allocVector3f();
+		Vector3f angular_axis = stack.allocVector3f();
 		float angularJacDiagABInv;
 		for (i = 0; i < 3; i++) {
 			if (angularLimits[i].needApplyTorques()) {
@@ -389,7 +389,7 @@ public class Generic6DofConstraint extends TypedConstraint {
 				angularLimits[i].solveAngularLimits(this.timeStep, angular_axis, angularJacDiagABInv, rbA, rbB);
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 
@@ -506,7 +506,7 @@ public class Generic6DofConstraint extends TypedConstraint {
 	
 	// overridable
 	public void calcAnchorPos() {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		float imA = rbA.getInvMass();
 		float imB = rbB.getInvMass();
 		float weight;
@@ -519,13 +519,13 @@ public class Generic6DofConstraint extends TypedConstraint {
 		Vector3f pA = calculatedTransformA.origin;
 		Vector3f pB = calculatedTransformB.origin;
 
-		Vector3f tmp1 = Stack.allocVector3f();
-		Vector3f tmp2 = Stack.allocVector3f();
+		Vector3f tmp1 = stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
 
 		tmp1.scale(weight, pA);
 		tmp2.scale(1f - weight, pB);
 		anchorPos.add(tmp1, tmp2);
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 }

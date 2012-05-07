@@ -198,9 +198,9 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 	
 	@Override
 	public void setLocalScaling(Vector3f scaling) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
-		tmp.sub(getLocalScaling(Stack.allocVector3f()), scaling);
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
+		tmp.sub(getLocalScaling(stack.allocVector3f()), scaling);
 
 		if (tmp.lengthSquared() > BulletGlobals.SIMD_EPSILON) {
 			super.setLocalScaling(scaling);
@@ -217,7 +217,7 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 			bvh.build(meshInterface, useQuantizedAabbCompression, localAabbMin, localAabbMax);
 			ownsBvh = true;
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	public OptimizedBvh getOptimizedBvh() {
@@ -225,11 +225,11 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 	}
 
 	public void setOptimizedBvh(OptimizedBvh bvh) {
-	    int sp = Stack.enter();
-		Vector3f scaling = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f scaling = stack.allocVector3f();
 		scaling.set(1f, 1f, 1f);
 		setOptimizedBvh(bvh, scaling);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void setOptimizedBvh(OptimizedBvh bvh, Vector3f scaling) {
@@ -239,15 +239,15 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 		this.bvh = bvh;
 		ownsBvh = false;
 
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		// update the scaling without rebuilding the bvh
-		Vector3f tmp = Stack.allocVector3f();
-		tmp.sub(getLocalScaling(Stack.allocVector3f()), scaling);
+		Vector3f tmp = stack.allocVector3f();
+		tmp.sub(getLocalScaling(stack.allocVector3f()), scaling);
 
 		if (tmp.lengthSquared() > BulletGlobals.SIMD_EPSILON) {
 			super.setLocalScaling(scaling);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public boolean usesQuantizedAabbCompression() {
@@ -271,10 +271,10 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 		}
 
 		public void processNode(int nodeSubPart, int nodeTriangleIndex) {
-		    int sp = Stack.enter();
+		    Stack stack = Stack.enter();
 			VertexData data = meshInterface.getLockedReadOnlyVertexIndexBase(nodeSubPart);
 
-			Vector3f meshScaling = meshInterface.getScaling(Stack.allocVector3f());
+			Vector3f meshScaling = meshInterface.getScaling(stack.allocVector3f());
 
 			data.getTriangle(nodeTriangleIndex*3, meshScaling, triangle);
 
@@ -282,7 +282,7 @@ public class BvhTriangleMeshShape extends TriangleMeshShape {
 			callback.processTriangle(triangle, nodeSubPart, nodeTriangleIndex);
 			
 			meshInterface.unLockReadOnlyVertexBase(nodeSubPart);
-			Stack.leave(sp);
+			stack.leave();
 		}
 	}
 	

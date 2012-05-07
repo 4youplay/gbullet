@@ -140,7 +140,7 @@ public class RotationalLimitMotor {
 		if (needApplyTorques() == false) {
 			return 0.0f;
 		}
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		float target_velocity = this.targetVelocity;
 		float maxMotorForce = this.maxMotorForce;
 
@@ -153,9 +153,9 @@ public class RotationalLimitMotor {
 		maxMotorForce *= timeStep;
 
 		// current velocity difference
-		Vector3f vel_diff = body0.getAngularVelocity(Stack.allocVector3f());
+		Vector3f vel_diff = body0.getAngularVelocity(stack.allocVector3f());
 		if (body1 != null) {
-			vel_diff.sub(body1.getAngularVelocity(Stack.allocVector3f()));
+			vel_diff.sub(body1.getAngularVelocity(stack.allocVector3f()));
 		}
 
 		float rel_vel = axis.dot(vel_diff);
@@ -191,7 +191,7 @@ public class RotationalLimitMotor {
 
 		clippedMotorImpulse = accumulatedImpulse - oldaccumImpulse;
 
-		Vector3f motorImp = Stack.allocVector3f();
+		Vector3f motorImp = stack.allocVector3f();
 		motorImp.scale(clippedMotorImpulse, axis);
 
 		body0.applyTorqueImpulse(motorImp);
@@ -199,7 +199,7 @@ public class RotationalLimitMotor {
 			motorImp.negate();
 			body1.applyTorqueImpulse(motorImp);
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return clippedMotorImpulse;
 	}
 	

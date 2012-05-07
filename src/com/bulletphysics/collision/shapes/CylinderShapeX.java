@@ -42,26 +42,26 @@ public class CylinderShapeX extends CylinderShape {
 
 	@Override
 	public Vector3f localGetSupportingVertexWithoutMargin(Vector3f vec, Vector3f out) {
-	    int sp = Stack.enter();
-		Vector3f result = cylinderLocalSupportX(getHalfExtentsWithoutMargin(Stack.allocVector3f()), vec, out);
-		Stack.leave(sp);
+	    Stack stack = Stack.enter();
+		Vector3f result = cylinderLocalSupportX(getHalfExtentsWithoutMargin(stack.allocVector3f()), vec, out);
+		stack.leave();
 		return result;
 	}
 
 	@Override
 	public void batchedUnitVectorGetSupportingVertexWithoutMargin(Vector3f[] vectors, Vector3f[] supportVerticesOut, int numVectors) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		for (int i = 0; i < numVectors; i++) {
-			cylinderLocalSupportX(getHalfExtentsWithoutMargin(Stack.allocVector3f()), vectors[i], supportVerticesOut[i]);
+			cylinderLocalSupportX(getHalfExtentsWithoutMargin(stack.allocVector3f()), vectors[i], supportVerticesOut[i]);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
 	public float getRadius() {
-	    int sp = Stack.enter();
-		float result = getHalfExtentsWithMargin(Stack.allocVector3f()).y;
-		Stack.leave(sp);
+	    Stack stack = Stack.enter();
+		float result = getHalfExtentsWithMargin(stack.allocVector3f()).y;
+		stack.leave();
 		return result;
 	}
 

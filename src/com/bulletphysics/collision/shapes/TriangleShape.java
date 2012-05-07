@@ -94,25 +94,25 @@ public class TriangleShape extends PolyhedralConvexShape {
 
 	@Override
 	public Vector3f localGetSupportingVertexWithoutMargin(Vector3f dir, Vector3f out) {
-	    int sp = Stack.enter();
-		Vector3f dots = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f dots = stack.allocVector3f();
 		dots.set(dir.dot(vertices1[0]), dir.dot(vertices1[1]), dir.dot(vertices1[2]));
 		out.set(vertices1[VectorUtil.maxAxis(dots)]);
-		Stack.leave(sp);
+		stack.leave();
 		return out;
 	}
 
 	@Override
 	public void batchedUnitVectorGetSupportingVertexWithoutMargin(Vector3f[] vectors, Vector3f[] supportVerticesOut, int numVectors) {
-	    int sp = Stack.enter();
-	    Vector3f dots = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+	    Vector3f dots = stack.allocVector3f();
 
 		for (int i = 0; i < numVectors; i++) {
 			Vector3f dir = vectors[i];
 			dots.set(dir.dot(vertices1[0]), dir.dot(vertices1[1]), dir.dot(vertices1[2]));
 			supportVerticesOut[i].set(vertices1[VectorUtil.maxAxis(dots)]);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
@@ -126,16 +126,16 @@ public class TriangleShape extends PolyhedralConvexShape {
 	}
 
 	public void calcNormal(Vector3f normal) {
-	    int sp = Stack.enter();
-		Vector3f tmp1 = Stack.allocVector3f();
-		Vector3f tmp2 = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp1 = stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
 
 		tmp1.sub(vertices1[1], vertices1[0]);
 		tmp2.sub(vertices1[2], vertices1[0]);
 
 		normal.cross(tmp1, tmp2);
 		normal.normalize();
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void getPlaneEquation(int i, Vector3f planeNormal, Vector3f planeSupport) {
@@ -151,8 +151,8 @@ public class TriangleShape extends PolyhedralConvexShape {
 	
 	@Override
 	public boolean isInside(Vector3f pt, float tolerance) {
-	    int sp = Stack.enter();
-		Vector3f normal = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f normal = stack.allocVector3f();
 		calcNormal(normal);
 		// distance to plane
 		float dist = pt.dot(normal);
@@ -162,25 +162,25 @@ public class TriangleShape extends PolyhedralConvexShape {
 			// inside check on edge-planes
 			int i;
 			for (i = 0; i < 3; i++) {
-				Vector3f pa = Stack.allocVector3f(), pb = Stack.allocVector3f();
+				Vector3f pa = stack.allocVector3f(), pb = stack.allocVector3f();
 				getEdge(i, pa, pb);
-				Vector3f edge = Stack.allocVector3f();
+				Vector3f edge = stack.allocVector3f();
 				edge.sub(pb, pa);
-				Vector3f edgeNormal = Stack.allocVector3f();
+				Vector3f edgeNormal = stack.allocVector3f();
 				edgeNormal.cross(edge, normal);
 				edgeNormal.normalize();
 				/*float*/ dist = pt.dot(edgeNormal);
 				float edgeConst = pa.dot(edgeNormal);
 				dist -= edgeConst;
 				if (dist < -tolerance) {
-				    Stack.leave(sp);
+				    stack.leave();
 					return false;
 				}
 			}
-			Stack.leave(sp);
+			stack.leave();
 			return true;
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return false;
 	}
 

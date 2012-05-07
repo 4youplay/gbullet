@@ -198,30 +198,30 @@ public class GjkEpaSolver {
 		}
 
 		public Vector3f LocalSupport(Vector3f d, /*unsigned*/ int i, Vector3f out) {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 			MatrixUtil.transposeTransform(tmp, d, wrotations[i]);
 
 			shapes[i].localGetSupportingVertex(tmp, out);
 			wrotations[i].transform(out);
 			out.add(positions[i]);
-			Stack.leave(sp);
+			stack.leave();
 			return out;
 		}
 		
 		public void Support(Vector3f d, Mkv v) {
 			v.r.set(d);
-			int sp = Stack.enter();
-			Vector3f tmp1 = LocalSupport(d, 0, Stack.allocVector3f());
+			Stack stack = Stack.enter();
+			Vector3f tmp1 = LocalSupport(d, 0, stack.allocVector3f());
 
-			Vector3f tmp = Stack.allocVector3f();
+			Vector3f tmp = stack.allocVector3f();
 			tmp.set(d);
 			tmp.negate();
-			Vector3f tmp2 = LocalSupport(tmp, 1, Stack.allocVector3f());
+			Vector3f tmp2 = LocalSupport(tmp, 1, stack.allocVector3f());
 
 			v.w.sub(tmp1, tmp2);
 			v.w.scaleAdd(margin, d, v.w);
-			Stack.leave(sp);
+			stack.leave();
 		}
 
 		public boolean FetchSupport() {
@@ -248,15 +248,15 @@ public class GjkEpaSolver {
 
 		public boolean SolveSimplex2(Vector3f ao, Vector3f ab) {
 			if (ab.dot(ao) >= 0) {
-			    int sp = Stack.enter();
-				Vector3f cabo = Stack.allocVector3f();
+			    Stack stack = Stack.enter();
+				Vector3f cabo = stack.allocVector3f();
 				cabo.cross(ab, ao);
 				if (cabo.lengthSquared() > GJK_sqinsimplex_eps) {
 					ray.cross(cabo, ab);
-                     Stack.leave(sp);
+                     stack.leave();
 				}
 				else {
-                    Stack.leave(sp);
+                    stack.leave();
 					return true;
 				}
 			}
@@ -270,21 +270,21 @@ public class GjkEpaSolver {
 
 		public boolean SolveSimplex3(Vector3f ao, Vector3f ab, Vector3f ac)
 		{
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 			tmp.cross(ab, ac);
 			boolean result = (SolveSimplex3a(ao,ab,ac,tmp));
-			Stack.leave(sp);
+			stack.leave();
 			return result;
 		}
 		
 		public boolean SolveSimplex3a(Vector3f ao, Vector3f ab, Vector3f ac, Vector3f cabc) {
 			// TODO: optimize
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 			tmp.cross(cabc, ab);
 
-			Vector3f tmp2 = Stack.allocVector3f();
+			Vector3f tmp2 = stack.allocVector3f();
 			tmp2.cross(cabc, ac);
 
 			boolean result;
@@ -319,22 +319,22 @@ public class GjkEpaSolver {
 					result = true;
 				}
 			}
-			Stack.leave(sp);
+			stack.leave();
 			return result;
 		}
 		
 		public boolean SolveSimplex4(Vector3f ao, Vector3f ab, Vector3f ac, Vector3f ad) {
 			// TODO: optimize
-		    int sp = Stack.enter();
-			Vector3f crs = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f crs = stack.allocVector3f();
 
-			Vector3f tmp = Stack.allocVector3f();
+			Vector3f tmp = stack.allocVector3f();
 			tmp.cross(ab, ac);
 
-			Vector3f tmp2 = Stack.allocVector3f();
+			Vector3f tmp2 = stack.allocVector3f();
 			tmp2.cross(ac, ad);
 
-			Vector3f tmp3 = Stack.allocVector3f();
+			Vector3f tmp3 = stack.allocVector3f();
 			tmp3.cross(ad, ab);
 
 			boolean result;
@@ -363,25 +363,25 @@ public class GjkEpaSolver {
 			else {
 				result = (true);
 			}
-			Stack.leave(sp);
+			stack.leave();
 			return result;
 		}
 		
 		public boolean SearchOrigin() {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 			tmp.set(1f, 0f, 0f);
 			boolean result = SearchOrigin(tmp);
-			Stack.leave(sp);
+			stack.leave();
 			return result;
 		}
 		
 		public boolean SearchOrigin(Vector3f initray) {
-		    int sp = Stack.enter();
-			Vector3f tmp1 = Stack.allocVector3f();
-			Vector3f tmp2 = Stack.allocVector3f();
-			Vector3f tmp3 = Stack.allocVector3f();
-			Vector3f tmp4 = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp1 = stack.allocVector3f();
+			Vector3f tmp2 = stack.allocVector3f();
+			Vector3f tmp3 = stack.allocVector3f();
+			Vector3f tmp4 = stack.allocVector3f();
 
 			iterations = 0;
 			order = -1;
@@ -422,25 +422,25 @@ public class GjkEpaSolver {
 						}
 					}
 					if (found) {
-					    Stack.leave(sp);
+					    stack.leave();
 						return true;
 					}
 				}
 				else {
-				    Stack.leave(sp);
+				    stack.leave();
 					return false;
 				}
 			}
 			failed = true;
-			Stack.leave(sp);
+			stack.leave();
 			return false;
 		}
 		
 		public boolean EncloseOrigin() {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
-			Vector3f tmp1 = Stack.allocVector3f();
-			Vector3f tmp2 = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
+			Vector3f tmp1 = stack.allocVector3f();
+			Vector3f tmp2 = stack.allocVector3f();
 
 			switch (order) {
 				// Point
@@ -448,10 +448,10 @@ public class GjkEpaSolver {
 					break;
 				// Line
 				case 1: {
-					Vector3f ab = Stack.allocVector3f();
+					Vector3f ab = stack.allocVector3f();
 					ab.sub(simplex[1].w, simplex[0].w);
 
-					Vector3f[] b = new Vector3f[] { Stack.allocVector3f(), Stack.allocVector3f(), Stack.allocVector3f() };
+					Vector3f[] b = new Vector3f[] { stack.allocVector3f(), stack.allocVector3f(), stack.allocVector3f() };
 					b[0].set(1f, 0f, 0f);
 					b[1].set(0f, 1f, 0f);
 					b[2].set(0f, 0f, 1f);
@@ -462,14 +462,14 @@ public class GjkEpaSolver {
 
 					float m[] = new float[] { b[0].lengthSquared(), b[1].lengthSquared(), b[2].lengthSquared() };
 
-					Quat4f tmpQuat = Stack.allocQuat4f();
+					Quat4f tmpQuat = stack.allocQuat4f();
 					tmp.normalize(ab);
 					QuaternionUtil.setRotation(tmpQuat, tmp, cst2Pi / 3f);
 
-					Matrix3f r = Stack.allocMatrix3f();
+					Matrix3f r = stack.allocMatrix3f();
 					MatrixUtil.setRotation(r, tmpQuat);
 
-					Vector3f w = Stack.allocVector3f();
+					Vector3f w = stack.allocVector3f();
 					w.set(b[m[0] > m[1] ? m[0] > m[2] ? 0 : 2 : m[1] > m[2] ? 1 : 2]);
 
 					tmp.normalize(w);
@@ -479,14 +479,14 @@ public class GjkEpaSolver {
 					tmp.normalize(w);
 					Support(tmp, simplex[3]); r.transform(w);
 					order = 4;
-					Stack.leave(sp);
+					stack.leave();
 					return (true);
 				}
 				// Triangle
 				case 2: {
 					tmp1.sub(simplex[1].w, simplex[0].w);
 					tmp2.sub(simplex[2].w, simplex[0].w);
-					Vector3f n = Stack.allocVector3f();
+					Vector3f n = stack.allocVector3f();
 					n.cross(tmp1, tmp2);
 					n.normalize();
 
@@ -495,19 +495,19 @@ public class GjkEpaSolver {
 					tmp.negate(n);
 					Support(tmp, simplex[4]);
 					order = 4;
-					Stack.leave(sp);
+					stack.leave();
 					return (true);
 				}
 				// Tetrahedron
 				case 3:
-				    Stack.leave(sp);
+				    stack.leave();
 					return (true);
 				// Hexahedron
 				case 4:
-				    Stack.leave(sp);
+				    stack.leave();
 					return (true);
 			}
-			Stack.leave(sp);
+			stack.leave();
 			return (false);
 		}
 		
@@ -562,12 +562,12 @@ public class GjkEpaSolver {
 		}
 		
 		public Vector3f GetCoordinates(Face face, Vector3f out) {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
-			Vector3f tmp1 = Stack.allocVector3f();
-			Vector3f tmp2 = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
+			Vector3f tmp1 = stack.allocVector3f();
+			Vector3f tmp2 = stack.allocVector3f();
 
-			Vector3f o = Stack.allocVector3f();
+			Vector3f o = stack.allocVector3f();
 			o.scale(-face.d, face.n);
 
 			float[] a = floatArrays.getFixed(3);
@@ -593,7 +593,7 @@ public class GjkEpaSolver {
 			out.scale(1f / (sm > 0f ? sm : 1f));
 
 			floatArrays.release(a);
-			Stack.leave(sp);
+			stack.leave();
 			return out;
 		}
 		
@@ -614,12 +614,12 @@ public class GjkEpaSolver {
 		}
 
 		public boolean Set(Face f, Mkv a, Mkv b, Mkv c) {
-		    int sp = Stack.enter();
-			Vector3f tmp1 = Stack.allocVector3f();
-			Vector3f tmp2 = Stack.allocVector3f();
-			Vector3f tmp3 = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp1 = stack.allocVector3f();
+			Vector3f tmp2 = stack.allocVector3f();
+			Vector3f tmp3 = stack.allocVector3f();
 
-			Vector3f nrm = Stack.allocVector3f();
+			Vector3f nrm = stack.allocVector3f();
 			tmp1.sub(b.w, a.w);
 			tmp2.sub(c.w, a.w);
 			nrm.cross(tmp1, tmp2);
@@ -640,7 +640,7 @@ public class GjkEpaSolver {
 			f.mark = 0;
 			f.n.scale(1f / (len > 0f ? len : cstInf), nrm);
 			f.d = Math.max(0, -f.n.dot(a.w));
-			Stack.leave(sp);
+			stack.leave();
 			return valid;
 		}
 		
@@ -727,9 +727,9 @@ public class GjkEpaSolver {
 		
 		public float EvaluatePD(float accuracy) {
 			pushStack();
-			int sp = Stack.enter();
+			Stack stack = Stack.enter();
 			try {
-				Vector3f tmp = Stack.allocVector3f();
+				Vector3f tmp = stack.allocVector3f();
 
 				//btBlock* sablock = sa->beginBlock();
 				Face bestface = null;
@@ -837,7 +837,7 @@ public class GjkEpaSolver {
 				}
 				/* Extract contact	*/
 				if (bestface != null) {
-					Vector3f b = GetCoordinates(bestface, Stack.allocVector3f());
+					Vector3f b = GetCoordinates(bestface, stack.allocVector3f());
 					normal.set(bestface.n);
 					depth = Math.max(0, bestface.d);
 					for (int i = 0; i < 2; ++i) {
@@ -848,9 +848,9 @@ public class GjkEpaSolver {
 						}
 					}
 
-					Vector3f tmp1 = Stack.allocVector3f();
-					Vector3f tmp2 = Stack.allocVector3f();
-					Vector3f tmp3 = Stack.allocVector3f();
+					Vector3f tmp1 = stack.allocVector3f();
+					Vector3f tmp2 = stack.allocVector3f();
+					Vector3f tmp3 = stack.allocVector3f();
 
 					tmp1.scale(b.x, features[0][0]);
 					tmp2.scale(b.y, features[0][1]);
@@ -870,7 +870,7 @@ public class GjkEpaSolver {
 			}
 			finally {
 				popStack();
-				Stack.leave(sp);
+				stack.leave();
 			}
 		}
 		
@@ -885,7 +885,7 @@ public class GjkEpaSolver {
 			float radialmargin/*,
 			btStackAlloc* stackAlloc*/,
 			Results results) {
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		// Initialize
 		results.witnesses[0].set(0f, 0f, 0f);
 		results.witnesses[1].set(0f, 0f, 0f);
@@ -929,7 +929,7 @@ public class GjkEpaSolver {
 			return (false);
 		}
 		finally {
-		    Stack.leave(sp);
+		    stack.leave();
 			gjk.destroy();
 		}
 	}

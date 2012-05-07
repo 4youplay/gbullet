@@ -62,8 +62,8 @@ public class ShapeHull {
 	}
 
 	public boolean buildHull(float margin) {
-	    int sp = Stack.enter();
-		Vector3f norm = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f norm = stack.allocVector3f();
 
 		int numSampleDirections = NUM_UNITSPHERE_POINTS;
 		{
@@ -99,7 +99,7 @@ public class ShapeHull {
 		HullLibrary hl = new HullLibrary();
 		HullResult hr = new HullResult();
 		if (!hl.createConvexHull(hd, hr)) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return false;
 		}
 
@@ -117,7 +117,7 @@ public class ShapeHull {
 		// free temporary hull result that we just copied
 		hl.releaseResult(hr);
 
-		Stack.leave(sp);
+		stack.leave();
 		return true;
 	}
 

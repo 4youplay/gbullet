@@ -130,8 +130,8 @@ public class BoxCollision {
 		 * Calc the transformation relative  1 to 0. Inverts matrics by transposing.
 		 */
 		public void calc_from_homogenic(Transform trans0, Transform trans1) {
-		    int sp = Stack.enter();
-			Transform temp_trans = Stack.allocTransform();
+		    Stack stack = Stack.enter();
+			Transform temp_trans = stack.allocTransform();
 			temp_trans.inverse(trans0);
 			temp_trans.mul(trans1);
 
@@ -139,7 +139,7 @@ public class BoxCollision {
 			R1to0.set(temp_trans.basis);
 
 			calc_absolute_matrix();
-			Stack.leave(sp);
+			stack.leave();
 		}
 		
 		/**
@@ -149,8 +149,8 @@ public class BoxCollision {
 			R1to0.invert(trans0.basis);
 			T1to0.negate(trans0.origin);
 			R1to0.transform(T1to0);
-			int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+			Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 			tmp.set(trans1.origin);
 			R1to0.transform(tmp);
 			T1to0.add(tmp);
@@ -158,23 +158,23 @@ public class BoxCollision {
 			R1to0.mul(trans1.basis);
 
 			calc_absolute_matrix();
-			Stack.leave(sp);
+			stack.leave();
 		}
 		
 		public Vector3f transform(Vector3f point, Vector3f out) {
-		    int sp = Stack.enter();
+		    Stack stack = Stack.enter();
 			if (point == out) {
-				point = Stack.alloc(point);
+				point = stack.alloc(point);
 			}
 			
-			Vector3f tmp = Stack.allocVector3f();
+			Vector3f tmp = stack.allocVector3f();
 			R1to0.getRow(0, tmp);
 			out.x = tmp.dot(point) + T1to0.x;
 			R1to0.getRow(1, tmp);
 			out.y = tmp.dot(point) + T1to0.y;
 			R1to0.getRow(2, tmp);
 			out.z = tmp.dot(point) + T1to0.z;
-			Stack.leave(sp);
+			stack.leave();
 			return out;
 		}
 	}
@@ -267,20 +267,20 @@ public class BoxCollision {
 		 * Apply a transform to an AABB.
 		 */
 		public void appy_transform(Transform trans) {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 
-			Vector3f center = Stack.allocVector3f();
+			Vector3f center = stack.allocVector3f();
 			center.add(max, min);
 			center.scale(0.5f);
 
-			Vector3f extends_ = Stack.allocVector3f();
+			Vector3f extends_ = stack.allocVector3f();
 			extends_.sub(max, center);
 
 			// Compute new center
 			trans.transform(center);
 
-			Vector3f textends = Stack.allocVector3f();
+			Vector3f textends = stack.allocVector3f();
 
 			trans.basis.getRow(0, tmp);
 			tmp.absolute();
@@ -296,27 +296,27 @@ public class BoxCollision {
 
 			min.sub(center, textends);
 			max.add(center, textends);
-			Stack.leave(sp);
+			stack.leave();
 		}
 
 		/**
 		 * Apply a transform to an AABB.
 		 */
 		public void appy_transform_trans_cache(BoxBoxTransformCache trans) {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 
-			Vector3f center = Stack.allocVector3f();
+			Vector3f center = stack.allocVector3f();
 			center.add(max, min);
 			center.scale(0.5f);
 
-			Vector3f extends_ = Stack.allocVector3f();
+			Vector3f extends_ = stack.allocVector3f();
 			extends_.sub(max, center);
 
 			// Compute new center
 			trans.transform(center, center);
 
-			Vector3f textends = Stack.allocVector3f();
+			Vector3f textends = stack.allocVector3f();
 
 			trans.R1to0.getRow(0, tmp);
 			tmp.absolute();
@@ -332,7 +332,7 @@ public class BoxCollision {
 
 			min.sub(center, textends);
 			max.add(center, textends);
-			Stack.leave(sp);
+			stack.leave();
 		}
 		
 		/**
@@ -404,55 +404,55 @@ public class BoxCollision {
 		 * @param vdir     a vec3f with the direction of the ray
 		 */
 		public boolean collide_ray(Vector3f vorigin, Vector3f vdir) {
-		    int sp = Stack.enter();
-			Vector3f extents = Stack.allocVector3f(), center = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f extents = stack.allocVector3f(), center = stack.allocVector3f();
 			get_center_extend(center, extents);
 
 			float Dx = vorigin.x - center.x;
 			if (BT_GREATER(Dx, extents.x) && Dx * vdir.x >= 0.0f) {
-			  Stack.leave(sp);
+			  stack.leave();
               return false;
 			}
 			
 			float Dy = vorigin.y - center.y;
 			if (BT_GREATER(Dy, extents.y) && Dy * vdir.y >= 0.0f) {
-              Stack.leave(sp);
+              stack.leave();
 			  return false;
 			}
 			
 			float Dz = vorigin.z - center.z;
 			if (BT_GREATER(Dz, extents.z) && Dz * vdir.z >= 0.0f) {
-              Stack.leave(sp);
+              stack.leave();
 			  return false;
 			}
 			
 			float f = vdir.y * Dz - vdir.z * Dy;
 			if (Math.abs(f) > extents.y * Math.abs(vdir.z) + extents.z * Math.abs(vdir.y)) {
-              Stack.leave(sp);
+              stack.leave();
 			  return false;
 			}
 			
 			f = vdir.z * Dx - vdir.x * Dz;
 			if (Math.abs(f) > extents.x * Math.abs(vdir.z) + extents.z * Math.abs(vdir.x)) {
-              Stack.leave(sp);
+              stack.leave();
 			  return false;
 			}
 			
 			f = vdir.x * Dy - vdir.y * Dx;
 			if (Math.abs(f) > extents.x * Math.abs(vdir.y) + extents.y * Math.abs(vdir.x)) {
-              Stack.leave(sp);
+              stack.leave();
 			  return false;
 			}
-			Stack.leave(sp);
+			stack.leave();
 			return true;
 		}
 	
 		public void projection_interval(Vector3f direction, float[] vmin, float[] vmax) {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 
-			Vector3f center = Stack.allocVector3f();
-			Vector3f extend = Stack.allocVector3f();
+			Vector3f center = stack.allocVector3f();
+			Vector3f extend = stack.allocVector3f();
 			get_center_extend(center, extend);
 
 			float _fOrigin = direction.dot(center);
@@ -460,46 +460,46 @@ public class BoxCollision {
 			float _fMaximumExtent = extend.dot(tmp);
 			vmin[0] = _fOrigin - _fMaximumExtent;
 			vmax[0] = _fOrigin + _fMaximumExtent;
-			Stack.leave(sp);
+			stack.leave();
 		}
 
 		public PlaneIntersectionType plane_classify(Vector4f plane) {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 
 			float[] _fmin = new float[1], _fmax = new float[1];
 			tmp.set(plane.x, plane.y, plane.z);
 			projection_interval(tmp, _fmin, _fmax);
 
 			if (plane.w > _fmax[0] + BOX_PLANE_EPSILON) {
-			    Stack.leave(sp);
+			    stack.leave();
 				return PlaneIntersectionType.BACK_PLANE; // 0
 			}
 
 			if (plane.w + BOX_PLANE_EPSILON >= _fmin[0]) {
-			    Stack.leave(sp);
+			    stack.leave();
 				return PlaneIntersectionType.COLLIDE_PLANE; //1
 			}
 			
-			Stack.leave(sp);
+			stack.leave();
 			return PlaneIntersectionType.FRONT_PLANE; //2
 		}
 		
 		public boolean overlapping_trans_conservative(AABB box, Transform trans1_to_0) {
-		    int sp = Stack.enter();
-			AABB tbox = Stack.alloc(box);
+		    Stack stack = Stack.enter();
+			AABB tbox = stack.alloc(box);
 			tbox.appy_transform(trans1_to_0);
 			boolean result = has_collision(tbox);
-			Stack.leave(sp);
+			stack.leave();
 			return result;
 		}
 
 		public boolean overlapping_trans_conservative2(AABB box, BoxBoxTransformCache trans1_to_0) {
-		    int sp = Stack.enter();
-			AABB tbox = Stack.alloc(box);
+		    Stack stack = Stack.enter();
+			AABB tbox = stack.alloc(box);
 			tbox.appy_transform_trans_cache(trans1_to_0);
 			boolean result = has_collision(tbox);
-			Stack.leave(sp);
+			stack.leave();
 			return result;
 		}
 
@@ -507,16 +507,16 @@ public class BoxCollision {
 		 * transcache is the transformation cache from box to this AABB.
 		 */
 		public boolean overlapping_trans_cache(AABB box, BoxBoxTransformCache transcache, boolean fulltest) {
-		    int sp = Stack.enter();
-			Vector3f tmp = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f tmp = stack.allocVector3f();
 
 			// Taken from OPCODE
-			Vector3f ea = Stack.allocVector3f(), eb = Stack.allocVector3f(); //extends
-			Vector3f ca = Stack.allocVector3f(), cb = Stack.allocVector3f(); //extends
+			Vector3f ea = stack.allocVector3f(), eb = stack.allocVector3f(); //extends
+			Vector3f ca = stack.allocVector3f(), cb = stack.allocVector3f(); //extends
 			get_center_extend(ca, ea);
 			box.get_center_extend(cb, eb);
 
-			Vector3f T = Stack.allocVector3f();
+			Vector3f T = stack.allocVector3f();
 			float t, t2;
 
 			// Class I : A's basis vectors
@@ -527,7 +527,7 @@ public class BoxCollision {
 				transcache.AR.getRow(i, tmp);
 				t = tmp.dot(eb) + VectorUtil.getCoord(ea, i);
 				if (BT_GREATER(VectorUtil.getCoord(T, i), t)) {
-				    Stack.leave(sp);
+				    stack.leave();
 					return false;
 				}
 			}
@@ -536,7 +536,7 @@ public class BoxCollision {
 				t = bt_mat3_dot_col(transcache.R1to0, T, i);
 				t2 = bt_mat3_dot_col(transcache.AR, ea, i) + VectorUtil.getCoord(eb, i);
 				if (BT_GREATER(t, t2)) {
-				    Stack.leave(sp);
+				    stack.leave();
 					return false;
 				}
 			}
@@ -555,13 +555,13 @@ public class BoxCollision {
 						t2 = VectorUtil.getCoord(ea, o) * transcache.AR.getElement(p, j) + VectorUtil.getCoord(ea, p) * transcache.AR.getElement(o, j) +
 								VectorUtil.getCoord(eb, r) * transcache.AR.getElement(i, q) + VectorUtil.getCoord(eb, q) * transcache.AR.getElement(i, r);
 						if (BT_GREATER(t, t2)) {
-		                    Stack.leave(sp);
+		                    stack.leave();
 							return false;
 						}
 					}
 				}
 			}
-            Stack.leave(sp);
+            stack.leave();
 			return true;
 		}
 		
@@ -580,21 +580,21 @@ public class BoxCollision {
 			if (!collide_plane(triangle_plane)) {
 				return false;
 			}
-			int sp = Stack.enter();
-			Vector3f center = Stack.allocVector3f(), extends_ = Stack.allocVector3f();
+			Stack stack = Stack.enter();
+			Vector3f center = stack.allocVector3f(), extends_ = stack.allocVector3f();
 			get_center_extend(center, extends_);
 
-			Vector3f v1 = Stack.allocVector3f();
+			Vector3f v1 = stack.allocVector3f();
 			v1.sub(p1, center);
-			Vector3f v2 = Stack.allocVector3f();
+			Vector3f v2 = stack.allocVector3f();
 			v2.sub(p2, center);
-			Vector3f v3 = Stack.allocVector3f();
+			Vector3f v3 = stack.allocVector3f();
 			v3.sub(p3, center);
 
 			// First axis
-			Vector3f diff = Stack.allocVector3f();
+			Vector3f diff = stack.allocVector3f();
 			diff.sub(v2, v1);
-			Vector3f abs_diff = Stack.allocVector3f();
+			Vector3f abs_diff = stack.allocVector3f();
 			abs_diff.absolute(diff);
 
 			// Test With X axis
@@ -624,7 +624,7 @@ public class BoxCollision {
 			// Test With Z axis
 			TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff, abs_diff, v3, v2, extends_);
 
-			Stack.leave(sp);
+			stack.leave();
 			return true;
 		}
 	}

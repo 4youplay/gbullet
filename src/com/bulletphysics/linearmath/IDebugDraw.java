@@ -68,20 +68,20 @@ public abstract class IDebugDraw {
 	public abstract int getDebugMode();
 
 	public void drawAabb(Vector3f from, Vector3f to, Vector3f color) {
-	    int sp = Stack.enter();
-		Vector3f halfExtents = Stack.alloc(to);
+	    Stack stack = Stack.enter();
+		Vector3f halfExtents = stack.alloc(to);
 		halfExtents.sub(from);
 		halfExtents.scale(0.5f);
 
-		Vector3f center = Stack.alloc(to);
+		Vector3f center = stack.alloc(to);
 		center.add(from);
 		center.scale(0.5f);
 
 		int i, j;
 
-		Vector3f edgecoord = Stack.allocVector3f();
+		Vector3f edgecoord = stack.allocVector3f();
 		edgecoord.set(1f, 1f, 1f);
-		Vector3f pa = Stack.allocVector3f(), pb = Stack.allocVector3f();
+		Vector3f pa = stack.allocVector3f(), pb = stack.allocVector3f();
 		for (i = 0; i < 4; i++) {
 			for (j = 0; j < 3; j++) {
 				pa.set(edgecoord.x * halfExtents.x, edgecoord.y * halfExtents.y, edgecoord.z * halfExtents.z);
@@ -100,6 +100,6 @@ public abstract class IDebugDraw {
 				VectorUtil.mulCoord(edgecoord, i, -1f);
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 }

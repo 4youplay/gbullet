@@ -100,62 +100,62 @@ public class PersistentManifold {
 		}
 //#endif //KEEP_DEEPEST_POINT
 
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		float res0 = 0f, res1 = 0f, res2 = 0f, res3 = 0f;
 		if (maxPenetrationIndex != 0) {
-			Vector3f a0 = Stack.alloc(pt.localPointA);
+			Vector3f a0 = stack.alloc(pt.localPointA);
 			a0.sub(pointCache[1].localPointA);
 
-			Vector3f b0 = Stack.alloc(pointCache[3].localPointA);
+			Vector3f b0 = stack.alloc(pointCache[3].localPointA);
 			b0.sub(pointCache[2].localPointA);
 
-			Vector3f cross = Stack.allocVector3f();
+			Vector3f cross = stack.allocVector3f();
 			cross.cross(a0, b0);
 
 			res0 = cross.lengthSquared();
 		}
 
 		if (maxPenetrationIndex != 1) {
-			Vector3f a1 = Stack.alloc(pt.localPointA);
+			Vector3f a1 = stack.alloc(pt.localPointA);
 			a1.sub(pointCache[0].localPointA);
 
-			Vector3f b1 = Stack.alloc(pointCache[3].localPointA);
+			Vector3f b1 = stack.alloc(pointCache[3].localPointA);
 			b1.sub(pointCache[2].localPointA);
 
-			Vector3f cross = Stack.allocVector3f();
+			Vector3f cross = stack.allocVector3f();
 			cross.cross(a1, b1);
 			res1 = cross.lengthSquared();
 		}
 
 		if (maxPenetrationIndex != 2) {
-			Vector3f a2 = Stack.alloc(pt.localPointA);
+			Vector3f a2 = stack.alloc(pt.localPointA);
 			a2.sub(pointCache[0].localPointA);
 
-			Vector3f b2 = Stack.alloc(pointCache[3].localPointA);
+			Vector3f b2 = stack.alloc(pointCache[3].localPointA);
 			b2.sub(pointCache[1].localPointA);
 
-			Vector3f cross = Stack.allocVector3f();
+			Vector3f cross = stack.allocVector3f();
 			cross.cross(a2, b2);
 
 			res2 = cross.lengthSquared();
 		}
 
 		if (maxPenetrationIndex != 3) {
-			Vector3f a3 = Stack.alloc(pt.localPointA);
+			Vector3f a3 = stack.alloc(pt.localPointA);
 			a3.sub(pointCache[0].localPointA);
 
-			Vector3f b3 = Stack.alloc(pointCache[2].localPointA);
+			Vector3f b3 = stack.alloc(pointCache[2].localPointA);
 			b3.sub(pointCache[1].localPointA);
 
-			Vector3f cross = Stack.allocVector3f();
+			Vector3f cross = stack.allocVector3f();
 			cross.cross(a3, b3);
 			res3 = cross.lengthSquared();
 		}
 
-		Vector4f maxvec = Stack.allocVector4f();
+		Vector4f maxvec = stack.allocVector4f();
 		maxvec.set(res0, res1, res2, res3);
 		int biggestarea = VectorUtil.closestAxis4(maxvec);
-		Stack.leave(sp);
+		stack.leave();
 		return biggestarea;
 	}
 
@@ -219,8 +219,8 @@ public class PersistentManifold {
 		float shortestDist = getContactBreakingThreshold() * getContactBreakingThreshold();
 		int size = getNumContacts();
 		int nearestPoint = -1;
-		int sp = Stack.enter();
-		Vector3f diffA = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f diffA = stack.allocVector3f();
 		for (int i = 0; i < size; i++) {
 			ManifoldPoint mp = pointCache[i];
 
@@ -232,7 +232,7 @@ public class PersistentManifold {
 				nearestPoint = i;
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return nearestPoint;
 	}
 
@@ -316,8 +316,8 @@ public class PersistentManifold {
 
 	/// calculated new worldspace coordinates and depth, and reject points that exceed the collision margin
 	public void refreshContactPoints(Transform trA, Transform trB) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 		int i;
 //#ifdef DEBUG_PERSISTENCY
 //	printf("refreshContactPoints posA = (%f,%f,%f) posB = (%f,%f,%f)\n",
@@ -347,7 +347,7 @@ public class PersistentManifold {
 
 		// then 
 		float distance2d;
-		Vector3f projectedDifference = Stack.allocVector3f(), projectedPoint = Stack.allocVector3f();
+		Vector3f projectedDifference = stack.allocVector3f(), projectedPoint = stack.allocVector3f();
 
 		for (i = getNumContacts() - 1; i >= 0; i--) {
 
@@ -376,7 +376,7 @@ public class PersistentManifold {
 //#ifdef DEBUG_PERSISTENCY
 //	DebugPersistency();
 //#endif //
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void clearManifold() {

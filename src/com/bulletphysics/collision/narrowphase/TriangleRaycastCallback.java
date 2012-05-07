@@ -49,18 +49,18 @@ public abstract class TriangleRaycastCallback extends TriangleCallback {
 	}
 	
 	public void processTriangle(Vector3f[] triangle, int partId, int triangleIndex) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		Vector3f vert0 = triangle[0];
 		Vector3f vert1 = triangle[1];
 		Vector3f vert2 = triangle[2];
 		
-		Vector3f v10 = Stack.allocVector3f();
+		Vector3f v10 = stack.allocVector3f();
 		v10.sub(vert1, vert0);
 
-		Vector3f v20 = Stack.allocVector3f();
+		Vector3f v20 = stack.allocVector3f();
 		v20.sub(vert2, vert0);
 
-		Vector3f triangleNormal = Stack.allocVector3f();
+		Vector3f triangleNormal = stack.allocVector3f();
 		triangleNormal.cross(v10, v20);
 
 		float dist = vert0.dot(triangleNormal);
@@ -70,7 +70,7 @@ public abstract class TriangleRaycastCallback extends TriangleCallback {
 		dist_b -= dist;
 
 		if (dist_a * dist_b >= 0f) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return; // same sign
 		}
 
@@ -87,20 +87,20 @@ public abstract class TriangleRaycastCallback extends TriangleCallback {
 			Vector3f point = new Vector3f();
 			VectorUtil.setInterpolate3(point, from, to, distance);
 			{
-				Vector3f v0p = Stack.allocVector3f();
+				Vector3f v0p = stack.allocVector3f();
 				v0p.sub(vert0, point);
-				Vector3f v1p = Stack.allocVector3f();
+				Vector3f v1p = stack.allocVector3f();
 				v1p.sub(vert1, point);
-				Vector3f cp0 = Stack.allocVector3f();
+				Vector3f cp0 = stack.allocVector3f();
 				cp0.cross(v0p, v1p);
 
 				if (cp0.dot(triangleNormal) >= edge_tolerance) {
-					Vector3f v2p = Stack.allocVector3f();
+					Vector3f v2p = stack.allocVector3f();
 					v2p.sub(vert2, point);
-					Vector3f cp1 = Stack.allocVector3f();
+					Vector3f cp1 = stack.allocVector3f();
 					cp1.cross(v1p, v2p);
 					if (cp1.dot(triangleNormal) >= edge_tolerance) {
-						Vector3f cp2 = Stack.allocVector3f();
+						Vector3f cp2 = stack.allocVector3f();
 						cp2.cross(v2p, v0p);
 
 						if (cp2.dot(triangleNormal) >= edge_tolerance) {
@@ -109,7 +109,7 @@ public abstract class TriangleRaycastCallback extends TriangleCallback {
 								hitFraction = reportHit(triangleNormal, distance, partId, triangleIndex);
 							}
 							else {
-								Vector3f tmp = Stack.allocVector3f();
+								Vector3f tmp = stack.allocVector3f();
 								tmp.negate(triangleNormal);
 								hitFraction = reportHit(tmp, distance, partId, triangleIndex);
 							}
@@ -118,7 +118,7 @@ public abstract class TriangleRaycastCallback extends TriangleCallback {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public abstract float reportHit(Vector3f hitNormalLocal, float hitFraction, int partId, int triangleIndex );

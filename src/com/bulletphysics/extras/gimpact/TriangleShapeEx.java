@@ -51,20 +51,20 @@ public class TriangleShapeEx extends TriangleShape {
 
 	@Override
 	public void getAabb(Transform t, Vector3f aabbMin, Vector3f aabbMax) {
-	    int sp = Stack.enter();
-		Vector3f tv0 = Stack.alloc(vertices1[0]);
+	    Stack stack = Stack.enter();
+		Vector3f tv0 = stack.alloc(vertices1[0]);
 		t.transform(tv0);
-		Vector3f tv1 = Stack.alloc(vertices1[1]);
+		Vector3f tv1 = stack.alloc(vertices1[1]);
 		t.transform(tv1);
-		Vector3f tv2 = Stack.alloc(vertices1[2]);
+		Vector3f tv2 = stack.alloc(vertices1[2]);
 		t.transform(tv2);
 
-		AABB trianglebox = Stack.allocAABB();
+		AABB trianglebox = stack.allocAABB();
 		trianglebox.init(tv0,tv1,tv2,collisionMargin);
 		
 		aabbMin.set(trianglebox.min);
 		aabbMax.set(trianglebox.max);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void applyTransform(Transform t) {
@@ -74,27 +74,27 @@ public class TriangleShapeEx extends TriangleShape {
 	}
 
 	public void buildTriPlane(Vector4f plane) {
-	    int sp = Stack.enter();
-		Vector3f tmp1 = Stack.allocVector3f();
-		Vector3f tmp2 = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp1 = stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
 
-		Vector3f normal = Stack.allocVector3f();
+		Vector3f normal = stack.allocVector3f();
 		tmp1.sub(vertices1[1], vertices1[0]);
 		tmp2.sub(vertices1[2], vertices1[0]);
 		normal.cross(tmp1, tmp2);
 		normal.normalize();
 
 		plane.set(normal.x, normal.y, normal.z, vertices1[0].dot(normal));
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public boolean overlap_test_conservative(TriangleShapeEx other) {
 		float total_margin = getMargin() + other.getMargin();
 
-		int sp = Stack.enter();
-		Vector4f plane0 = Stack.allocVector4f();
+		Stack stack = Stack.enter();
+		Vector4f plane0 = stack.allocVector4f();
 		buildTriPlane(plane0);
-		Vector4f plane1 = Stack.allocVector4f();
+		Vector4f plane1 = stack.allocVector4f();
 		other.buildTriPlane(plane1);
 
 		// classify points on other triangle
@@ -105,7 +105,7 @@ public class TriangleShapeEx extends TriangleShape {
 		float dis2 = ClipPolygon.distance_point_plane(plane0, other.vertices1[2]) - total_margin;
 
 		if (dis0 > 0.0f && dis1 > 0.0f && dis2 > 0.0f) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return false; // classify points on this triangle
 		}
 		dis0 = ClipPolygon.distance_point_plane(plane1, vertices1[0]) - total_margin;
@@ -114,7 +114,7 @@ public class TriangleShapeEx extends TriangleShape {
 
 		dis2 = ClipPolygon.distance_point_plane(plane1, vertices1[2]) - total_margin;
 
-		Stack.leave(sp);
+		stack.leave();
 		if (dis0 > 0.0f && dis1 > 0.0f && dis2 > 0.0f) {
 			return false;
 		}

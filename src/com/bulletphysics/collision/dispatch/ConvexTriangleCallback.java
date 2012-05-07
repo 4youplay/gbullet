@@ -86,24 +86,24 @@ class ConvexTriangleCallback extends TriangleCallback {
 		this.collisionMarginTriangle = collisionMarginTriangle;
 		this.resultOut = resultOut;
 
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		// recalc aabbs
-		Transform convexInTriangleSpace = Stack.allocTransform();
+		Transform convexInTriangleSpace = stack.allocTransform();
 
 		triBody.getWorldTransform(convexInTriangleSpace);
 		convexInTriangleSpace.inverse();
-		convexInTriangleSpace.mul(convexBody.getWorldTransform(Stack.allocTransform()));
+		convexInTriangleSpace.mul(convexBody.getWorldTransform(stack.allocTransform()));
 
 		CollisionShape convexShape = (CollisionShape)convexBody.getCollisionShape();
 		//CollisionShape* triangleShape = static_cast<btCollisionShape*>(triBody->m_collisionShape);
 		convexShape.getAabb(convexInTriangleSpace, aabbMin, aabbMax);
 		float extraMargin = collisionMarginTriangle;
-		Vector3f extra = Stack.allocVector3f();
+		Vector3f extra = stack.allocVector3f();
 		extra.set(extraMargin, extraMargin, extraMargin);
 
 		aabbMax.add(extra);
 		aabbMin.sub(extra);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	private CollisionAlgorithmConstructionInfo ci = new CollisionAlgorithmConstructionInfo();
@@ -121,13 +121,13 @@ class ConvexTriangleCallback extends TriangleCallback {
 
 		// debug drawing of the overlapping triangles
 		if (dispatchInfoPtr != null && dispatchInfoPtr.debugDraw != null && dispatchInfoPtr.debugDraw.getDebugMode() > 0) {
-		    int sp = Stack.enter();
-			Vector3f color = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f color = stack.allocVector3f();
 			color.set(255, 255, 0);
-			Transform tr = ob.getWorldTransform(Stack.allocTransform());
+			Transform tr = ob.getWorldTransform(stack.allocTransform());
 
-			Vector3f tmp1 = Stack.allocVector3f();
-			Vector3f tmp2 = Stack.allocVector3f();
+			Vector3f tmp1 = stack.allocVector3f();
+			Vector3f tmp2 = stack.allocVector3f();
 
 			tmp1.set(triangle[0]); tr.transform(tmp1);
 			tmp2.set(triangle[1]); tr.transform(tmp2);
@@ -146,7 +146,7 @@ class ConvexTriangleCallback extends TriangleCallback {
 			//m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[0]),tr(center),color);
 			//m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[1]),tr(center),color);
 			//m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[2]),tr(center),color);
-			Stack.leave(sp);
+			stack.leave();
 		}
 
 		//btCollisionObject* colObj = static_cast<btCollisionObject*>(m_convexProxy->m_clientObject);

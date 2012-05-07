@@ -182,18 +182,18 @@ public class ConvexcastBatch {
 		//#ifdef USE_BT_CLOCK
 		frame_timer.reset();
 		//#endif //USE_BT_CLOCK
-        int sp = Stack.enter();
+        Stack stack = Stack.enter();
 
 		for (int i=0; i<NUMRAYS_IN_BAR; i++) {
 			ClosestConvexResultCallback cb = new ClosestConvexResultCallback(source[i], dest[i]);
 
-			Quat4f qFrom = Stack.allocQuat4f();
-			Quat4f qTo = Stack.allocQuat4f();
+			Quat4f qFrom = stack.allocQuat4f();
+			Quat4f qTo = stack.allocQuat4f();
 			QuaternionUtil.setRotation(qFrom, new Vector3f(1f, 0f, 0f), 0f);
 			QuaternionUtil.setRotation(qTo, new Vector3f(1f, 0f, 0f), 0.7f);
 
-			Transform from = Stack.allocTransform();
-			Transform to = Stack.allocTransform();
+			Transform from = stack.allocTransform();
+			Transform to = stack.allocTransform();
 			from.basis.set(qFrom);
 			from.origin.set(source[i]);
 			to.basis.set(qTo);
@@ -232,7 +232,7 @@ public class ConvexcastBatch {
 			ms = 0;
 			frame_counter = 0;
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void drawCube(IGL gl, Transform T) {
@@ -246,7 +246,7 @@ public class ConvexcastBatch {
 	}
 
 	public void draw(IGL gl) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		gl.glDisable(GL_LIGHTING);
 		gl.glColor3f(0f, 1f, 0f);
 		gl.glBegin(GL_LINES);
@@ -263,29 +263,29 @@ public class ConvexcastBatch {
 		}
 		gl.glEnd();
 		gl.glColor3f(0f, 1f, 1f);
-		Quat4f qFrom = Stack.allocQuat4f();
-		Quat4f qTo = Stack.allocQuat4f();
+		Quat4f qFrom = stack.allocQuat4f();
+		Quat4f qTo = stack.allocQuat4f();
 		QuaternionUtil.setRotation(qFrom, new Vector3f(1f, 0f, 0f), 0f);
 		QuaternionUtil.setRotation(qTo, new Vector3f(1f, 0f, 0f), 0.7f);
 		for (int i=0; i<NUMRAYS_IN_BAR; i++) {
-			Transform from = Stack.allocTransform();
+			Transform from = stack.allocTransform();
 			from.basis.set(qFrom);
 			from.origin.set(source[i]);
 
-			Transform to = Stack.allocTransform();
+			Transform to = stack.allocTransform();
 			to.basis.set(qTo);
 			to.origin.set(dest[i]);
 
-			Vector3f linVel = Stack.allocVector3f();
-			Vector3f angVel = Stack.allocVector3f();
+			Vector3f linVel = stack.allocVector3f();
+			Vector3f angVel = stack.allocVector3f();
 
 			TransformUtil.calculateVelocity(from, to, 1f, linVel, angVel);
-			Transform T = Stack.allocTransform();
+			Transform T = stack.allocTransform();
 			TransformUtil.integrateTransform(from, linVel, angVel, hit_fraction[i], T);
 			drawCube(gl, T);
 		}
 		gl.glEnable(GL_LIGHTING);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 }

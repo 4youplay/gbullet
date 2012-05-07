@@ -65,13 +65,13 @@ public abstract class PolyhedralConvexShape extends ConvexInternalShape {
 	@Override
 	public Vector3f localGetSupportingVertexWithoutMargin(Vector3f vec0, Vector3f out) {
 		int i;
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		Vector3f supVec = out;
 		supVec.set(0f, 0f, 0f);
 
 		float maxDot = -1e30f;
 
-		Vector3f vec = Stack.alloc(vec0);
+		Vector3f vec = stack.alloc(vec0);
 		float lenSqr = vec.lengthSquared();
 		if (lenSqr < 0.0001f) {
 			vec.set(1f, 0f, 0f);
@@ -81,7 +81,7 @@ public abstract class PolyhedralConvexShape extends ConvexInternalShape {
 			vec.scale(rlen);
 		}
 
-		Vector3f vtx = Stack.allocVector3f();
+		Vector3f vtx = stack.allocVector3f();
 		float newDot;
 
 		for (i = 0; i < getNumVertices(); i++) {
@@ -92,15 +92,15 @@ public abstract class PolyhedralConvexShape extends ConvexInternalShape {
 				supVec = vtx;
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return out;
 	}
 
 	@Override
 	public void batchedUnitVectorGetSupportingVertexWithoutMargin(Vector3f[] vectors, Vector3f[] supportVerticesOut, int numVectors) {
 		int i;
-		int sp = Stack.enter();
-		Vector3f vtx = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f vtx = stack.allocVector3f();
 		float newDot;
 
 		// JAVA NOTE: rewritten as code used W coord for temporary usage in Vector3
@@ -128,21 +128,21 @@ public abstract class PolyhedralConvexShape extends ConvexInternalShape {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
 	public void calculateLocalInertia(float mass, Vector3f inertia) {
 		// not yet, return box inertia
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		float margin = getMargin();
 
-		Transform ident = Stack.allocTransform();
+		Transform ident = stack.allocTransform();
 		ident.setIdentity();
-		Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
+		Vector3f aabbMin = stack.allocVector3f(), aabbMax = stack.allocVector3f();
 		getAabb(ident, aabbMin, aabbMax);
 
-		Vector3f halfExtents = Stack.allocVector3f();
+		Vector3f halfExtents = stack.allocVector3f();
 		halfExtents.sub(aabbMax, aabbMin);
 		halfExtents.scale(0.5f);
 
@@ -156,7 +156,7 @@ public abstract class PolyhedralConvexShape extends ConvexInternalShape {
 
 		inertia.set(y2 + z2, x2 + z2, x2 + y2);
 		inertia.scale(scaledmass);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	private void getNonvirtualAabb(Transform trans, Vector3f aabbMin, Vector3f aabbMax, float margin) {
@@ -189,10 +189,10 @@ public abstract class PolyhedralConvexShape extends ConvexInternalShape {
 		
 		//#else
 		//for (int i=0; i<3; i++) {
-		//	Vector3f vec = Stack.allocVector3f();
+		//	Vector3f vec = stack.allocVector3f();
 		//	vec.set(0f, 0f, 0f);
 		//	VectorUtil.setCoord(vec, i, 1f);
-		//	Vector3f tmp = localGetSupportingVertex(vec, Stack.allocVector3f());
+		//	Vector3f tmp = localGetSupportingVertex(vec, stack.allocVector3f());
 		//	VectorUtil.setCoord(localAabbMax, i, VectorUtil.getCoord(tmp, i) + collisionMargin);
 		//	VectorUtil.setCoord(vec, i, -1f);
 		//	localGetSupportingVertex(vec, tmp);

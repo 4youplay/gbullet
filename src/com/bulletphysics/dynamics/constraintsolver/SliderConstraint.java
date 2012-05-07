@@ -467,12 +467,12 @@ public class SliderConstraint extends TypedConstraint {
 	// internal
 	
 	public void buildJacobianInt(RigidBody rbA, RigidBody rbB, Transform frameInA, Transform frameInB) {
-	    int sp = Stack.enter();
-		Transform tmpTrans = Stack.allocTransform();
-		Transform tmpTrans1 = Stack.allocTransform();
-		Transform tmpTrans2 = Stack.allocTransform();
-		Vector3f tmp = Stack.allocVector3f();
-		Vector3f tmp2 = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Transform tmpTrans = stack.allocTransform();
+		Transform tmpTrans1 = stack.allocTransform();
+		Transform tmpTrans2 = stack.allocTransform();
+		Vector3f tmp = stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
 
 		// calculate transforms
 		calculatedTransformA.mul(rbA.getCenterOfMassTransform(tmpTrans), frameInA);
@@ -485,7 +485,7 @@ public class SliderConstraint extends TypedConstraint {
 		projPivotInW.scaleAdd(sliderAxis.dot(delta), sliderAxis, realPivotAInW);
 		relPosA.sub(projPivotInW, rbA.getCenterOfMassPosition(tmp));
 		relPosB.sub(realPivotBInW, rbB.getCenterOfMassPosition(tmp));
-		Vector3f normalWorld = Stack.allocVector3f();
+		Vector3f normalWorld = stack.allocVector3f();
 
 		// linear part
 		for (int i=0; i<3; i++) {
@@ -531,26 +531,26 @@ public class SliderConstraint extends TypedConstraint {
 		}
 		testAngLimits();
 
-		Vector3f axisA = Stack.allocVector3f();
+		Vector3f axisA = stack.allocVector3f();
 		calculatedTransformA.basis.getColumn(0, axisA);
 		kAngle = 1f / (rbA.computeAngularImpulseDenominator(axisA) + rbB.computeAngularImpulseDenominator(axisA));
 		// clear accumulator for motors
 		accumulatedLinMotorImpulse = 0f;
 		accumulatedAngMotorImpulse = 0f;
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	public void solveConstraintInt(RigidBody rbA, RigidBody rbB) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 
 		// linear
-		Vector3f velA = rbA.getVelocityInLocalPoint(relPosA, Stack.allocVector3f());
-		Vector3f velB = rbB.getVelocityInLocalPoint(relPosB, Stack.allocVector3f());
-		Vector3f vel = Stack.allocVector3f();
+		Vector3f velA = rbA.getVelocityInLocalPoint(relPosA, stack.allocVector3f());
+		Vector3f velB = rbB.getVelocityInLocalPoint(relPosB, stack.allocVector3f());
+		Vector3f vel = stack.allocVector3f();
 		vel.sub(velA, velB);
 
-		Vector3f impulse_vector = Stack.allocVector3f();
+		Vector3f impulse_vector = stack.allocVector3f();
 
 		for (int i=0; i<3; i++) {
 			Vector3f normal = jacLin[i].linearJointAxis;
@@ -598,42 +598,42 @@ public class SliderConstraint extends TypedConstraint {
 
 		// angular
 		// get axes in world space
-		Vector3f axisA = Stack.allocVector3f();
+		Vector3f axisA = stack.allocVector3f();
 		calculatedTransformA.basis.getColumn(0, axisA);
-		Vector3f axisB = Stack.allocVector3f();
+		Vector3f axisB = stack.allocVector3f();
 		calculatedTransformB.basis.getColumn(0, axisB);
 
-		Vector3f angVelA = rbA.getAngularVelocity(Stack.allocVector3f());
-		Vector3f angVelB = rbB.getAngularVelocity(Stack.allocVector3f());
+		Vector3f angVelA = rbA.getAngularVelocity(stack.allocVector3f());
+		Vector3f angVelB = rbB.getAngularVelocity(stack.allocVector3f());
 
-		Vector3f angVelAroundAxisA = Stack.allocVector3f();
+		Vector3f angVelAroundAxisA = stack.allocVector3f();
 		angVelAroundAxisA.scale(axisA.dot(angVelA), axisA);
-		Vector3f angVelAroundAxisB = Stack.allocVector3f();
+		Vector3f angVelAroundAxisB = stack.allocVector3f();
 		angVelAroundAxisB.scale(axisB.dot(angVelB), axisB);
 
-		Vector3f angAorthog = Stack.allocVector3f();
+		Vector3f angAorthog = stack.allocVector3f();
 		angAorthog.sub(angVelA, angVelAroundAxisA);
-		Vector3f angBorthog = Stack.allocVector3f();
+		Vector3f angBorthog = stack.allocVector3f();
 		angBorthog.sub(angVelB, angVelAroundAxisB);
-		Vector3f velrelOrthog = Stack.allocVector3f();
+		Vector3f velrelOrthog = stack.allocVector3f();
 		velrelOrthog.sub(angAorthog, angBorthog);
 
 		// solve orthogonal angular velocity correction
 		float len = velrelOrthog.length();
 		if (len > 0.00001f) {
-			Vector3f normal = Stack.allocVector3f();
+			Vector3f normal = stack.allocVector3f();
 			normal.normalize(velrelOrthog);
 			float denom = rbA.computeAngularImpulseDenominator(normal) + rbB.computeAngularImpulseDenominator(normal);
 			velrelOrthog.scale((1f / denom) * dampingOrthoAng * softnessOrthoAng);
 		}
 
 		// solve angular positional correction
-		Vector3f angularError = Stack.allocVector3f();
+		Vector3f angularError = stack.allocVector3f();
 		angularError.cross(axisA, axisB);
 		angularError.scale(1f / timeStep);
 		float len2 = angularError.length();
 		if (len2 > 0.00001f) {
-			Vector3f normal2 = Stack.allocVector3f();
+			Vector3f normal2 = stack.allocVector3f();
 			normal2.normalize(angularError);
 			float denom2 = rbA.computeAngularImpulseDenominator(normal2) + rbB.computeAngularImpulseDenominator(normal2);
 			angularError.scale((1f / denom2) * restitutionOrthoAng * softnessOrthoAng);
@@ -658,7 +658,7 @@ public class SliderConstraint extends TypedConstraint {
 			impulseMag = tmp.dot(axisA) * dampingDirAng + angDepth * restitutionDirAng / timeStep;
 			impulseMag *= kAngle * softnessDirAng;
 		}
-		Vector3f impulse = Stack.allocVector3f();
+		Vector3f impulse = stack.allocVector3f();
 		impulse.scale(impulseMag, axisA);
 		rbA.applyTorqueImpulse(impulse);
 		tmp.negate(impulse);
@@ -667,7 +667,7 @@ public class SliderConstraint extends TypedConstraint {
 		// apply angular motor
 		if (poweredAngMotor) {
 			if (accumulatedAngMotorImpulse < maxAngMotorForce) {
-				Vector3f velrel = Stack.allocVector3f();
+				Vector3f velrel = stack.allocVector3f();
 				velrel.sub(angVelAroundAxisA, angVelAroundAxisB);
 				float projRelVel = velrel.dot(axisA);
 
@@ -689,21 +689,21 @@ public class SliderConstraint extends TypedConstraint {
 				accumulatedAngMotorImpulse = new_acc;
 
 				// apply clamped impulse
-				Vector3f motorImp = Stack.allocVector3f();
+				Vector3f motorImp = stack.allocVector3f();
 				motorImp.scale(angImpulse, axisA);
 				rbA.applyTorqueImpulse(motorImp);
 				tmp.negate(motorImp);
 				rbB.applyTorqueImpulse(tmp);
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	// shared code used by ODE solver
 	
 	public void calculateTransforms() {
-	    int sp = Stack.enter();
-		Transform tmpTrans = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform tmpTrans = stack.allocTransform();
 
 		if (useLinearReferenceFrameA) {
 			calculatedTransformA.mul(rbA.getCenterOfMassTransform(tmpTrans), frameInA);
@@ -718,13 +718,13 @@ public class SliderConstraint extends TypedConstraint {
 		calculatedTransformA.basis.getColumn(0, sliderAxis); // along X
 		delta.sub(realPivotBInW, realPivotAInW);
 		projPivotInW.scaleAdd(sliderAxis.dot(delta), sliderAxis, realPivotAInW);
-		Vector3f normalWorld = Stack.allocVector3f();
+		Vector3f normalWorld = stack.allocVector3f();
 		// linear part
 		for (int i=0; i<3; i++) {
 			calculatedTransformA.basis.getColumn(i, normalWorld);
 			VectorUtil.setCoord(depth, i, delta.dot(normalWorld));
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void testLinLimits() {
@@ -752,12 +752,12 @@ public class SliderConstraint extends TypedConstraint {
 		angDepth = 0f;
 		solveAngLim = false;
 		if (lowerAngLimit <= upperAngLimit) {
-		    int sp = Stack.enter();
-			Vector3f axisA0 = Stack.allocVector3f();
+		    Stack stack = Stack.enter();
+			Vector3f axisA0 = stack.allocVector3f();
 			calculatedTransformA.basis.getColumn(1, axisA0);
-			Vector3f axisA1 = Stack.allocVector3f();
+			Vector3f axisA1 = stack.allocVector3f();
 			calculatedTransformA.basis.getColumn(2, axisA1);
-			Vector3f axisB0 = Stack.allocVector3f();
+			Vector3f axisB0 = stack.allocVector3f();
 			calculatedTransformB.basis.getColumn(1, axisB0);
 
 			float rot = (float) Math.atan2(axisB0.dot(axisA1), axisB0.dot(axisA0));
@@ -769,22 +769,22 @@ public class SliderConstraint extends TypedConstraint {
 				angDepth = rot - upperAngLimit;
 				solveAngLim = true;
 			}
-			Stack.leave(sp);
+			stack.leave();
 		}
 	}
 	
 	// access for PE Solver
 	
 	public Vector3f getAncorInA(Vector3f out) {
-	    int sp = Stack.enter();
-		Transform tmpTrans = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform tmpTrans = stack.allocTransform();
 
 		Vector3f ancorInA = out;
 		ancorInA.scaleAdd((lowerLinLimit + upperLinLimit) * 0.5f, sliderAxis, realPivotAInW);
 		rbA.getCenterOfMassTransform(tmpTrans);
 		tmpTrans.inverse();
 		tmpTrans.transform(ancorInA);
-		Stack.leave(sp);
+		stack.leave();
 		return ancorInA;
 	}
 

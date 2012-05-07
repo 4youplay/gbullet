@@ -81,7 +81,7 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 	
 	@Override
 	public void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		CollisionObject colObj = isSwapped ? body1 : body0;
 		CollisionObject otherObj = isSwapped ? body0 : body1;
 
@@ -95,11 +95,11 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 		// then use each overlapping node AABB against Tree0
 		// and vise versa.
 
-		Transform tmpTrans = Stack.allocTransform();
-		Transform orgTrans = Stack.allocTransform();
-		Transform childTrans = Stack.allocTransform();
-		Transform orgInterpolationTrans = Stack.allocTransform();
-		Transform newChildWorldTrans = Stack.allocTransform();
+		Transform tmpTrans = stack.allocTransform();
+		Transform orgTrans = stack.allocTransform();
+		Transform childTrans = stack.allocTransform();
+		Transform orgInterpolationTrans = stack.allocTransform();
+		Transform newChildWorldTrans = stack.allocTransform();
 
 		int numChildren = childCollisionAlgorithms.size();
 		int i;
@@ -125,12 +125,12 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 			colObj.setWorldTransform(orgTrans);
 			colObj.setInterpolationWorldTransform(orgInterpolationTrans);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
 	public float calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		CollisionObject colObj = isSwapped ? body1 : body0;
 		CollisionObject otherObj = isSwapped ? body0 : body1;
 
@@ -145,9 +145,9 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 		// then use each overlapping node AABB against Tree0
 		// and vise versa.
 
-		Transform tmpTrans = Stack.allocTransform();
-		Transform orgTrans = Stack.allocTransform();
-		Transform childTrans = Stack.allocTransform();
+		Transform tmpTrans = stack.allocTransform();
+		Transform orgTrans = stack.allocTransform();
+		Transform childTrans = stack.allocTransform();
 		float hitFraction = 1f;
 
 		int numChildren = childCollisionAlgorithms.size();
@@ -175,7 +175,7 @@ public class CompoundCollisionAlgorithm extends CollisionAlgorithm {
 			colObj.internalSetTemporaryCollisionShape(tmpShape);
 			colObj.setWorldTransform(orgTrans);
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return hitFraction;
 	}
 

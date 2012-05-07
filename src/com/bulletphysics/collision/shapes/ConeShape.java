@@ -105,14 +105,14 @@ public class ConeShape extends ConvexInternalShape {
 	public Vector3f localGetSupportingVertex(Vector3f vec, Vector3f out) {
 		Vector3f supVertex = coneLocalSupport(vec, out);
 		if (getMargin() != 0f) {
-		    int sp = Stack.enter();
-			Vector3f vecnorm = Stack.alloc(vec);
+		    Stack stack = Stack.enter();
+			Vector3f vecnorm = stack.alloc(vec);
 			if (vecnorm.lengthSquared() < (BulletGlobals.FLT_EPSILON * BulletGlobals.FLT_EPSILON)) {
 				vecnorm.set(-1f, -1f, -1f);
 			}
 			vecnorm.normalize();
 			supVertex.scaleAdd(getMargin(), vecnorm, supVertex);
-			Stack.leave(sp);
+			stack.leave();
 		}
 		return supVertex;
 	}
@@ -124,13 +124,13 @@ public class ConeShape extends ConvexInternalShape {
 
 	@Override
 	public void calculateLocalInertia(float mass, Vector3f inertia) {
-	    int sp = Stack.enter();
-		Transform identity = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform identity = stack.allocTransform();
 		identity.setIdentity();
-		Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
+		Vector3f aabbMin = stack.allocVector3f(), aabbMax = stack.allocVector3f();
 		getAabb(identity, aabbMin, aabbMax);
 
-		Vector3f halfExtents = Stack.allocVector3f();
+		Vector3f halfExtents = stack.allocVector3f();
 		halfExtents.sub(aabbMax, aabbMin);
 		halfExtents.scale(0.5f);
 
@@ -150,7 +150,7 @@ public class ConeShape extends ConvexInternalShape {
 		//inertia.x() = scaledmass * (y2+z2);
 		//inertia.y() = scaledmass * (x2+z2);
 		//inertia.z() = scaledmass * (x2+y2);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override

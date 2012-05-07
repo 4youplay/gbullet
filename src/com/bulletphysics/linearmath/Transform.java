@@ -103,33 +103,33 @@ public class Transform {
 	}
 	
 	public void mul(Transform tr) {
-	    int sp = Stack.enter();
-		Vector3f vec = Stack.alloc(tr.origin);
+	    Stack stack = Stack.enter();
+		Vector3f vec = stack.alloc(tr.origin);
 		transform(vec);
 
 		basis.mul(tr.basis);
 		origin.set(vec);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@StaticAlloc
 	public void mul(Transform tr1, Transform tr2) {
-	    int sp = Stack.enter();
-		Vector3f vec = Stack.alloc(tr2.origin);
+	    Stack stack = Stack.enter();
+		Vector3f vec = stack.alloc(tr2.origin);
 		tr1.transform(vec);
 
 		basis.mul(tr1.basis, tr2.basis);
 		origin.set(vec);
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	public void invXform(Vector3f inVec, Vector3f out) {
 		out.sub(inVec, origin);
-		int sp = Stack.enter();
-		Matrix3f mat = Stack.alloc(basis);
+		Stack stack = Stack.enter();
+		Matrix3f mat = stack.alloc(basis);
 		mat.transpose();
 		mat.transform(out);
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	public Quat4f getRotation(Quat4f out) {

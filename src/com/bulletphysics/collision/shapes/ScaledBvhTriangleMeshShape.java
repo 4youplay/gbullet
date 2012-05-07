@@ -57,14 +57,14 @@ public class ScaledBvhTriangleMeshShape extends ConcaveShape {
 
 	@Override
 	public void processAllTriangles(TriangleCallback callback, Vector3f aabbMin, Vector3f aabbMax) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		ScaledTriangleCallback scaledCallback = new ScaledTriangleCallback(callback, localScaling);
 
-		Vector3f invLocalScaling = Stack.allocVector3f();
+		Vector3f invLocalScaling = stack.allocVector3f();
 		invLocalScaling.set(1.f / localScaling.x, 1.f / localScaling.y, 1.f / localScaling.z);
 
-		Vector3f scaledAabbMin = Stack.allocVector3f();
-		Vector3f scaledAabbMax = Stack.allocVector3f();
+		Vector3f scaledAabbMin = stack.allocVector3f();
+		Vector3f scaledAabbMax = stack.allocVector3f();
 
 		// support negative scaling
 		scaledAabbMin.x = localScaling.x >= 0f ? aabbMin.x * invLocalScaling.x : aabbMax.x * invLocalScaling.x;
@@ -76,17 +76,17 @@ public class ScaledBvhTriangleMeshShape extends ConcaveShape {
 		scaledAabbMax.z = localScaling.z <= 0f ? aabbMin.z * invLocalScaling.z : aabbMax.z * invLocalScaling.z;
 
 		bvhTriMeshShape.processAllTriangles(scaledCallback, scaledAabbMin, scaledAabbMax);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
 	public void getAabb(Transform trans, Vector3f aabbMin, Vector3f aabbMax) {
-	    int sp = Stack.enter();
-		Vector3f localAabbMin = bvhTriMeshShape.getLocalAabbMin(Stack.allocVector3f());
-		Vector3f localAabbMax = bvhTriMeshShape.getLocalAabbMax(Stack.allocVector3f());
+	    Stack stack = Stack.enter();
+		Vector3f localAabbMin = bvhTriMeshShape.getLocalAabbMin(stack.allocVector3f());
+		Vector3f localAabbMax = bvhTriMeshShape.getLocalAabbMax(stack.allocVector3f());
 
-		Vector3f tmpLocalAabbMin = Stack.allocVector3f();
-		Vector3f tmpLocalAabbMax = Stack.allocVector3f();
+		Vector3f tmpLocalAabbMin = stack.allocVector3f();
+		Vector3f tmpLocalAabbMax = stack.allocVector3f();
 		VectorUtil.mul(tmpLocalAabbMin, localAabbMin, localScaling);
 		VectorUtil.mul(tmpLocalAabbMax, localAabbMax, localScaling);
 
@@ -97,7 +97,7 @@ public class ScaledBvhTriangleMeshShape extends ConcaveShape {
 		localAabbMax.y = (localScaling.y <= 0f) ? tmpLocalAabbMin.y : tmpLocalAabbMax.y;
 		localAabbMax.z = (localScaling.z <= 0f) ? tmpLocalAabbMin.z : tmpLocalAabbMax.z;
 
-		Vector3f localHalfExtents = Stack.allocVector3f();
+		Vector3f localHalfExtents = stack.allocVector3f();
 		localHalfExtents.sub(localAabbMax, localAabbMin);
 		localHalfExtents.scale(0.5f);
 
@@ -106,18 +106,18 @@ public class ScaledBvhTriangleMeshShape extends ConcaveShape {
 		localHalfExtents.y += margin;
 		localHalfExtents.z += margin;
 
-		Vector3f localCenter = Stack.allocVector3f();
+		Vector3f localCenter = stack.allocVector3f();
 		localCenter.add(localAabbMax, localAabbMin);
 		localCenter.scale(0.5f);
 
-		Matrix3f abs_b = Stack.alloc(trans.basis);
+		Matrix3f abs_b = stack.alloc(trans.basis);
 		MatrixUtil.absolute(abs_b);
 
-		Vector3f center = Stack.alloc(localCenter);
+		Vector3f center = stack.alloc(localCenter);
 		trans.transform(center);
 
-		Vector3f extent = Stack.allocVector3f();
-		Vector3f tmp = Stack.allocVector3f();
+		Vector3f extent = stack.allocVector3f();
+		Vector3f tmp = stack.allocVector3f();
 		abs_b.getRow(0, tmp);
 		extent.x = tmp.dot(localHalfExtents);
 		abs_b.getRow(1, tmp);
@@ -127,7 +127,7 @@ public class ScaledBvhTriangleMeshShape extends ConcaveShape {
 
 		aabbMin.sub(center, extent);
 		aabbMax.add(center, extent);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override

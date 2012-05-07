@@ -68,27 +68,27 @@ public class GjkConvexCast extends ConvexCast {
 	public boolean calcTimeOfImpact(Transform fromA, Transform toA, Transform fromB, Transform toB, CastResult result) {
 		simplexSolver.reset();
 
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		// compute linear velocity for this interval, to interpolate
 		// assume no rotation/angular velocity, assert here?
-		Vector3f linVelA = Stack.allocVector3f();
-		Vector3f linVelB = Stack.allocVector3f();
+		Vector3f linVelA = stack.allocVector3f();
+		Vector3f linVelB = stack.allocVector3f();
 
 		linVelA.sub(toA.origin, fromA.origin);
 		linVelB.sub(toB.origin, fromB.origin);
 
 		float radius = 0.001f;
 		float lambda = 0f;
-		Vector3f v = Stack.allocVector3f();
+		Vector3f v = stack.allocVector3f();
 		v.set(1f, 0f, 0f);
 
 		int maxIter = MAX_ITERATIONS;
 
-		Vector3f n = Stack.allocVector3f();
+		Vector3f n = stack.allocVector3f();
 		n.set(0f, 0f, 0f);
 		boolean hasResult = false;
-		Vector3f c = Stack.allocVector3f();
-		Vector3f r = Stack.allocVector3f();
+		Vector3f c = stack.allocVector3f();
+		Vector3f r = stack.allocVector3f();
 		r.sub(linVelA, linVelB);
 
 		float lastLambda = lambda;
@@ -97,7 +97,7 @@ public class GjkConvexCast extends ConvexCast {
 		int numIter = 0;
 		// first solution, using GJK
 
-		Transform identityTrans = Stack.allocTransform();
+		Transform identityTrans = stack.allocTransform();
 		identityTrans.setIdentity();
 
 		//result.drawCoordSystem(sphereTr);
@@ -163,7 +163,7 @@ public class GjkConvexCast extends ConvexCast {
 							n.set(pointCollector.normalOnBInWorld);
 							result.normal.set(n);
 							result.hitPoint.set(pointCollector.pointInWorld);
-							Stack.leave(sp);
+							stack.leave();
 							return true;
 						}
 						c.set(pointCollector.pointInWorld);
@@ -191,7 +191,7 @@ public class GjkConvexCast extends ConvexCast {
 			return false;
 		}
 		finally {
-            Stack.leave(sp);
+            stack.leave();
 			pointInputsPool.release(input);
 		}
 	}

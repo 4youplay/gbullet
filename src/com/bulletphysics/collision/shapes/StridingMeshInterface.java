@@ -40,11 +40,11 @@ public abstract class StridingMeshInterface {
 	protected final Vector3f scaling = new Vector3f(1f, 1f, 1f);
 	
 	public void internalProcessAllTriangles(InternalTriangleIndexCallback callback, Vector3f aabbMin, Vector3f aabbMax) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		int graphicssubparts = getNumSubParts();
-		Vector3f[] triangle/*[3]*/ = new Vector3f[]{ Stack.allocVector3f(), Stack.allocVector3f(), Stack.allocVector3f() };
+		Vector3f[] triangle/*[3]*/ = new Vector3f[]{ stack.allocVector3f(), stack.allocVector3f(), stack.allocVector3f() };
 
-		Vector3f meshScaling = getScaling(Stack.allocVector3f());
+		Vector3f meshScaling = getScaling(stack.allocVector3f());
 
 		for (int part=0; part<graphicssubparts; part++) {
 			VertexData data = getLockedReadOnlyVertexIndexBase(part);
@@ -56,7 +56,7 @@ public abstract class StridingMeshInterface {
 
 			unLockReadOnlyVertexBase(part);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	private static class AabbCalculationCallback extends InternalTriangleIndexCallback {

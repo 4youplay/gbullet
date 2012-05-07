@@ -58,8 +58,8 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 	}
 
 	protected void predictUnconstraintMotion(float timeStep) {
-	    int sp = Stack.enter();
-		Transform tmpTrans = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform tmpTrans = stack.allocTransform();
 		
 		for (int i = 0; i < collisionObjects.size(); i++) {
 			CollisionObject colObj = collisionObjects.getQuick(i);
@@ -75,12 +75,12 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	protected void integrateTransforms(float timeStep) {
-	    int sp = Stack.enter();
-		Transform predictedTrans = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform predictedTrans = stack.allocTransform();
 		for (int i = 0; i < collisionObjects.size(); i++) {
 			CollisionObject colObj = collisionObjects.getQuick(i);
 			RigidBody body = RigidBody.upcast(colObj);
@@ -91,7 +91,7 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	/**
@@ -182,10 +182,10 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 
 	@Override
 	public void updateAabbs() {
-	    int sp = Stack.enter();
-		Transform tmpTrans = Stack.allocTransform();
-//		Transform predictedTrans = Stack.allocTransform();
-		Vector3f minAabb = Stack.allocVector3f(), maxAabb = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Transform tmpTrans = stack.allocTransform();
+//		Transform predictedTrans = stack.allocTransform();
+		Vector3f minAabb = stack.allocVector3f(), maxAabb = stack.allocVector3f();
 
 		for (int i = 0; i < collisionObjects.size(); i++) {
 			CollisionObject colObj = collisionObjects.getQuick(i);
@@ -198,12 +198,12 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void synchronizeMotionStates() {
-	    int sp = Stack.enter();
-		Transform tmpTrans = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform tmpTrans = stack.allocTransform();
 		
 		// todo: iterate over awake simulation islands!
 		for (int i = 0; i < collisionObjects.size(); i++) {
@@ -215,7 +215,7 @@ public class SimpleDynamicsWorld extends DynamicsWorld {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override

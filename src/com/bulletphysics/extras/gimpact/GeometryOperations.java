@@ -51,20 +51,23 @@ class GeometryOperations {
 	 * Calc a plane from a triangle edge an a normal.
 	 */
 	public static void edge_plane(Vector3f e1, Vector3f e2, Vector3f normal, Vector4f plane) {
-		Vector3f planenormal = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f planenormal = stack.allocVector3f();
 		planenormal.sub(e2, e1);
 		planenormal.cross(planenormal, normal);
 		planenormal.normalize();
 
 		plane.set(planenormal);
 		plane.w = e2.dot(planenormal);
+		stack.leave();
 	}
 	
 	/**
 	 * Finds the closest point(cp) to (v) on a segment (e1,e2).
 	 */
 	public static void closest_point_on_segment(Vector3f cp, Vector3f v, Vector3f e1, Vector3f e2) {
-		Vector3f n = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f n = stack.allocVector3f();
 		n.sub(e2, e1);
 		cp.sub(v, e1);
 		float _scalar = cp.dot(n) / n.dot(n);
@@ -77,6 +80,7 @@ class GeometryOperations {
 		else {
 			cp.scaleAdd(_scalar, n, e1);
 		}
+		stack.leave();
 	}
 	
 	/**
@@ -112,17 +116,18 @@ class GeometryOperations {
 	 * Find closest points on segments.
 	 */
 	public static void segment_collision(Vector3f vA1, Vector3f vA2, Vector3f vB1, Vector3f vB2, Vector3f vPointA, Vector3f vPointB) {
-		Vector3f AD = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f AD = stack.allocVector3f();
 		AD.sub(vA2, vA1);
 
-		Vector3f BD = Stack.allocVector3f();
+		Vector3f BD = stack.allocVector3f();
 		BD.sub(vB2, vB1);
 
-		Vector3f N = Stack.allocVector3f();
+		Vector3f N = stack.allocVector3f();
 		N.cross(AD, BD);
 		float[] tp = new float[] { N.lengthSquared() };
 
-		Vector4f _M = Stack.allocVector4f();//plane
+		Vector4f _M = stack.allocVector4f();//plane
 
 		if (tp[0] < BulletGlobals.SIMD_EPSILON)//ARE PARALELE
 		{
@@ -172,6 +177,7 @@ class GeometryOperations {
 					closest_point_on_segment(vPointA, vPointB, vA1, vA2);
 				}
 			}
+			stack.leave();
 			return;
 		}
 
@@ -188,6 +194,7 @@ class GeometryOperations {
 		tp[0] = CLAMP(tp[0], 0.0f, 1.0f);
 
 		vPointB.scaleAdd(tp[0], BD, vB1);
+		stack.leave();
 	}
 	
 }

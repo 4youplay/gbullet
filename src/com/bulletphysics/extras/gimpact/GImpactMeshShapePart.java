@@ -124,8 +124,8 @@ public class GImpactMeshShapePart extends GImpactShapeInterface {
 		int i = getVertexCount();
 		float pointmass = mass / (float)i;
 
-		int sp = Stack.enter();
-		Vector3f pointintertia = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f pointintertia = stack.allocVector3f();
 
 		while ((i--) != 0) {
 			getVertex(i, pointintertia);
@@ -150,7 +150,7 @@ public class GImpactMeshShapePart extends GImpactShapeInterface {
 		//
 		//#endif
 		unlockChildShapes();
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
@@ -220,9 +220,9 @@ public class GImpactMeshShapePart extends GImpactShapeInterface {
 
 	@Override
 	public void processAllTriangles(TriangleCallback callback, Vector3f aabbMin, Vector3f aabbMax) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		lockChildShapes();
-		AABB box = Stack.allocAABB();
+		AABB box = stack.allocAABB();
 		box.min.set(aabbMin);
 		box.max.set(aabbMax);
 
@@ -235,14 +235,14 @@ public class GImpactMeshShapePart extends GImpactShapeInterface {
 		}
 
 		int part = getPart();
-		PrimitiveTriangle triangle = Stack.allocPrimitiveTriangle();
+		PrimitiveTriangle triangle = stack.allocPrimitiveTriangle();
 		int i = collided.size();
 		while ((i--) != 0) {
 			getPrimitiveTriangle(collided.get(i), triangle);
 			callback.processTriangle(triangle.vertices, part, collided.get(i));
 		}
 		unlockChildShapes();
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 }

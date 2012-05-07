@@ -67,18 +67,18 @@ public class PrimitiveTriangle {
 	}
 	
 	public void buildTriPlane() {
-	    int sp = Stack.enter();
-		Vector3f tmp1 = Stack.allocVector3f();
-		Vector3f tmp2 = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp1 = stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
 
-		Vector3f normal = Stack.allocVector3f();
+		Vector3f normal = stack.allocVector3f();
 		tmp1.sub(vertices[1], vertices[0]);
 		tmp2.sub(vertices[2], vertices[0]);
 		normal.cross(tmp1, tmp2);
 		normal.normalize();
 
 		plane.set(normal.x, normal.y, normal.z, vertices[0].dot(normal));
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	/**
@@ -114,15 +114,15 @@ public class PrimitiveTriangle {
 	 * This triangle must have its plane calculated.
 	 */
 	public void get_edge_plane(int edge_index, Vector4f plane) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		Vector3f e0 = vertices[edge_index];
 		Vector3f e1 = vertices[(edge_index + 1) % 3];
 
-		Vector3f tmp = Stack.allocVector3f();
+		Vector3f tmp = stack.allocVector3f();
 		tmp.set(this.plane.x, this.plane.y, this.plane.z);
 
 		GeometryOperations.edge_plane(e0, e1, tmp, plane);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void applyTransform(Transform t) {
@@ -139,10 +139,10 @@ public class PrimitiveTriangle {
 	 */
 	public int clip_triangle(PrimitiveTriangle other, ObjectArrayList<Vector3f> clipped_points) {
 		// edge 0
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		ObjectArrayList<Vector3f> temp_points = tmpVecList1;
 
-		Vector4f edgeplane = Stack.allocVector4f();
+		Vector4f edgeplane = stack.allocVector4f();
 
 		get_edge_plane(0, edgeplane);
 
@@ -165,7 +165,7 @@ public class PrimitiveTriangle {
 
 		clipped_count = ClipPolygon.plane_clip_polygon(edgeplane, temp_points1, clipped_count, clipped_points);
 
-		Stack.leave(sp);
+		stack.leave();
 		return clipped_count;
 	}
 	
@@ -182,15 +182,15 @@ public class PrimitiveTriangle {
 		//create planes
 		// plane v vs U points
 
-		int sp = Stack.enter();
-		TriangleContact contacts1 = Stack.allocTriangleContact();
+		Stack stack = Stack.enter();
+		TriangleContact contacts1 = stack.allocTriangleContact();
 
 		contacts1.separating_normal.set(plane);
 
 		clipped_count = clip_triangle(other, clipped_points);
 
 		if (clipped_count == 0) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return false; // Reject
 		}
 
@@ -205,20 +205,20 @@ public class PrimitiveTriangle {
 		contacts1.separating_normal.z *= -1.f;
 
 		// Clip tri1 by tri2 edges
-		TriangleContact contacts2 = Stack.allocTriangleContact();
+		TriangleContact contacts2 = stack.allocTriangleContact();
 		contacts2.separating_normal.set(other.plane);
 
 		clipped_count = other.clip_triangle(this, clipped_points);
 
 		if (clipped_count == 0) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return false; // Reject
 		}
 
 		// find most deep interval face1
 		contacts2.merge_points(contacts2.separating_normal, margin, clipped_points, clipped_count);
 		if (contacts2.point_count == 0) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return false; // too far
 
 		// check most dir for contacts
@@ -229,7 +229,7 @@ public class PrimitiveTriangle {
 		else {
 			contacts.copy_from(contacts1);
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return true;
 	}
 	

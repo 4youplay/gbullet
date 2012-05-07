@@ -125,13 +125,13 @@ class TrimeshPrimitiveManager extends PrimitiveManagerBase {
 	
 	@Override
 	public void get_primitive_box(int prim_index, AABB primbox) {
-	    int sp = Stack.enter();
-		PrimitiveTriangle triangle = Stack.allocPrimitiveTriangle();
+	    Stack stack = Stack.enter();
+		PrimitiveTriangle triangle = stack.allocPrimitiveTriangle();
 		get_primitive_triangle(prim_index, triangle);
 		primbox.calc_from_triangle_margin(
 				triangle.vertices[0],
 				triangle.vertices[1], triangle.vertices[2], triangle.margin);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override

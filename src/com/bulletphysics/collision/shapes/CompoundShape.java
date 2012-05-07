@@ -63,10 +63,10 @@ public class CompoundShape extends CollisionShape {
 
 		children.add(child);
 		
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 
 		// extend the local aabbMin/aabbMax
-		Vector3f _localAabbMin = Stack.allocVector3f(), _localAabbMax = Stack.allocVector3f();
+		Vector3f _localAabbMin = stack.allocVector3f(), _localAabbMax = stack.allocVector3f();
 		shape.getAabb(localTransform, _localAabbMin, _localAabbMax);
 
 		// JAVA NOTE: rewritten
@@ -83,7 +83,7 @@ public class CompoundShape extends CollisionShape {
 //		}
 		VectorUtil.setMin(this.localAabbMin, _localAabbMin);
 		VectorUtil.setMax(this.localAabbMax, _localAabbMax);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	/**
@@ -131,27 +131,27 @@ public class CompoundShape extends CollisionShape {
 	 */
 	@Override
 	public void getAabb(Transform trans, Vector3f aabbMin, Vector3f aabbMax) {
-	    int sp = Stack.enter();
-		Vector3f localHalfExtents = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f localHalfExtents = stack.allocVector3f();
 		localHalfExtents.sub(localAabbMax, localAabbMin);
 		localHalfExtents.scale(0.5f);
 		localHalfExtents.x += getMargin();
 		localHalfExtents.y += getMargin();
 		localHalfExtents.z += getMargin();
 
-		Vector3f localCenter = Stack.allocVector3f();
+		Vector3f localCenter = stack.allocVector3f();
 		localCenter.add(localAabbMax, localAabbMin);
 		localCenter.scale(0.5f);
 
-		Matrix3f abs_b = Stack.alloc(trans.basis);
+		Matrix3f abs_b = stack.alloc(trans.basis);
 		MatrixUtil.absolute(abs_b);
 
-		Vector3f center = Stack.alloc(localCenter);
+		Vector3f center = stack.alloc(localCenter);
 		trans.transform(center);
 
-		Vector3f tmp = Stack.allocVector3f();
+		Vector3f tmp = stack.allocVector3f();
 
-		Vector3f extent = Stack.allocVector3f();
+		Vector3f extent = stack.allocVector3f();
 		abs_b.getRow(0, tmp);
 		extent.x = tmp.dot(localHalfExtents);
 		abs_b.getRow(1, tmp);
@@ -161,7 +161,7 @@ public class CompoundShape extends CollisionShape {
 
 		aabbMin.sub(center, extent);
 		aabbMax.add(center, extent);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	/**
@@ -171,12 +171,12 @@ public class CompoundShape extends CollisionShape {
 	public void recalculateLocalAabb() {
 		// Recalculate the local aabb
 		// Brute force, it iterates over all the shapes left.
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		localAabbMin.set(1e30f, 1e30f, 1e30f);
 		localAabbMax.set(-1e30f, -1e30f, -1e30f);
 
-		Vector3f tmpLocalAabbMin = Stack.allocVector3f();
-		Vector3f tmpLocalAabbMax = Stack.allocVector3f();
+		Vector3f tmpLocalAabbMin = stack.allocVector3f();
+		Vector3f tmpLocalAabbMax = stack.allocVector3f();
 
 		// extend the local aabbMin/aabbMax
 		for (int j = 0; j < children.size(); j++) {
@@ -191,7 +191,7 @@ public class CompoundShape extends CollisionShape {
 				}
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	@Override
@@ -208,13 +208,13 @@ public class CompoundShape extends CollisionShape {
 	@Override
 	public void calculateLocalInertia(float mass, Vector3f inertia) {
 		// approximation: take the inertia from the aabb for now
-	    int sp = Stack.enter();
-		Transform ident = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform ident = stack.allocTransform();
 		ident.setIdentity();
-		Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
+		Vector3f aabbMin = stack.allocVector3f(), aabbMax = stack.allocVector3f();
 		getAabb(ident, aabbMin, aabbMax);
 
-		Vector3f halfExtents = Stack.allocVector3f();
+		Vector3f halfExtents = stack.allocVector3f();
 		halfExtents.sub(aabbMax, aabbMin);
 		halfExtents.scale(0.5f);
 
@@ -225,7 +225,7 @@ public class CompoundShape extends CollisionShape {
 		inertia.x = (mass / 12f) * (ly * ly + lz * lz);
 		inertia.y = (mass / 12f) * (lx * lx + lz * lz);
 		inertia.z = (mass / 12f) * (lx * lx + ly * ly);
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	@Override
@@ -267,9 +267,9 @@ public class CompoundShape extends CollisionShape {
 	 */
 	public void calculatePrincipalAxisTransform(float[] masses, Transform principal, Vector3f inertia) {
 		int n = children.size();
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		float totalMass = 0;
-		Vector3f center = Stack.allocVector3f();
+		Vector3f center = stack.allocVector3f();
 		center.set(0, 0, 0);
 		for (int k = 0; k < n; k++) {
 			center.scaleAdd(masses[k], children.getQuick(k).transform.origin, center);
@@ -278,19 +278,19 @@ public class CompoundShape extends CollisionShape {
 		center.scale(1f / totalMass);
 		principal.origin.set(center);
 
-		Matrix3f tensor = Stack.allocMatrix3f();
+		Matrix3f tensor = stack.allocMatrix3f();
 		tensor.setZero();
 
 		for (int k = 0; k < n; k++) {
-			Vector3f i = Stack.allocVector3f();
+			Vector3f i = stack.allocVector3f();
 			children.getQuick(k).childShape.calculateLocalInertia(masses[k], i);
 
 			Transform t = children.getQuick(k).transform;
-			Vector3f o = Stack.allocVector3f();
+			Vector3f o = stack.allocVector3f();
 			o.sub(t.origin, center);
 
 			// compute inertia tensor in coordinate system of compound shape
-			Matrix3f j = Stack.allocMatrix3f();
+			Matrix3f j = stack.allocMatrix3f();
 			j.transpose(t.basis);
 
 			j.m00 *= i.x;
@@ -338,7 +338,7 @@ public class CompoundShape extends CollisionShape {
 		MatrixUtil.diagonalize(tensor, principal.basis, 0.00001f, 20);
 
 		inertia.set(tensor.m00, tensor.m11, tensor.m22);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 }

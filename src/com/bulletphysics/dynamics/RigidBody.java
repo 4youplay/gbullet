@@ -280,12 +280,12 @@ public class RigidBody extends CollisionObject {
 			if (speed < linearDamping) {
 				float dampVel = 0.005f;
 				if (speed > dampVel) {
-				    int sp = Stack.enter();
-					Vector3f dir = Stack.alloc(linearVelocity);
+				    Stack stack = Stack.enter();
+					Vector3f dir = stack.alloc(linearVelocity);
 					dir.normalize();
 					dir.scale(dampVel);
 					linearVelocity.sub(dir);
-					Stack.leave(sp);
+					stack.leave();
 				}
 				else {
 					linearVelocity.set(0f, 0f, 0f);
@@ -296,12 +296,12 @@ public class RigidBody extends CollisionObject {
 			if (angSpeed < angularDamping) {
 				float angDampVel = 0.005f;
 				if (angSpeed > angDampVel) {
-				    int sp = Stack.enter();
-					Vector3f dir = Stack.alloc(angularVelocity);
+				    Stack stack = Stack.enter();
+					Vector3f dir = stack.alloc(angularVelocity);
 					dir.normalize();
 					dir.scale(angDampVel);
 					angularVelocity.sub(dir);
-					Stack.leave(sp);
+					stack.leave();
 				}
 				else {
 					angularVelocity.set(0f, 0f, 0f);
@@ -338,9 +338,9 @@ public class RigidBody extends CollisionObject {
 		if (isStaticOrKinematicObject()) {
 			return;
 		}
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		linearVelocity.scaleAdd(inverseMass * step, totalForce, linearVelocity);
-		Vector3f tmp = Stack.alloc(totalTorque);
+		Vector3f tmp = stack.alloc(totalTorque);
 		invInertiaTensorWorld.transform(tmp);
 		angularVelocity.scaleAdd(step, tmp, angularVelocity);
 
@@ -349,7 +349,7 @@ public class RigidBody extends CollisionObject {
 		if (angvel * step > MAX_ANGVEL) {
 			angularVelocity.scale((MAX_ANGVEL / step) / angvel);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void setCenterOfMassTransform(Transform xform) {
@@ -388,14 +388,14 @@ public class RigidBody extends CollisionObject {
 	}
 
 	public void applyForce(Vector3f force, Vector3f rel_pos) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		applyCentralForce(force);
 		
-		Vector3f tmp = Stack.allocVector3f();
+		Vector3f tmp = stack.allocVector3f();
 		tmp.cross(rel_pos, force);
 		tmp.scale(angularFactor);
 		applyTorque(tmp);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void applyCentralImpulse(Vector3f impulse) {
@@ -404,11 +404,11 @@ public class RigidBody extends CollisionObject {
 	
 	@StaticAlloc
 	public void applyTorqueImpulse(Vector3f torque) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.alloc(torque);
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.alloc(torque);
 		invInertiaTensorWorld.transform(tmp);
 		angularVelocity.add(tmp);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@StaticAlloc
@@ -416,12 +416,12 @@ public class RigidBody extends CollisionObject {
 		if (inverseMass != 0f) {
 			applyCentralImpulse(impulse);
 			if (angularFactor != 0f) {
-			    int sp = Stack.enter();
-				Vector3f tmp = Stack.allocVector3f();
+			    Stack stack = Stack.enter();
+				Vector3f tmp = stack.allocVector3f();
 				tmp.cross(rel_pos, impulse);
 				tmp.scale(angularFactor);
 				applyTorqueImpulse(tmp);
-				Stack.leave(sp);
+				stack.leave();
 			}
 		}
 	}
@@ -444,15 +444,15 @@ public class RigidBody extends CollisionObject {
 	}
 	
 	public void updateInertiaTensor() {
-	    int sp = Stack.enter();
-		Matrix3f mat1 = Stack.allocMatrix3f();
+	    Stack stack = Stack.enter();
+		Matrix3f mat1 = stack.allocMatrix3f();
 		MatrixUtil.scale(mat1, worldTransform.basis, invInertiaLocal);
 
-		Matrix3f mat2 = Stack.alloc(worldTransform.basis);
+		Matrix3f mat2 = stack.alloc(worldTransform.basis);
 		mat2.transpose();
 
 		invInertiaTensorWorld.mul(mat1, mat2);
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	public Vector3f getCenterOfMassPosition(Vector3f out) {
@@ -510,30 +510,30 @@ public class RigidBody extends CollisionObject {
 	}
 
 	public float computeImpulseDenominator(Vector3f pos, Vector3f normal) {
-	    int sp = Stack.enter();
-		Vector3f r0 = Stack.allocVector3f();
-		r0.sub(pos, getCenterOfMassPosition(Stack.allocVector3f()));
+	    Stack stack = Stack.enter();
+		Vector3f r0 = stack.allocVector3f();
+		r0.sub(pos, getCenterOfMassPosition(stack.allocVector3f()));
 
-		Vector3f c0 = Stack.allocVector3f();
+		Vector3f c0 = stack.allocVector3f();
 		c0.cross(r0, normal);
 
-		Vector3f tmp = Stack.allocVector3f();
-		MatrixUtil.transposeTransform(tmp, c0, getInvInertiaTensorWorld(Stack.allocMatrix3f()));
+		Vector3f tmp = stack.allocVector3f();
+		MatrixUtil.transposeTransform(tmp, c0, getInvInertiaTensorWorld(stack.allocMatrix3f()));
 
-		Vector3f vec = Stack.allocVector3f();
+		Vector3f vec = stack.allocVector3f();
 		vec.cross(tmp, r0);
 
 		float result = inverseMass + normal.dot(vec);
-		Stack.leave(sp);
+		stack.leave();
 		return result;
 	}
 
 	public float computeAngularImpulseDenominator(Vector3f axis) {
-	    int sp = Stack.enter();
-		Vector3f vec = Stack.allocVector3f();
-		MatrixUtil.transposeTransform(vec, axis, getInvInertiaTensorWorld(Stack.allocMatrix3f()));
+	    Stack stack = Stack.enter();
+		Vector3f vec = stack.allocVector3f();
+		MatrixUtil.transposeTransform(vec, axis, getInvInertiaTensorWorld(stack.allocMatrix3f()));
 		float result = axis.dot(vec);
-		Stack.leave(sp);
+		stack.leave();
 		return result;
 	}
 
@@ -541,16 +541,16 @@ public class RigidBody extends CollisionObject {
 		if ((getActivationState() == ISLAND_SLEEPING) || (getActivationState() == DISABLE_DEACTIVATION)) {
 			return;
 		}
-		int sp = Stack.enter();
-		if ((getLinearVelocity(Stack.allocVector3f()).lengthSquared() < linearSleepingThreshold * linearSleepingThreshold) &&
-				(getAngularVelocity(Stack.allocVector3f()).lengthSquared() < angularSleepingThreshold * angularSleepingThreshold)) {
+		Stack stack = Stack.enter();
+		if ((getLinearVelocity(stack.allocVector3f()).lengthSquared() < linearSleepingThreshold * linearSleepingThreshold) &&
+				(getAngularVelocity(stack.allocVector3f()).lengthSquared() < angularSleepingThreshold * angularSleepingThreshold)) {
 			deactivationTime += timeStep;
 		}
 		else {
 			deactivationTime = 0f;
 			setActivationState(0);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public boolean wantsSleeping() {

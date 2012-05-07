@@ -165,11 +165,11 @@ public class KinematicCharacterController extends ActionInterface {
 	 * This call will reset any velocity set by {@link #setVelocityForTimeInterval}.
 	 */
 	public void	setWalkDirection(Vector3f walkDirection) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		useWalkDirection = true;
 		this.walkDirection.set(walkDirection);
-		normalizedDirection.set(getNormalizedVector(walkDirection, Stack.allocVector3f()));
-		Stack.leave(sp);
+		normalizedDirection.set(getNormalizedVector(walkDirection, stack.allocVector3f()));
+		stack.leave();
 	}
 
 	/**
@@ -179,24 +179,24 @@ public class KinematicCharacterController extends ActionInterface {
 	 * Negative time intervals will result in no motion.
 	 */
 	public void setVelocityForTimeInterval(Vector3f velocity, float timeInterval) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		useWalkDirection = false;
 		walkDirection.set(velocity);
-		normalizedDirection.set(getNormalizedVector(walkDirection, Stack.allocVector3f()));
+		normalizedDirection.set(getNormalizedVector(walkDirection, stack.allocVector3f()));
 		velocityTimeInterval = timeInterval;
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void reset() {
 	}
 
 	public void warp(Vector3f origin) {
-	    int sp = Stack.enter();
-		Transform xform = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform xform = stack.allocTransform();
 		xform.setIdentity();
 		xform.origin.set(origin);
 		ghostObject.setWorldTransform(xform);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void preStep(CollisionWorld collisionWorld) {
@@ -211,11 +211,11 @@ public class KinematicCharacterController extends ActionInterface {
 			}
 		}
 
-		int sp = Stack.enter();
-		currentPosition.set(ghostObject.getWorldTransform(Stack.allocTransform()).origin);
+		Stack stack = Stack.enter();
+		currentPosition.set(ghostObject.getWorldTransform(stack.allocTransform()).origin);
 		targetPosition.set(currentPosition);
 		//printf("m_targetPosition=%f,%f,%f\n",m_targetPosition[0],m_targetPosition[1],m_targetPosition[2]);
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	public void playerStep(CollisionWorld collisionWorld, float dt) {
@@ -242,8 +242,8 @@ public class KinematicCharacterController extends ActionInterface {
 		}
 		verticalOffset = verticalVelocity * dt;
 
-		int sp = Stack.enter();
-		Transform xform = ghostObject.getWorldTransform(Stack.allocTransform());
+		Stack stack = Stack.enter();
+		Transform xform = ghostObject.getWorldTransform(stack.allocTransform());
 
 		//printf("walkDirection(%f,%f,%f)\n",walkDirection[0],walkDirection[1],walkDirection[2]);
 		//printf("walkSpeed=%f\n",walkSpeed);
@@ -262,7 +262,7 @@ public class KinematicCharacterController extends ActionInterface {
 			velocityTimeInterval -= dt;
 
 			// how far will we move while we are moving?
-			Vector3f move = Stack.allocVector3f();
+			Vector3f move = stack.allocVector3f();
 			move.scale(dtMoving, walkDirection);
 
 			//printf("  dtMoving: %f", dtMoving);
@@ -276,7 +276,7 @@ public class KinematicCharacterController extends ActionInterface {
 
 		xform.origin.set(currentPosition);
 		ghostObject.setWorldTransform(xform);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void setFallSpeed(float fallSpeed) {
@@ -380,12 +380,12 @@ public class KinematicCharacterController extends ActionInterface {
 
 	protected boolean recoverFromPenetration(CollisionWorld collisionWorld) {
 		boolean penetration = false;
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		
 		collisionWorld.getDispatcher().dispatchAllCollisionPairs(
 				ghostObject.getOverlappingPairCache(), collisionWorld.getDispatchInfo(), collisionWorld.getDispatcher());
 
-		currentPosition.set(ghostObject.getWorldTransform(Stack.allocTransform()).origin);
+		currentPosition.set(ghostObject.getWorldTransform(stack.allocTransform()).origin);
 
 		float maxPen = 0.0f;
 		for (int i=0; i<ghostObject.getOverlappingPairCache().getNumOverlappingPairs(); i++) {
@@ -424,22 +424,22 @@ public class KinematicCharacterController extends ActionInterface {
 			}
 		}
 		
-		Transform newTrans = ghostObject.getWorldTransform(Stack.allocTransform());
+		Transform newTrans = ghostObject.getWorldTransform(stack.allocTransform());
 		newTrans.origin.set(currentPosition);
 		ghostObject.setWorldTransform(newTrans);
 		//printf("m_touchingNormal = %f,%f,%f\n",m_touchingNormal[0],m_touchingNormal[1],m_touchingNormal[2]);
 
 		//System.out.println("recoverFromPenetration "+penetration+" "+touchingNormal);
 
-		Stack.leave(sp);
+		stack.leave();
 		return penetration;
 	}
 	
 	protected void stepUp(CollisionWorld world) {
 		// phase 1: up
-	    int sp = Stack.enter();
-		Transform start = Stack.allocTransform();
-		Transform end = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform start = stack.allocTransform();
+		Transform end = stack.allocTransform();
 		targetPosition.scaleAdd(stepHeight + (verticalOffset > 0.0?verticalOffset:0.0f), upAxisDirection[upAxis], currentPosition);
 
 		start.setIdentity ();
@@ -450,7 +450,7 @@ public class KinematicCharacterController extends ActionInterface {
 		end.origin.set(targetPosition);
 		
 		// Find only sloped/flat surface hits, avoid wall and ceiling hits...
-		Vector3f up = Stack.allocVector3f();
+		Vector3f up = stack.allocVector3f();
 		up.scale(-1f, upAxisDirection[upAxis]);
 		KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(ghostObject, up, 0.0f);
 		callback.collisionFilterGroup = getGhostObject().getBroadphaseHandle().collisionFilterGroup;
@@ -474,7 +474,7 @@ public class KinematicCharacterController extends ActionInterface {
 			currentStepOffset = stepHeight;
 			currentPosition.set(targetPosition);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	protected void updateTargetPositionBasedOnCollision (Vector3f hitNormal) {
@@ -482,30 +482,30 @@ public class KinematicCharacterController extends ActionInterface {
 	}
 
 	protected void updateTargetPositionBasedOnCollision(Vector3f hitNormal, float tangentMag, float normalMag) {
-	    int sp = Stack.enter();
-		Vector3f movementDirection = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f movementDirection = stack.allocVector3f();
 		movementDirection.sub(targetPosition, currentPosition);
 		float movementLength = movementDirection.length();
 		if (movementLength>BulletGlobals.SIMD_EPSILON) {
 			movementDirection.normalize();
 
-			Vector3f reflectDir = computeReflectionDirection(movementDirection, hitNormal, Stack.allocVector3f());
+			Vector3f reflectDir = computeReflectionDirection(movementDirection, hitNormal, stack.allocVector3f());
 			reflectDir.normalize();
 
-			Vector3f parallelDir = parallelComponent(reflectDir, hitNormal, Stack.allocVector3f());
-			Vector3f perpindicularDir = perpindicularComponent(reflectDir, hitNormal, Stack.allocVector3f());
+			Vector3f parallelDir = parallelComponent(reflectDir, hitNormal, stack.allocVector3f());
+			Vector3f perpindicularDir = perpindicularComponent(reflectDir, hitNormal, stack.allocVector3f());
 
 			targetPosition.set(currentPosition);
 			if (false) //tangentMag != 0.0)
 			{
-				Vector3f parComponent = Stack.allocVector3f();
+				Vector3f parComponent = stack.allocVector3f();
 				parComponent.scale(tangentMag * movementLength, parallelDir);
 				//printf("parComponent=%f,%f,%f\n",parComponent[0],parComponent[1],parComponent[2]);
 				targetPosition.add(parComponent);
 			}
 
 			if (normalMag != 0.0f) {
-				Vector3f perpComponent = Stack.allocVector3f();
+				Vector3f perpComponent = stack.allocVector3f();
 				perpComponent.scale(normalMag * movementLength, perpindicularDir);
 				//printf("perpComponent=%f,%f,%f\n",perpComponent[0],perpComponent[1],perpComponent[2]);
 				targetPosition.add(perpComponent);
@@ -514,22 +514,22 @@ public class KinematicCharacterController extends ActionInterface {
 		else {
 			//printf("movementLength don't normalize a zero vector\n");
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	protected void stepForwardAndStrafe(CollisionWorld collisionWorld, Vector3f walkMove) {
 		// printf("m_normalizedDirection=%f,%f,%f\n",
 		// 	m_normalizedDirection[0],m_normalizedDirection[1],m_normalizedDirection[2]);
 		// phase 2: forward and strafe
-	    int sp = Stack.enter();
-		Transform start = Stack.allocTransform();
-		Transform end = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform start = stack.allocTransform();
+		Transform end = stack.allocTransform();
 		targetPosition.add(currentPosition, walkMove);
 		start.setIdentity ();
 		end.setIdentity ();
 
 		float fraction = 1.0f;
-		Vector3f distance2Vec = Stack.allocVector3f();
+		Vector3f distance2Vec = stack.allocVector3f();
 		distance2Vec.sub(currentPosition, targetPosition);
 		float distance2 = distance2Vec.lengthSquared();
 		//printf("distance2=%f\n",distance2);
@@ -566,7 +566,7 @@ public class KinematicCharacterController extends ActionInterface {
 
 			if (callback.hasHit()) {
 				// we moved only a fraction
-				Vector3f hitDistanceVec = Stack.allocVector3f();
+				Vector3f hitDistanceVec = stack.allocVector3f();
 				hitDistanceVec.sub(callback.hitPointWorld, currentPosition);
 				//float hitDistance = hitDistanceVec.length();
 
@@ -578,7 +578,7 @@ public class KinematicCharacterController extends ActionInterface {
 
 				updateTargetPositionBasedOnCollision(callback.hitNormalWorld);
 
-				Vector3f currentDir = Stack.allocVector3f();
+				Vector3f currentDir = stack.allocVector3f();
 				currentDir.sub(targetPosition, currentPosition);
 				distance2 = currentDir.lengthSquared();
 				if (distance2 > BulletGlobals.SIMD_EPSILON) {
@@ -601,20 +601,20 @@ public class KinematicCharacterController extends ActionInterface {
 			//if (callback.m_closestHitFraction == 0.f)
 			//    break;
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	protected void stepDown(CollisionWorld collisionWorld, float dt) {
-	    int sp = Stack.enter();
-		Transform start = Stack.allocTransform();
-		Transform end = Stack.allocTransform();
+	    Stack stack = Stack.enter();
+		Transform start = stack.allocTransform();
+		Transform end = stack.allocTransform();
 
 		// phase 3: down
 		float additionalDownStep = (wasOnGround /*&& !onGround()*/) ? stepHeight : 0.0f;
-		Vector3f step_drop = Stack.allocVector3f();
+		Vector3f step_drop = stack.allocVector3f();
 		step_drop.scale(currentStepOffset + additionalDownStep, upAxisDirection[upAxis]);
 		float downVelocity = (additionalDownStep == 0.0f && verticalVelocity<0.0f?-verticalVelocity:0.0f) * dt;
-		Vector3f gravity_drop = Stack.allocVector3f();
+		Vector3f gravity_drop = stack.allocVector3f();
 		gravity_drop.scale(downVelocity, upAxisDirection[upAxis]);
 		targetPosition.sub(step_drop);
 		targetPosition.sub(gravity_drop);
@@ -646,7 +646,7 @@ public class KinematicCharacterController extends ActionInterface {
 			// we dropped the full height
 			currentPosition.set(targetPosition);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	////////////////////////////////////////////////////////////////////////////
@@ -693,11 +693,11 @@ public class KinematicCharacterController extends ActionInterface {
 			if (normalInWorldSpace) {
 				hitNormalWorld = convexResult.hitNormalLocal;
 			} else {
-			    int sp = Stack.enter();
+			    Stack stack = Stack.enter();
 				//need to transform normal into worldspace
-				hitNormalWorld = Stack.allocVector3f();
-				hitCollisionObject.getWorldTransform(Stack.allocTransform()).basis.transform(convexResult.hitNormalLocal, hitNormalWorld);
-				Stack.leave(sp);
+				hitNormalWorld = stack.allocVector3f();
+				hitCollisionObject.getWorldTransform(stack.allocTransform()).basis.transform(convexResult.hitNormalLocal, hitNormalWorld);
+				stack.leave();
 			}
 			
 			float dotUp = up.dot(hitNormalWorld);

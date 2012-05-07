@@ -50,13 +50,13 @@ public class AabbUtil2 {
 	}
 	
 	public static boolean rayAabb(Vector3f rayFrom, Vector3f rayTo, Vector3f aabbMin, Vector3f aabbMax, float[] param, Vector3f normal) {
-	    int sp = Stack.enter();
-		Vector3f aabbHalfExtent = Stack.allocVector3f();
-		Vector3f aabbCenter = Stack.allocVector3f();
-		Vector3f source = Stack.allocVector3f();
-		Vector3f target = Stack.allocVector3f();
-		Vector3f r = Stack.allocVector3f();
-		Vector3f hitNormal = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f aabbHalfExtent = stack.allocVector3f();
+		Vector3f aabbCenter = stack.allocVector3f();
+		Vector3f source = stack.allocVector3f();
+		Vector3f target = stack.allocVector3f();
+		Vector3f r = stack.allocVector3f();
+		Vector3f hitNormal = stack.allocVector3f();
 
 		aabbHalfExtent.sub(aabbMax, aabbMin);
 		aabbHalfExtent.scale(0.5f);
@@ -100,11 +100,11 @@ public class AabbUtil2 {
 			if (lambda_enter <= lambda_exit) {
 				param[0] = lambda_enter;
 				normal.set(hitNormal);
-				Stack.leave(sp);
+				stack.leave();
 				return true;
 			}
 		}
-		Stack.leave(sp);
+		stack.leave();
 		return false;
 	}
 	
@@ -140,19 +140,19 @@ public class AabbUtil2 {
 	}
 
 	public static void transformAabb(Vector3f halfExtents, float margin, Transform t, Vector3f aabbMinOut, Vector3f aabbMaxOut) {
-	    int sp = Stack.enter();
-		Vector3f halfExtentsWithMargin = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f halfExtentsWithMargin = stack.allocVector3f();
 		halfExtentsWithMargin.x = halfExtents.x + margin;
 		halfExtentsWithMargin.y = halfExtents.y + margin;
 		halfExtentsWithMargin.z = halfExtents.z + margin;
 
-		Matrix3f abs_b = Stack.alloc(t.basis);
+		Matrix3f abs_b = stack.alloc(t.basis);
 		MatrixUtil.absolute(abs_b);
 
-		Vector3f tmp = Stack.allocVector3f();
+		Vector3f tmp = stack.allocVector3f();
 
-		Vector3f center = Stack.alloc(t.origin);
-		Vector3f extent = Stack.allocVector3f();
+		Vector3f center = stack.alloc(t.origin);
+		Vector3f extent = stack.allocVector3f();
 		abs_b.getRow(0, tmp);
 		extent.x = tmp.dot(halfExtentsWithMargin);
 		abs_b.getRow(1, tmp);
@@ -162,7 +162,7 @@ public class AabbUtil2 {
 
 		aabbMinOut.sub(center, extent);
 		aabbMaxOut.add(center, extent);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public static void transformAabb(Vector3f localAabbMin, Vector3f localAabbMax, float margin, Transform trans, Vector3f aabbMinOut, Vector3f aabbMaxOut) {
@@ -170,8 +170,8 @@ public class AabbUtil2 {
 		assert (localAabbMin.y <= localAabbMax.y);
 		assert (localAabbMin.z <= localAabbMax.z);
 
-		int sp = Stack.enter();
-		Vector3f localHalfExtents = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f localHalfExtents = stack.allocVector3f();
 		localHalfExtents.sub(localAabbMax, localAabbMin);
 		localHalfExtents.scale(0.5f);
 
@@ -179,18 +179,18 @@ public class AabbUtil2 {
 		localHalfExtents.y += margin;
 		localHalfExtents.z += margin;
 
-		Vector3f localCenter = Stack.allocVector3f();
+		Vector3f localCenter = stack.allocVector3f();
 		localCenter.add(localAabbMax, localAabbMin);
 		localCenter.scale(0.5f);
 
-		Matrix3f abs_b = Stack.alloc(trans.basis);
+		Matrix3f abs_b = stack.alloc(trans.basis);
 		MatrixUtil.absolute(abs_b);
 
-		Vector3f center = Stack.alloc(localCenter);
+		Vector3f center = stack.alloc(localCenter);
 		trans.transform(center);
 
-		Vector3f extent = Stack.allocVector3f();
-		Vector3f tmp = Stack.allocVector3f();
+		Vector3f extent = stack.allocVector3f();
+		Vector3f tmp = stack.allocVector3f();
 
 		abs_b.getRow(0, tmp);
 		extent.x = tmp.dot(localHalfExtents);
@@ -201,7 +201,7 @@ public class AabbUtil2 {
 
 		aabbMinOut.sub(center, extent);
 		aabbMaxOut.add(center, extent);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 }

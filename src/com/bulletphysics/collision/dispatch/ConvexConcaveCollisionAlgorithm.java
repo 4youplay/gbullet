@@ -85,22 +85,22 @@ public class ConvexConcaveCollisionAlgorithm extends CollisionAlgorithm {
 
 				btConvexTriangleCallback.manifoldPtr.setBodies(convexBody, triBody);
 
-				int sp = Stack.enter();
+				Stack stack = Stack.enter();
 				concaveShape.processAllTriangles(
 						btConvexTriangleCallback,
-						btConvexTriangleCallback.getAabbMin(Stack.allocVector3f()),
-						btConvexTriangleCallback.getAabbMax(Stack.allocVector3f()));
+						btConvexTriangleCallback.getAabbMin(stack.allocVector3f()),
+						btConvexTriangleCallback.getAabbMax(stack.allocVector3f()));
 
 				resultOut.refreshContactPoints();
-				Stack.leave(sp);
+				stack.leave();
 			}
 		}
 	}
 
 	@Override
 	public float calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 
 		CollisionObject convexbody = isSwapped ? body1 : body0;
 		CollisionObject triBody = isSwapped ? body0 : body1;
@@ -109,33 +109,33 @@ public class ConvexConcaveCollisionAlgorithm extends CollisionAlgorithm {
 
 		// only perform CCD above a certain threshold, this prevents blocking on the long run
 		// because object in a blocked ccd state (hitfraction<1) get their linear velocity halved each frame...
-		tmp.sub(convexbody.getInterpolationWorldTransform(Stack.allocTransform()).origin, convexbody.getWorldTransform(Stack.allocTransform()).origin);
+		tmp.sub(convexbody.getInterpolationWorldTransform(stack.allocTransform()).origin, convexbody.getWorldTransform(stack.allocTransform()).origin);
 		float squareMot0 = tmp.lengthSquared();
 		if (squareMot0 < convexbody.getCcdSquareMotionThreshold()) {
-		    Stack.leave(sp);
+		    stack.leave();
 			return 1f;
 		}
 
-		Transform tmpTrans = Stack.allocTransform();
+		Transform tmpTrans = stack.allocTransform();
 		
 		//const btVector3& from = convexbody->m_worldTransform.getOrigin();
 		//btVector3 to = convexbody->m_interpolationWorldTransform.getOrigin();
 		//todo: only do if the motion exceeds the 'radius'
 
-		Transform triInv = triBody.getWorldTransform(Stack.allocTransform());
+		Transform triInv = triBody.getWorldTransform(stack.allocTransform());
 		triInv.inverse();
 
-		Transform convexFromLocal = Stack.allocTransform();
+		Transform convexFromLocal = stack.allocTransform();
 		convexFromLocal.mul(triInv, convexbody.getWorldTransform(tmpTrans));
 
-		Transform convexToLocal = Stack.allocTransform();
+		Transform convexToLocal = stack.allocTransform();
 		convexToLocal.mul(triInv, convexbody.getInterpolationWorldTransform(tmpTrans));
 
 		if (triBody.getCollisionShape().isConcave()) {
-			Vector3f rayAabbMin = Stack.alloc(convexFromLocal.origin);
+			Vector3f rayAabbMin = stack.alloc(convexFromLocal.origin);
 			VectorUtil.setMin(rayAabbMin, convexToLocal.origin);
 
-			Vector3f rayAabbMax = Stack.alloc(convexFromLocal.origin);
+			Vector3f rayAabbMax = stack.alloc(convexFromLocal.origin);
 			VectorUtil.setMax(rayAabbMax, convexToLocal.origin);
 
 			float ccdRadius0 = convexbody.getCcdSweptSphereRadius();
@@ -159,12 +159,12 @@ public class ConvexConcaveCollisionAlgorithm extends CollisionAlgorithm {
 
 			if (raycastCallback.hitFraction < convexbody.getHitFraction()) {
 				convexbody.setHitFraction(raycastCallback.hitFraction);
-				Stack.leave(sp);
+				stack.leave();
 				return raycastCallback.hitFraction;
 			}
 		}
 
-		Stack.leave(sp);
+		stack.leave();
 		return 1f;
 	}
 

@@ -52,11 +52,11 @@ public class SolverBody {
 	public final Vector3f turnVelocity = new Vector3f();
 	
 	public void getVelocityInLocalPoint(Vector3f rel_pos, Vector3f velocity) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 		tmp.cross(angularVelocity, rel_pos);
 		velocity.add(linearVelocity, tmp);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	/**
@@ -88,16 +88,16 @@ public class SolverBody {
 		if (invMass != 0f) {
 			originalBody.setLinearVelocity(linearVelocity);
 			originalBody.setAngularVelocity(angularVelocity);
-			int sp = Stack.enter();
+			Stack stack = Stack.enter();
 			
 			// correct the position/orientation based on push/turn recovery
-			Transform newTransform = Stack.allocTransform();
-			Transform curTrans = originalBody.getWorldTransform(Stack.allocTransform());
+			Transform newTransform = stack.allocTransform();
+			Transform curTrans = originalBody.getWorldTransform(stack.allocTransform());
 			TransformUtil.integrateTransform(curTrans, pushVelocity, turnVelocity, timeStep, newTransform);
 			originalBody.setWorldTransform(newTransform);
 
 			//m_originalBody->setCompanionId(-1);
-			Stack.leave(sp);
+			stack.leave();
 		}
 	}
 	

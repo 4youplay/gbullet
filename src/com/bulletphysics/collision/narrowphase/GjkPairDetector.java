@@ -73,16 +73,16 @@ public class GjkPairDetector extends DiscreteCollisionDetectorInterface {
 	
 	@StaticAlloc
 	public void getClosestPoints(ClosestPointInput input, Result output, IDebugDraw debugDraw, boolean swapResults) {
-	    int sp = Stack.enter();
-		Vector3f tmp = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 
 		float distance = 0f;
-		Vector3f normalInB = Stack.allocVector3f();
+		Vector3f normalInB = stack.allocVector3f();
 		normalInB.set(0f, 0f, 0f);
-		Vector3f pointOnA = Stack.allocVector3f(), pointOnB = Stack.allocVector3f();
-		Transform localTransA = Stack.alloc(input.transformA);
-		Transform localTransB = Stack.alloc(input.transformB);
-		Vector3f positionOffset = Stack.allocVector3f();
+		Vector3f pointOnA = stack.allocVector3f(), pointOnB = stack.allocVector3f();
+		Transform localTransA = stack.alloc(input.transformA);
+		Transform localTransB = stack.alloc(input.transformB);
+		Vector3f positionOffset = stack.allocVector3f();
 		positionOffset.add(localTransA.origin, localTransB.origin);
 		positionOffset.scale(0.5f);
 		localTransA.origin.sub(positionOffset);
@@ -118,18 +118,18 @@ public class GjkPairDetector extends DiscreteCollisionDetectorInterface {
 
 			simplexSolver.reset();
 
-			Vector3f seperatingAxisInA = Stack.allocVector3f();
-			Vector3f seperatingAxisInB = Stack.allocVector3f();
+			Vector3f seperatingAxisInA = stack.allocVector3f();
+			Vector3f seperatingAxisInB = stack.allocVector3f();
 			
-			Vector3f pInA = Stack.allocVector3f();
-			Vector3f qInB = Stack.allocVector3f();
+			Vector3f pInA = stack.allocVector3f();
+			Vector3f qInB = stack.allocVector3f();
 			
-			Vector3f pWorld = Stack.allocVector3f();
-			Vector3f qWorld = Stack.allocVector3f();
-			Vector3f w = Stack.allocVector3f();
+			Vector3f pWorld = stack.allocVector3f();
+			Vector3f qWorld = stack.allocVector3f();
+			Vector3f w = stack.allocVector3f();
 			
-			Vector3f tmpPointOnA = Stack.allocVector3f(), tmpPointOnB = Stack.allocVector3f();
-			Vector3f tmpNormalInB = Stack.allocVector3f();
+			Vector3f tmpPointOnA = stack.allocVector3f(), tmpPointOnB = stack.allocVector3f();
+			Vector3f tmpNormalInB = stack.allocVector3f();
 			
 			for (;;) //while (true)
 			{
@@ -327,7 +327,7 @@ public class GjkPairDetector extends DiscreteCollisionDetectorInterface {
 					distance);
 		//printf("gjk add:%f",distance);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public void setMinkowskiA(ConvexShape minkA) {

@@ -80,7 +80,7 @@ public abstract class AxisSweep3Internal extends BroadphaseInterface {
 	protected int mask;
 	
 	AxisSweep3Internal(Vector3f worldAabbMin, Vector3f worldAabbMax, int handleMask, int handleSentinel, int userMaxHandles/* = 16384*/, OverlappingPairCache pairCache/*=0*/) {
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 	    this.bpHandleMask = handleMask;
 		this.handleSentinel = handleSentinel;
 		this.pairCache = pairCache;
@@ -98,7 +98,7 @@ public abstract class AxisSweep3Internal extends BroadphaseInterface {
 		this.worldAabbMin.set(worldAabbMin);
 		this.worldAabbMax.set(worldAabbMax);
 
-		Vector3f aabbSize = Stack.allocVector3f();
+		Vector3f aabbSize = stack.allocVector3f();
 		aabbSize.sub(this.worldAabbMax, this.worldAabbMin);
 
 		int maxInt = this.handleSentinel;
@@ -149,7 +149,7 @@ public abstract class AxisSweep3Internal extends BroadphaseInterface {
 		
 		// JAVA NOTE: added
 		mask = getMask();
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	// allocation/deallocation
@@ -204,20 +204,20 @@ public abstract class AxisSweep3Internal extends BroadphaseInterface {
 	//#endif //DEBUG_BROADPHASE
 
 	protected void quantize(int[] out, Vector3f point, int isMax) {
-	    int sp = Stack.enter();
-		Vector3f clampedPoint = Stack.alloc(point);
+	    Stack stack = Stack.enter();
+		Vector3f clampedPoint = stack.alloc(point);
 
 		VectorUtil.setMax(clampedPoint, worldAabbMin);
 		VectorUtil.setMin(clampedPoint, worldAabbMax);
 
-		Vector3f v = Stack.allocVector3f();
+		Vector3f v = stack.allocVector3f();
 		v.sub(clampedPoint, worldAabbMin);
 		VectorUtil.mul(v, v, quantize);
 
 		out[0] = (((int)v.x & bpHandleMask) | isMax) & mask;
 		out[1] = (((int)v.y & bpHandleMask) | isMax) & mask;
 		out[2] = (((int)v.z & bpHandleMask) | isMax) & mask;
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	// sorting a min edge downwards can only ever *add* overlaps

@@ -246,7 +246,7 @@ public class SimulationIslandManager {
 		int numElem = getUnionFind().getNumElements();
 
 		BulletStats.pushProfile("processIslands");
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		try {
 			//#ifndef SPLIT_ISLANDS
 			//btPersistentManifold** manifold = dispatcher->getInternalManifoldPointer();
@@ -326,7 +326,7 @@ public class SimulationIslandManager {
 		}
 		finally {
 			BulletStats.popProfile();
-			Stack.leave(sp);
+			stack.leave();
 		}
 	}
 

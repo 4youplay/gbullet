@@ -53,11 +53,11 @@ public abstract class ConvexInternalShape extends ConvexShape {
 	
 	@Override
 	public void getAabbSlow(Transform trans, Vector3f minAabb, Vector3f maxAabb) {
-	    int sp = Stack.enter();
+	    Stack stack = Stack.enter();
 		float margin = getMargin();
-		Vector3f vec = Stack.allocVector3f();
-		Vector3f tmp1 = Stack.allocVector3f();
-		Vector3f tmp2 = Stack.allocVector3f();
+		Vector3f vec = stack.allocVector3f();
+		Vector3f tmp1 = stack.allocVector3f();
+		Vector3f tmp2 = stack.allocVector3f();
 		
 		for (int i=0;i<3;i++)
 		{
@@ -79,7 +79,7 @@ public abstract class ConvexInternalShape extends ConvexShape {
 
 			VectorUtil.setCoord(minAabb, i, VectorUtil.getCoord(tmp2, i) - margin);
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	@Override
@@ -87,14 +87,14 @@ public abstract class ConvexInternalShape extends ConvexShape {
 		Vector3f supVertex = localGetSupportingVertexWithoutMargin(vec, out);
 
 		if (getMargin() != 0f) {
-		    int sp = Stack.enter();
-			Vector3f vecnorm = Stack.alloc(vec);
+		    Stack stack = Stack.enter();
+			Vector3f vecnorm = stack.alloc(vec);
 			if (vecnorm.lengthSquared() < (BulletGlobals.FLT_EPSILON * BulletGlobals.FLT_EPSILON)) {
 				vecnorm.set(-1f, -1f, -1f);
 			}
 			vecnorm.normalize();
 			supVertex.scaleAdd(getMargin(), vecnorm, supVertex);
-			Stack.leave(sp);
+			stack.leave();
 		}
 		return out;
 	}

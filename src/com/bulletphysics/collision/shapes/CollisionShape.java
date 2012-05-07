@@ -46,11 +46,12 @@ public abstract class CollisionShape {
 	public abstract void getAabb(Transform t, Vector3f aabbMin, Vector3f aabbMax);
 
 	public float getBoundingSphere(Vector3f center) {
-		Vector3f tmp = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f tmp = stack.allocVector3f();
 
-		Transform tr = Stack.allocTransform();
+		Transform tr = stack.allocTransform();
 		tr.setIdentity();
-		Vector3f aabbMin = Stack.allocVector3f(), aabbMax = Stack.allocVector3f();
+		Vector3f aabbMin = stack.allocVector3f(), aabbMax = stack.allocVector3f();
 
 		getAabb(tr, aabbMin, aabbMax);
 
@@ -59,16 +60,17 @@ public abstract class CollisionShape {
 
 		tmp.add(aabbMin, aabbMax);
 		center.scale(0.5f, tmp);
+		stack.leave();
 		return radius;
 	}
 
 	///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
 	public float getAngularMotionDisc() {
-	    int sp = Stack.enter();
-		Vector3f center = Stack.allocVector3f();
+	    Stack stack = Stack.enter();
+		Vector3f center = stack.allocVector3f();
 		float disc = getBoundingSphere(center);
 		disc += center.length();
-		Stack.leave(sp);
+		stack.leave();
 		return disc;
 	}
 
@@ -78,7 +80,7 @@ public abstract class CollisionShape {
 		//start with static aabb
 		getAabb(curTrans, temporalAabbMin, temporalAabbMax);
 
-		int sp = Stack.enter();
+		Stack stack = Stack.enter();
 		
 		float temporalAabbMaxx = temporalAabbMax.x;
 		float temporalAabbMaxy = temporalAabbMax.y;
@@ -88,7 +90,7 @@ public abstract class CollisionShape {
 		float temporalAabbMinz = temporalAabbMin.z;
 
 		// add linear motion
-		Vector3f linMotion = Stack.alloc(linvel);
+		Vector3f linMotion = stack.alloc(linvel);
 		linMotion.scale(timeStep);
 
 		//todo: simd would have a vector max/min operation, instead of per-element access
@@ -113,7 +115,7 @@ public abstract class CollisionShape {
 
 		//add conservative angular motion
 		float angularMotion = angvel.length() * getAngularMotionDisc() * timeStep;
-		Vector3f angularMotion3d = Stack.allocVector3f();
+		Vector3f angularMotion3d = stack.allocVector3f();
 		angularMotion3d.set(angularMotion, angularMotion, angularMotion);
 		temporalAabbMin.set(temporalAabbMinx, temporalAabbMiny, temporalAabbMinz);
 		temporalAabbMax.set(temporalAabbMaxx, temporalAabbMaxy, temporalAabbMaxz);
@@ -121,7 +123,7 @@ public abstract class CollisionShape {
 		temporalAabbMin.sub(angularMotion3d);
 		temporalAabbMax.add(angularMotion3d);
 		
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 //#ifndef __SPU__

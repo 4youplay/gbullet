@@ -75,8 +75,8 @@ public class TransformUtil {
 //	#else
 		// Exponential map
 		// google for "Practical Parameterization of Rotations Using the Exponential Map", F. Sebastian Grassia
-		int sp = Stack.enter();
-		Vector3f axis = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f axis = stack.allocVector3f();
 		float fAngle = angvel.length();
 
 		// limit the angular motion
@@ -92,27 +92,27 @@ public class TransformUtil {
 			// sync(fAngle) = sin(c*fAngle)/t
 			axis.scale((float) Math.sin(0.5f * fAngle * timeStep) / fAngle, angvel);
 		}
-		Quat4f dorn = Stack.allocQuat4f();
+		Quat4f dorn = stack.allocQuat4f();
 		dorn.set(axis.x, axis.y, axis.z, (float) Math.cos(fAngle * timeStep * 0.5f));
-		Quat4f orn0 = curTrans.getRotation(Stack.allocQuat4f());
+		Quat4f orn0 = curTrans.getRotation(stack.allocQuat4f());
 
-		Quat4f predictedOrn = Stack.allocQuat4f();
+		Quat4f predictedOrn = stack.allocQuat4f();
 		predictedOrn.mul(dorn, orn0);
 		predictedOrn.normalize();
 //  #endif
 		predictedTransform.setRotation(predictedOrn);
-		Stack.leave(sp);
+		stack.leave();
 	}
 
 	public static void calculateVelocity(Transform transform0, Transform transform1, float timeStep, Vector3f linVel, Vector3f angVel) {
 		linVel.sub(transform1.origin, transform0.origin);
 		linVel.scale(1f / timeStep);
-		int sp = Stack.enter();
-		Vector3f axis = Stack.allocVector3f();
+		Stack stack = Stack.enter();
+		Vector3f axis = stack.allocVector3f();
 		float[] angle = new float[1];
 		calculateDiffAxisAngle(transform0, transform1, axis, angle);
 		angVel.scale(angle[0] / timeStep, axis);
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 	public static void calculateDiffAxisAngle(Transform transform0, Transform transform1, Vector3f axis, float[] angle) {
@@ -122,15 +122,15 @@ public class TransformUtil {
 //		btQuaternion orn1 = orn0.farthest(orn1a);
 //		btQuaternion dorn = orn1 * orn0.inverse();
 // #else
-	    int sp = Stack.enter();
-		Matrix3f tmp = Stack.allocMatrix3f();
+	    Stack stack = Stack.enter();
+		Matrix3f tmp = stack.allocMatrix3f();
 		tmp.set(transform0.basis);
 		MatrixUtil.invert(tmp);
 
-		Matrix3f dmat = Stack.allocMatrix3f();
+		Matrix3f dmat = stack.allocMatrix3f();
 		dmat.mul(transform1.basis, tmp);
 
-		Quat4f dorn = Stack.allocQuat4f();
+		Quat4f dorn = stack.allocQuat4f();
 		MatrixUtil.getRotation(dmat, dorn);
 // #endif
 
@@ -151,7 +151,7 @@ public class TransformUtil {
 		else {
 			axis.scale(1f / (float) Math.sqrt(len));
 		}
-		Stack.leave(sp);
+		stack.leave();
 	}
 	
 }
