@@ -69,6 +69,7 @@ public class GjkConvexCast extends ConvexCast {
 		simplexSolver.reset();
 
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		// compute linear velocity for this interval, to interpolate
 		// assume no rotation/angular velocity, assert here?
 		Vector3f linVelA = stack.allocVector3f();
@@ -191,7 +192,7 @@ public class GjkConvexCast extends ConvexCast {
 			return false;
 		}
 		finally {
-            stack.leave();
+            stack.leave(sp);
 			pointInputsPool.release(input);
 		}
 	}

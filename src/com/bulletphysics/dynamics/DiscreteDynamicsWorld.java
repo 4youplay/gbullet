@@ -303,6 +303,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 		
 		BulletStats.pushProfile("stepSimulation");
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 			int numSimulationSubSteps = 0;
 
@@ -360,13 +361,14 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 			BulletStats.popProfile();
 			
 			BulletStats.stepSimulationTime = (Clock.nanoTime() - t0) / 1000000;
-			stack.leave();
+			stack.leave(sp);
 		}
 	}
 
 	protected void internalSingleStepSimulation(float timeStep) {
 		BulletStats.pushProfile("internalSingleStepSimulation");
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 			// apply gravity, predict motion
 			predictUnconstraintMotion(timeStep);
@@ -406,7 +408,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 		}
 		finally {
 			BulletStats.popProfile();
-			stack.leave();
+			stack.leave(sp);
 		}
 	}
 
@@ -486,6 +488,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 	protected void updateActivationState(float timeStep) {
 		BulletStats.pushProfile("updateActivationState");
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 			Vector3f tmp = stack.allocVector3f();
 
@@ -519,7 +522,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 			}
 		}
 		finally {
-		    stack.leave();
+		    stack.leave(sp);
 			BulletStats.popProfile();
 		}
 	}
@@ -688,6 +691,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 	protected void integrateTransforms(float timeStep) {
 		BulletStats.pushProfile("integrateTransforms");
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 			Vector3f tmp = stack.allocVector3f();
 			Transform tmpTrans = stack.allocTransform();
@@ -739,7 +743,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 			}
 		}
 		finally {
-		    stack.leave();
+		    stack.leave(sp);
 			BulletStats.popProfile();
 		}
 	}
@@ -747,6 +751,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 	protected void predictUnconstraintMotion(float timeStep) {
 		BulletStats.pushProfile("predictUnconstraintMotion");
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 			Transform tmpTrans = stack.allocTransform();
 			
@@ -767,7 +772,7 @@ public class DiscreteDynamicsWorld extends DynamicsWorld {
 			}
 		}
 		finally {
-		    stack.leave();
+		    stack.leave(sp);
 			BulletStats.popProfile();
 		}
 	}

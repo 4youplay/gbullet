@@ -447,6 +447,7 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 	public float solveGroupCacheFriendlySetup(ObjectArrayList<CollisionObject> bodies, int numBodies, ObjectArrayList<PersistentManifold> manifoldPtr, int manifold_offset, int numManifolds, ObjectArrayList<TypedConstraint> constraints, int constraints_offset, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer/*,btStackAlloc* stackAlloc*/) {
 		BulletStats.pushProfile("solveGroupCacheFriendlySetup");
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 
 			if ((numConstraints + numManifolds) == 0) {
@@ -819,7 +820,7 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 			return 0f;
 		}
 		finally {
-		    stack.leave();
+		    stack.leave(sp);
 			BulletStats.popProfile();
 		}
 	}
@@ -827,6 +828,7 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 	public float solveGroupCacheFriendlyIterations(ObjectArrayList<CollisionObject> bodies, int numBodies, ObjectArrayList<PersistentManifold> manifoldPtr, int manifold_offset, int numManifolds, ObjectArrayList<TypedConstraint> constraints, int constraints_offset, int numConstraints, ContactSolverInfo infoGlobal, IDebugDraw debugDrawer/*,btStackAlloc* stackAlloc*/) {
 		BulletStats.pushProfile("solveGroupCacheFriendlyIterations");
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 			int numConstraintPool = tmpSolverConstraintPool.size();
 			int numFrictionPool = tmpSolverFrictionConstraintPool.size();
@@ -920,7 +922,7 @@ public class SequentialImpulseConstraintSolver extends ConstraintSolver {
 			return 0f;
 		}
 		finally {
-		    stack.leave();
+		    stack.leave(sp);
 			BulletStats.popProfile();		
 		}
 	}

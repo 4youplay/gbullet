@@ -728,6 +728,7 @@ public class GjkEpaSolver {
 		public float EvaluatePD(float accuracy) {
 			pushStack();
 			Stack stack = Stack.enter();
+			int sp = stack.getSp();
 			try {
 				Vector3f tmp = stack.allocVector3f();
 
@@ -870,7 +871,7 @@ public class GjkEpaSolver {
 			}
 			finally {
 				popStack();
-				stack.leave();
+				stack.leave(sp);
 			}
 		}
 		
@@ -886,6 +887,7 @@ public class GjkEpaSolver {
 			btStackAlloc* stackAlloc*/,
 			Results results) {
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		// Initialize
 		results.witnesses[0].set(0f, 0f, 0f);
 		results.witnesses[1].set(0f, 0f, 0f);
@@ -929,7 +931,7 @@ public class GjkEpaSolver {
 			return (false);
 		}
 		finally {
-		    stack.leave();
+		    stack.leave(sp);
 			gjk.destroy();
 		}
 	}

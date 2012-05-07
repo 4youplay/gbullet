@@ -184,14 +184,14 @@ public class Stack {
 		}
 	}
 
-	public void leave(int sp) {
-		for (int i = sp; i < sp; i++) {
+	public void leave(int savedSp) {
+		for (int i = savedSp; i < sp; i++) {
 			int type = types[i];
 			if (type != -1) {
 				stackPositions[type]--;
 			}
 		}
-		sp = sp - 1;
+		this.sp = savedSp - 1;
 		assert types[sp] == -1;
 	}
 

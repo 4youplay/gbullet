@@ -447,6 +447,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 		SubSimplexClosestResult tempResult = subsimplexResultsPool.get();
 		tempResult.reset();
 		Stack stack = Stack.enter();
+		int sp = stack.getSp();
 		try {
 			Vector3f tmp = stack.allocVector3f();
 			Vector3f q = stack.allocVector3f();
@@ -605,7 +606,7 @@ public class VoronoiSimplexSolver extends SimplexSolverInterface {
 		}
 		finally {
 			subsimplexResultsPool.release(tempResult);
-			stack.leave();
+			stack.leave(sp);
 		}
 	}
 	
