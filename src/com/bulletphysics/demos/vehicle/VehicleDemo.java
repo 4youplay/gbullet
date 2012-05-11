@@ -145,6 +145,7 @@ public class VehicleDemo extends DemoApplication {
 		//#endif
 
 		CollisionShape groundShape = new BoxShape(new Vector3f(50, 3, 50));
+		groundShape.setUserPointer("Grid");
 		collisionShapes.add(groundShape);
 		collisionConfiguration = new DefaultCollisionConfiguration();
 		dispatcher = new CollisionDispatcher(collisionConfiguration);
@@ -166,72 +167,72 @@ public class VehicleDemo extends DemoApplication {
 		// either use heightfield or triangle mesh
 		//#define  USE_TRIMESH_GROUND 1
 		//#ifdef USE_TRIMESH_GROUND
-
-		final float TRIANGLE_SIZE = 20f;
-
-		// create a triangle-mesh ground
-		int vertStride = 4 * 3 /* sizeof(btVector3) */;
-		int indexStride = 3 * 4 /* 3*sizeof(int) */;
-
-		final int NUM_VERTS_X = 20;
-		final int NUM_VERTS_Y = 20;
-		final int totalVerts = NUM_VERTS_X * NUM_VERTS_Y;
-
-		final int totalTriangles = 2 * (NUM_VERTS_X - 1) * (NUM_VERTS_Y - 1);
-
-		vertices = ByteBuffer.allocateDirect(totalVerts * vertStride).order(ByteOrder.nativeOrder());
-		ByteBuffer gIndices = ByteBuffer.allocateDirect(totalTriangles * 3 * 4).order(ByteOrder.nativeOrder());
-
-		Vector3f tmp = new Vector3f();
-		for (int i = 0; i < NUM_VERTS_X; i++) {
-			for (int j = 0; j < NUM_VERTS_Y; j++) {
-				float wl = 0.2f;
-				// height set to zero, but can also use curved landscape, just uncomment out the code
-				float height = 0f; // 20f * (float)Math.sin(i * wl) * (float)Math.cos(j * wl);
-				
-				//#ifdef FORCE_ZAXIS_UP
-				//m_vertices[i+j*NUM_VERTS_X].setValue(
-				//	(i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
-				//	(j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE,
-				//	height
-				//	);
-				//#else
-				tmp.set(
-						(i - NUM_VERTS_X * 0.5f) * TRIANGLE_SIZE,
-						height,
-						(j - NUM_VERTS_Y * 0.5f) * TRIANGLE_SIZE);
-
-				int index = i + j * NUM_VERTS_X;
-				vertices.putFloat((index * 3 + 0) * 4, tmp.x);
-				vertices.putFloat((index * 3 + 1) * 4, tmp.y);
-				vertices.putFloat((index * 3 + 2) * 4, tmp.z);
-				//#endif
-			}
-		}
-
-		//int index=0;
-		gIndices.clear();
-		for (int i = 0; i < NUM_VERTS_X - 1; i++) {
-			for (int j = 0; j < NUM_VERTS_Y - 1; j++) {
-				gIndices.putInt(j * NUM_VERTS_X + i);
-				gIndices.putInt(j * NUM_VERTS_X + i + 1);
-				gIndices.putInt((j + 1) * NUM_VERTS_X + i + 1);
-
-				gIndices.putInt(j * NUM_VERTS_X + i);
-				gIndices.putInt((j + 1) * NUM_VERTS_X + i + 1);
-				gIndices.putInt((j + 1) * NUM_VERTS_X + i);
-			}
-		}
-		gIndices.flip();
-
-		indexVertexArrays = new TriangleIndexVertexArray(totalTriangles,
-				gIndices,
-				indexStride,
-				totalVerts, vertices, vertStride);
-
-		boolean useQuantizedAabbCompression = true;
-		groundShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression);
-
+//
+//		final float TRIANGLE_SIZE = 20f;
+//
+//		// create a triangle-mesh ground
+//		int vertStride = 4 * 3 /* sizeof(btVector3) */;
+//		int indexStride = 3 * 4 /* 3*sizeof(int) */;
+//
+//		final int NUM_VERTS_X = 20;
+//		final int NUM_VERTS_Y = 20;
+//		final int totalVerts = NUM_VERTS_X * NUM_VERTS_Y;
+//
+//		final int totalTriangles = 2 * (NUM_VERTS_X - 1) * (NUM_VERTS_Y - 1);
+//
+//		vertices = ByteBuffer.allocateDirect(totalVerts * vertStride).order(ByteOrder.nativeOrder());
+//		ByteBuffer gIndices = ByteBuffer.allocateDirect(totalTriangles * 3 * 4).order(ByteOrder.nativeOrder());
+//
+//		Vector3f tmp = new Vector3f();
+//		for (int i = 0; i < NUM_VERTS_X; i++) {
+//			for (int j = 0; j < NUM_VERTS_Y; j++) {
+//				float wl = 0.2f;
+//				// height set to zero, but can also use curved landscape, just uncomment out the code
+//				float height = 0f; // 20f * (float)Math.sin(i * wl) * (float)Math.cos(j * wl);
+//				
+//				//#ifdef FORCE_ZAXIS_UP
+//				//m_vertices[i+j*NUM_VERTS_X].setValue(
+//				//	(i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
+//				//	(j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE,
+//				//	height
+//				//	);
+//				//#else
+//				tmp.set(
+//						(i - NUM_VERTS_X * 0.5f) * TRIANGLE_SIZE,
+//						height,
+//						(j - NUM_VERTS_Y * 0.5f) * TRIANGLE_SIZE);
+//
+//				int index = i + j * NUM_VERTS_X;
+//				vertices.putFloat((index * 3 + 0) * 4, tmp.x);
+//				vertices.putFloat((index * 3 + 1) * 4, tmp.y);
+//				vertices.putFloat((index * 3 + 2) * 4, tmp.z);
+//				//#endif
+//			}
+//		}
+//
+//		//int index=0;
+//		gIndices.clear();
+//		for (int i = 0; i < NUM_VERTS_X - 1; i++) {
+//			for (int j = 0; j < NUM_VERTS_Y - 1; j++) {
+//				gIndices.putInt(j * NUM_VERTS_X + i);
+//				gIndices.putInt(j * NUM_VERTS_X + i + 1);
+//				gIndices.putInt((j + 1) * NUM_VERTS_X + i + 1);
+//
+//				gIndices.putInt(j * NUM_VERTS_X + i);
+//				gIndices.putInt((j + 1) * NUM_VERTS_X + i + 1);
+//				gIndices.putInt((j + 1) * NUM_VERTS_X + i);
+//			}
+//		}
+//		gIndices.flip();
+//
+//		indexVertexArrays = new TriangleIndexVertexArray(totalTriangles,
+//				gIndices,
+//				indexStride,
+//				totalVerts, vertices, vertStride);
+//
+//		boolean useQuantizedAabbCompression = true;
+//		groundShape = new BvhTriangleMeshShape(indexVertexArrays, useQuantizedAabbCompression);
+//
 		tr.origin.set(0, -4.5f, 0);
 
 		//#else
@@ -300,6 +301,7 @@ public class VehicleDemo extends DemoApplication {
 		//localTrans.setOrigin(btVector3(0,0,1));
 		//#else
 		CollisionShape chassisShape = new BoxShape(new Vector3f(1.0f, 0.5f, 2.0f));
+		chassisShape.setUserPointer("Warning");
 		collisionShapes.add(chassisShape);
 
 		CompoundShape compound = new CompoundShape();
@@ -383,7 +385,7 @@ public class VehicleDemo extends DemoApplication {
 		updateCamera();
 
 		CylinderShapeX wheelShape = new CylinderShapeX(new Vector3f(wheelWidth, wheelRadius, wheelRadius));
-		Vector3f wheelColor = new Vector3f(1, 0, 0);
+		Vector3f wheelColor = new Vector3f(0, 0, 0);
 
 		for (int i = 0; i < vehicle.getNumWheels(); i++) {
 			// synchronize the wheels with the (interpolated) chassis worldtransform
