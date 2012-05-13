@@ -18,5 +18,6 @@ public interface Keyboard {
   static final int KEY_PAGE_DOWN = 209;
   static final int KEY_RIGHT = 205;
   static final int KEY_UP = 200;
+static final int SHIFT_DOWN_MASK = 64;
 
 }

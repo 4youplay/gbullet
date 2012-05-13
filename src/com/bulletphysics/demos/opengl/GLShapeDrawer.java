@@ -145,6 +145,8 @@ public class GLShapeDrawer {
 				// you can comment out any of the specific cases, and use the default
 				// the benefit of 'default' is that it approximates the actual collision shape including collision margin
 				
+				useWireframeFallback = false;
+				
 				gl.setUserPointer(shape.getUserPointer());
 				switch (shape.getShapeType()) {
 					case BOX_SHAPE_PROXYTYPE: {
@@ -260,88 +262,87 @@ public class GLShapeDrawer {
 
 						break;
 					}
-					default: {
-						if (shape.isConvex())
-						{
-							ConvexShape convexShape = (ConvexShape)shape;
-							if (shape.getUserPointer() == null)
-							{
-								// create a hull approximation
-								ShapeHull hull = new ShapeHull(convexShape);
+				default: {
+					if (shape.isConvex()) {
+						ConvexShape convexShape = (ConvexShape) shape;
+						if (!(shape.getUserPointer() instanceof ShapeHull)) {
+							
+							// create a hull approximation
+							ShapeHull hull = new ShapeHull(convexShape);
 
-								// JAVA NOTE: not needed
-								///// cleanup memory
-								//m_shapeHulls.push_back(hull);
+							// JAVA NOTE: not needed
+							// /// cleanup memory
+							// m_shapeHulls.push_back(hull);
 
-								float margin = shape.getMargin();
-								hull.buildHull(margin);
-								convexShape.setUserPointer(hull);
+							float margin = shape.getMargin();
+							hull.buildHull(margin);
+							convexShape.setUserPointer(hull);
 
-								//printf("numTriangles = %d\n", hull->numTriangles ());
-								//printf("numIndices = %d\n", hull->numIndices ());
-								//printf("numVertices = %d\n", hull->numVertices ());
-							}
+							// printf("numTriangles = %d\n", hull->numTriangles
+							// ());
+							// printf("numIndices = %d\n", hull->numIndices ());
+							// printf("numVertices = %d\n", hull->numVertices
+							// ());
+						}
 
-							if (shape.getUserPointer() != null)
-							{
-								//glutSolidCube(1.0);
-								ShapeHull hull = (ShapeHull)shape.getUserPointer();
-								
-								Vector3f normal = vectorsPool.get();
-								Vector3f tmp1 = vectorsPool.get();
-								Vector3f tmp2 = vectorsPool.get();
+						if (shape.getUserPointer() != null) {
+							// glutSolidCube(1.0);
+							ShapeHull hull = (ShapeHull) shape.getUserPointer();
 
-								if (hull.numTriangles () > 0)
-								{
-									int index = 0;
-									IntArrayList idx = hull.getIndexPointer();
-									ObjectArrayList<Vector3f> vtx = hull.getVertexPointer();
+							Vector3f normal = vectorsPool.get();
+							Vector3f tmp1 = vectorsPool.get();
+							Vector3f tmp2 = vectorsPool.get();
 
-									gl.glBegin (gl.GL_TRIANGLES);
+							if (hull.numTriangles() > 0) {
+								int index = 0;
+								IntArrayList idx = hull.getIndexPointer();
+								ObjectArrayList<Vector3f> vtx = hull
+										.getVertexPointer();
 
-									for (int i=0; i<hull.numTriangles (); i++)
-									{
-										int i1 = index++;
-										int i2 = index++;
-										int i3 = index++;
-										assert(i1 < hull.numIndices () &&
-											i2 < hull.numIndices () &&
-											i3 < hull.numIndices ());
+								gl.glBegin(gl.GL_TRIANGLES);
 
-										int index1 = idx.get(i1);
-										int index2 = idx.get(i2);
-										int index3 = idx.get(i3);
-										assert(index1 < hull.numVertices () &&
-											index2 < hull.numVertices () &&
-											index3 < hull.numVertices ());
+								for (int i = 0; i < hull.numTriangles(); i++) {
+									int i1 = index++;
+									int i2 = index++;
+									int i3 = index++;
+									assert (i1 < hull.numIndices()
+											&& i2 < hull.numIndices() && i3 < hull
+											.numIndices());
 
-										Vector3f v1 = vtx.getQuick(index1);
-										Vector3f v2 = vtx.getQuick(index2);
-										Vector3f v3 = vtx.getQuick(index3);
-										tmp1.sub(v3, v1);
-										tmp2.sub(v2, v1);
-										normal.cross(tmp1, tmp2);
-										normal.normalize();
+									int index1 = idx.get(i1);
+									int index2 = idx.get(i2);
+									int index3 = idx.get(i3);
+									assert (index1 < hull.numVertices()
+											&& index2 < hull.numVertices() && index3 < hull
+											.numVertices());
 
-										gl.glNormal3f(normal.x,normal.y,normal.z);
-										gl.glVertex3f (v1.x, v1.y, v1.z);
-										gl.glVertex3f (v2.x, v2.y, v2.z);
-										gl.glVertex3f (v3.x, v3.y, v3.z);
+									Vector3f v1 = vtx.getQuick(index1);
+									Vector3f v2 = vtx.getQuick(index2);
+									Vector3f v3 = vtx.getQuick(index3);
+									tmp1.sub(v3, v1);
+									tmp2.sub(v2, v1);
+									normal.cross(tmp1, tmp2);
+									normal.normalize();
 
-									}
-									gl.glEnd ();
+									gl.glNormal3f(normal.x, normal.y, normal.z);
+									gl.glVertex3f(v1.x, v1.y, v1.z);
+									gl.glVertex3f(v2.x, v2.y, v2.z);
+									gl.glVertex3f(v3.x, v3.y, v3.z);
+
 								}
-								
-								vectorsPool.release(normal);
-								vectorsPool.release(tmp1);
-								vectorsPool.release(tmp2);
+								gl.glEnd();
 							}
-						} else
-						{
-	//						printf("unhandled drawing\n");
-						}						
 
+							vectorsPool.release(normal);
+							vectorsPool.release(tmp1);
+							vectorsPool.release(tmp2);
+						}
+					} else {
+						useWireframeFallback = true;
+						// printf("unhandled drawing\n");
 					}
+
+				}
 
 				}
 

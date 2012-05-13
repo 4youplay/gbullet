@@ -69,8 +69,6 @@ public class DemoRunner {
     gl.drawString("2) Forklift Demo", 20, 70, 0, 0, 0);
     gl.drawString("3) Generic Joint Demo", 20, 90, 0, 0, 0);
     gl.drawString("4) DynamicControl Demo", 20, 110, 0, 0, 0);
-    gl.drawString("5) Moving Concave Demo", 20, 130, 0, 0, 0);
-
   }
 
   public void keyboardCallback(char eventCharacter, int x, int y, int modifiers) {
@@ -106,8 +104,6 @@ public class DemoRunner {
       return new DynamicControlDemo(gl); 
     case '4':
       return new GenericJointDemo(gl); 
-    case '5':
-      return new MovingConcaveDemo(gl); 
     default:
       return null;
     }

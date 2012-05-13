@@ -86,7 +86,8 @@ public class DynamicControlDemo extends DemoApplication {
 
 		// Setup a big ground box
 		{
-			CollisionShape groundShape = new BoxShape(new Vector3f(200f, 10f, 200f));
+			CollisionShape groundShape = new BoxShape(new Vector3f(50f, 10f, 50f));
+			groundShape.setUserPointer("Grid");
 			// TODO
 			//m_collisionShapes.push_back(groundShape);
 			Transform groundTransform = new Transform();

@@ -4,6 +4,7 @@ import com.bulletphysics.demos.bsp.BspDemo;
 import com.bulletphysics.demos.character.CharacterDemo;
 import com.bulletphysics.demos.concave.ConcaveDemo;
 import com.bulletphysics.demos.concaveconvexcast.ConcaveConvexcastDemo;
+import com.bulletphysics.demos.movingconcave.MovingConcaveDemo;
 import com.bulletphysics.demos.opengl.DemoApplication;
 import com.bulletphysics.demos.opengl.DemoRunner;
 import com.bulletphysics.demos.opengl.IGL;
@@ -16,6 +17,8 @@ public class FullDemoRunner extends DemoRunner {
 
   protected DemoApplication createDemo(char c) {
     switch(c) {
+    case '5':
+        return new MovingConcaveDemo(gl); 
     case '6':
       return new BspDemo(gl);
     case '7':
@@ -31,6 +34,7 @@ public class FullDemoRunner extends DemoRunner {
     
   protected void drawMenu() {
     super.drawMenu();
+    gl.drawString("5) Moving Concave Demo", 20, 130, 0, 0, 0);
     gl.drawString("6) Bsp Demo", 20, 150, 0, 0, 0);
     gl.drawString("7) Character Demo", 20, 170, 0, 0, 0);
     gl.drawString("8) Concave Demo", 20, 190, 0, 0, 0);

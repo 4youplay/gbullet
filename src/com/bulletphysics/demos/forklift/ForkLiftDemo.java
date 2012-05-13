@@ -54,7 +54,6 @@ import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.linearmath.DebugDrawModes;
 import com.bulletphysics.linearmath.MatrixUtil;
 import com.bulletphysics.linearmath.Transform;
-import java.awt.event.KeyEvent;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import javax.vecmath.Vector3f;
@@ -268,6 +267,7 @@ public class ForkLiftDemo extends DemoApplication {
 		carChassis.setCenterOfMassTransform(tr);
 		carChassis.setLinearVelocity(new Vector3f(0,0,0));
 		carChassis.setAngularVelocity(new Vector3f(0,0,0));
+
 		dynamicsWorld.getBroadphase().getOverlappingPairCache().cleanProxyFromPairs(carChassis.getBroadphaseHandle(),getDynamicsWorld().getDispatcher());
 		if (vehicle != null)
 		{
@@ -278,6 +278,7 @@ public class ForkLiftDemo extends DemoApplication {
 				vehicle.updateWheelTransform(i,true);
 			}
 		}
+		
 		Transform liftTrans = new Transform();
 		liftTrans.setIdentity();
 		liftTrans.origin.set(liftStartPos);
@@ -388,7 +389,7 @@ public class ForkLiftDemo extends DemoApplication {
 			return;
 		}
 
-		if ((modifiers & KeyEvent.SHIFT_DOWN_MASK) != 0) {
+		if ((modifiers & Keyboard.SHIFT_DOWN_MASK) != 0) {
 			switch (key) {
 				case Keyboard.KEY_LEFT: {
 					liftHinge.setLimit(-PI / 16.0f, PI / 8.0f);
@@ -495,7 +496,7 @@ public class ForkLiftDemo extends DemoApplication {
 		//int i;
 
 		CylinderShapeX wheelShape = new CylinderShapeX(new Vector3f(wheelWidth,wheelRadius,wheelRadius));
-		Vector3f wheelColor = new Vector3f(1,0,0);
+		Vector3f wheelColor = new Vector3f(0,0,0);
 
 		Vector3f worldBoundsMin = new Vector3f(),worldBoundsMax = new Vector3f();
 		getDynamicsWorld().getBroadphase().getBroadphaseAabb(worldBoundsMin,worldBoundsMax);
@@ -516,9 +517,9 @@ public class ForkLiftDemo extends DemoApplication {
 			gl.glDisable(GL_LIGHTING);
 			gl.glColor3f(0, 0, 0);
 
-			drawString("SHIFT+Cursor Left/Right - rotate lift", 350, 20, TEXT_COLOR);
-			drawString("SHIFT+Cursor UP/Down - move fork up/down", 350, 40, TEXT_COLOR);
-			drawString("F5 - toggle camera mode", 350, 60, TEXT_COLOR);
+			drawString("SHIFT+Cursor Left/Right - rotate lift", 500, 20, TEXT_COLOR);
+			drawString("SHIFT+Cursor UP/Down - move fork up/down", 500, 40, TEXT_COLOR);
+			drawString("F5 - toggle camera mode", 500, 60, TEXT_COLOR);
 
 			resetPerspectiveProjection();
 			gl.glEnable(GL_LIGHTING);
@@ -534,6 +535,7 @@ public class ForkLiftDemo extends DemoApplication {
 
 		CollisionShape groundShape = new BoxShape(new Vector3f(50,3,50));
 		collisionShapes.add(groundShape);
+		groundShape.setUserPointer("Grid");
 		collisionConfiguration = new DefaultCollisionConfiguration();
 		dispatcher = new CollisionDispatcher(collisionConfiguration);
 		Vector3f worldMin = new Vector3f(-1000,-1000,-1000);
@@ -553,66 +555,66 @@ public class ForkLiftDemo extends DemoApplication {
 		// either use heightfield or triangle mesh
 		//#define  USE_TRIMESH_GROUND 1
 		//#ifdef USE_TRIMESH_GROUND
-		final float TRIANGLE_SIZE=20f;
-
-		// create a triangle-mesh ground
-		int vertStride = 3*4;
-		int indexStride = 3*4;
-
-		final int NUM_VERTS_X = 20;
-		final int NUM_VERTS_Y = 20;
-		final int totalVerts = NUM_VERTS_X*NUM_VERTS_Y;
-
-		final int totalTriangles = 2*(NUM_VERTS_X-1)*(NUM_VERTS_Y-1);
-
-		vertices = ByteBuffer.allocateDirect(totalVerts*vertStride).order(ByteOrder.nativeOrder());
-		ByteBuffer gIndices = ByteBuffer.allocateDirect(totalTriangles*3*4).order(ByteOrder.nativeOrder());
-
-		for (int i=0;i<NUM_VERTS_X;i++)
-		{
-			for (int j=0;j<NUM_VERTS_Y;j++)
-			{
-				float wl = 0.2f;
-				// height set to zero, but can also use curved landscape, just uncomment out the code
-				float height = 0.f;//20.f*sinf(float(i)*wl)*cosf(float(j)*wl);
-				//#ifdef FORCE_ZAXIS_UP
-				//m_vertices[i+j*NUM_VERTS_X].setValue(
-				//	(i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
-				//	(j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE,
-				//	height
-				//	);
-				//#else
-				int idx = (i+j*NUM_VERTS_X)*3*4;
-				vertices.putFloat(idx+0*4, (i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE);
-				vertices.putFloat(idx+1*4, height);
-				vertices.putFloat(idx+2*4, (j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE);
-				//#endif
-			}
-		}
-
-		//int index=0;
-		for (int i=0;i<NUM_VERTS_X-1;i++)
-		{
-			for (int j=0;j<NUM_VERTS_Y-1;j++)
-			{
-				gIndices.putInt(j*NUM_VERTS_X+i);
-				gIndices.putInt(j*NUM_VERTS_X+i+1);
-				gIndices.putInt((j+1)*NUM_VERTS_X+i+1);
-
-				gIndices.putInt(j*NUM_VERTS_X+i);
-				gIndices.putInt((j+1)*NUM_VERTS_X+i+1);
-				gIndices.putInt((j+1)*NUM_VERTS_X+i);
-			}
-		}
-		gIndices.flip();
-
-		indexVertexArrays = new TriangleIndexVertexArray(totalTriangles,
-			gIndices,
-			indexStride,
-			totalVerts,vertices,vertStride);
-
-		boolean useQuantizedAabbCompression = true;
-		groundShape = new BvhTriangleMeshShape(indexVertexArrays,useQuantizedAabbCompression);
+//		final float TRIANGLE_SIZE=20f;
+//
+//		// create a triangle-mesh ground
+//		int vertStride = 3*4;
+//		int indexStride = 3*4;
+//
+//		final int NUM_VERTS_X = 20;
+//		final int NUM_VERTS_Y = 20;
+//		final int totalVerts = NUM_VERTS_X*NUM_VERTS_Y;
+//
+//		final int totalTriangles = 2*(NUM_VERTS_X-1)*(NUM_VERTS_Y-1);
+//
+//		vertices = ByteBuffer.allocateDirect(totalVerts*vertStride).order(ByteOrder.nativeOrder());
+//		ByteBuffer gIndices = ByteBuffer.allocateDirect(totalTriangles*3*4).order(ByteOrder.nativeOrder());
+//
+//		for (int i=0;i<NUM_VERTS_X;i++)
+//		{
+//			for (int j=0;j<NUM_VERTS_Y;j++)
+//			{
+//				float wl = 0.2f;
+//				// height set to zero, but can also use curved landscape, just uncomment out the code
+//				float height = 0.f;//20.f*sinf(float(i)*wl)*cosf(float(j)*wl);
+//				//#ifdef FORCE_ZAXIS_UP
+//				//m_vertices[i+j*NUM_VERTS_X].setValue(
+//				//	(i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE,
+//				//	(j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE,
+//				//	height
+//				//	);
+//				//#else
+//				int idx = (i+j*NUM_VERTS_X)*3*4;
+//				vertices.putFloat(idx+0*4, (i-NUM_VERTS_X*0.5f)*TRIANGLE_SIZE);
+//				vertices.putFloat(idx+1*4, height);
+//				vertices.putFloat(idx+2*4, (j-NUM_VERTS_Y*0.5f)*TRIANGLE_SIZE);
+//				//#endif
+//			}
+//		}
+//
+//		//int index=0;
+//		for (int i=0;i<NUM_VERTS_X-1;i++)
+//		{
+//			for (int j=0;j<NUM_VERTS_Y-1;j++)
+//			{
+//				gIndices.putInt(j*NUM_VERTS_X+i);
+//				gIndices.putInt(j*NUM_VERTS_X+i+1);
+//				gIndices.putInt((j+1)*NUM_VERTS_X+i+1);
+//
+//				gIndices.putInt(j*NUM_VERTS_X+i);
+//				gIndices.putInt((j+1)*NUM_VERTS_X+i+1);
+//				gIndices.putInt((j+1)*NUM_VERTS_X+i);
+//			}
+//		}
+//		gIndices.flip();
+//
+//		indexVertexArrays = new TriangleIndexVertexArray(totalTriangles,
+//			gIndices,
+//			indexStride,
+//			totalVerts,vertices,vertStride);
+//
+//		boolean useQuantizedAabbCompression = true;
+//		groundShape = new BvhTriangleMeshShape(indexVertexArrays,useQuantizedAabbCompression);
 
 		tr.origin.set(0,-4.5f,0);
 		//#else
@@ -681,6 +683,7 @@ public class ForkLiftDemo extends DemoApplication {
 		//localTrans.setOrigin(btVector3(0,0,1));
 		//#else
 		CollisionShape chassisShape = new BoxShape(new Vector3f(1.f,0.5f,2.f));
+		chassisShape.setUserPointer("Warning");
 		collisionShapes.add(chassisShape);
 
 		CompoundShape compound = new CompoundShape();
@@ -695,6 +698,7 @@ public class ForkLiftDemo extends DemoApplication {
 
 		{
 			CollisionShape suppShape = new BoxShape(new Vector3f(0.5f,0.1f,0.5f));
+			suppShape.setUserPointer("Warning");
 			collisionShapes.add(chassisShape);
 			Transform suppLocalTrans = new Transform();
 			suppLocalTrans.setIdentity();
@@ -711,6 +715,7 @@ public class ForkLiftDemo extends DemoApplication {
 
 		{
 			CollisionShape liftShape = new BoxShape(new Vector3f(0.5f,2.0f,0.05f));
+			liftShape.setUserPointer("Warning");
 			collisionShapes.add(liftShape);
 			Transform liftTrans = new Transform();
 			liftStartPos.set(0.0f, 2.5f, 3.05f);
@@ -771,17 +776,21 @@ public class ForkLiftDemo extends DemoApplication {
 			CompoundShape loadCompound = new CompoundShape();
 			collisionShapes.add(loadCompound);
 			CollisionShape loadShapeA = new BoxShape(new Vector3f(2.0f,0.5f,0.5f));
+			loadShapeA.setUserPointer("Warning");
 			collisionShapes.add(loadShapeA);
 			Transform loadTrans = new Transform();
 			loadTrans.setIdentity();
 			loadCompound.addChildShape(loadTrans, loadShapeA);
 			CollisionShape loadShapeB = new BoxShape(new Vector3f(0.1f,1.0f,1.0f));
+			loadShapeB.setUserPointer("Warning");
 			collisionShapes.add(loadShapeB);
 			loadTrans.setIdentity();
 			loadTrans.origin.set(2.1f, 0.0f, 0.0f);
 			loadCompound.addChildShape(loadTrans, loadShapeB);
 			CollisionShape loadShapeC = new BoxShape(new Vector3f(0.1f,1.0f,1.0f));
+			loadShapeC.setUserPointer("Warning");
 			collisionShapes.add(loadShapeC);
+			
 			loadTrans.setIdentity();
 			loadTrans.origin.set(-2.1f, 0.0f, 0.0f);
 			loadCompound.addChildShape(loadTrans, loadShapeC);
